@@ -5,6 +5,7 @@ div#banner{
 div.pane{
 	float: left;
 	width: 512px;
+	height: auto;
 	border-width: 1px;
 	border-color: black;
 	border-style: solid;

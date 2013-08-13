@@ -6,12 +6,25 @@
   <script src="/static/bower_components/jquery/jquery.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4oLS7DjhME0pLuTTauJw3rjs1_n4TuKM&sensor=false" type="text/javascript" charset="utf-8"></script>
   <script src="/static/js/initmap.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/d3.v3.js" type="text/javascript" charset="utf-8"></script>
+  <!--<script src="/static/js/nv.d3.min.js" type="text/javascript" charset="utf-8"></script>-->
+  <!--<link rel="stylesheet" href="/static/css/nv.d3.css" type="text/css" media="screen" title="no title" charset="utf-8">-->
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
   <script src="/static/js/profileviewer/main.js" type="text/javascript" charset="utf-8"></script>
   <link rel="stylesheet" href="/static/css/profileviewer/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <script type="text/javascript" charset="utf-8">
+    google.load("visualization", "1", {packages:["corechart"]});
+    map_data = JSON.parse("{{ map_data | escapejs }}");
+    cate_pie_data = JSON.parse("{{ cate_pie_data | escapejs }}");
+    cate_timelines_data = JSON.parse("{{ cate_timelines_data | escapejs }}");
+    poi_pie_data = JSON.parse("{{ poi_pie_data | escapejs }}");
     $(document).ready(function () {
-      init();
-    })
+      init_map();
+      init_cate_pie();
+      init_cate_timelines();
+      init_poi_pie();
+    });
   </script>
 </head>
 <body>
@@ -23,10 +36,22 @@
       Left pane
     </div>
     <div id="right-pane" class="pane">
-      <div id="map-title">
+      <div class="title">
         Last 60 places checked-in
       </div>
-      <div id="map-canvas" />
+      <div id="map-canvas"></div>
+      <div class="title">
+        Category Distribution
+      </div>
+      <div id="chart-cate-pie"> </div>
+      <div class="title">
+        Category Timeline
+      </div>
+      <div id="chart-cate-timeline"> </div>
+      <div class="title">
+        10 Top POIs
+      </div>
+      <div id="chart-poi-pie"> </div>
     </div>
   </div>
 
