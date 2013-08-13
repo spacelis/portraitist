@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Geoexpert Judgment System</title>
+  <meta charset="utf-8" />
+  <script src="/static/bower_components/jquery/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4oLS7DjhME0pLuTTauJw3rjs1_n4TuKM&sensor=false" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/initmap.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/main.js" type="text/javascript" charset="utf-8"></script>
+  <link rel="stylesheet" href="/static/css/profileviewer/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+      init();
+    })
+  </script>
+</head>
+<body>
+  <div id="banner" class="frame">
+    <H1> GeoExpert Judgment System </H1>
+  </div>
+  <div id="content">
+    <div id="left-pane" class="pane">
+      Left pane
+    </div>
+    <div id="right-pane" class="pane">
+      <div id="map-title">
+        Last 60 places checked-in
+      </div>
+      <div id="map-canvas" />
+    </div>
+  </div>
+
+</body>
+</html>
+
+

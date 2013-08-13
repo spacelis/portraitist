@@ -1,0 +1,19 @@
+application: geo-expertise
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /static
+  static_dir: static
+
+libraries:
+- name: django
+  version: '1.5'
+
+builtins:
+- django_wsgi: on
+
+env_variables:
+  DJANGO_SETTINGS_MODULE: 'apps.settings'

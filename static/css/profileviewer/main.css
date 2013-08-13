@@ -1,0 +1,15 @@
+div#banner{
+	width: 1024px;
+	border-width: 1px;
+}
+div.pane{
+	float: left;
+	width: 512px;
+	border-width: 1px;
+	border-color: black;
+	border-style: solid;
+}
+div#map-canvas{
+	height: 512px;
+	width: 512px;
+}
