@@ -1,8 +1,8 @@
-function init_map(){
+function init_map(map_data){
   $('#map-canvas').initMap(map_data);
 }
 
-function init_cate_pie() {
+function init_cate_pie(cate_pie_data) {
   var data = google.visualization.arrayToDataTable(cate_pie_data);
 
   var options = {
@@ -14,7 +14,7 @@ function init_cate_pie() {
   chart.draw(data, options);
 }
 
-function init_cate_timelines() {
+function init_cate_timelines(cate_timelines_data) {
   var data = google.visualization.arrayToDataTable(cate_timelines_data);
 
   var options = {
@@ -29,7 +29,7 @@ function init_cate_timelines() {
 }
 
 
-function init_poi_pie() {
+function init_poi_pie(poi_pie_data) {
   var data = google.visualization.arrayToDataTable(poi_pie_data);
 
   var options = {

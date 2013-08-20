@@ -9,27 +9,32 @@ Description:
     This is the main module for rendering user profiles.
 """
 
-import json
-import twitter
-from django.http import HttpResponse
+#import twitter
+#from django.http import HttpResponse
 from django.shortcuts import render_to_response
+from django.shortcuts import redirect
 from django.template import RequestContext
+from django.views.decorators.csrf import csrf_protect
+from apps.profileviewer.util import jsonfy
+from apps.profileviewer.models import Expert
 
 
-def test_data():
+def test_data(screen_name):
     """return mock data
     :returns: @todo
 
     """
+    _ = screen_name
     data = dict()
     data['map_data'] = {'center': [48.0, 2.35],
                         'markers': {
-                            'paris_marker': {'position': 'Paris, France',
-                                'info_window':{
+                            'paris_marker': {
+                                'position': 'Paris, France',
+                                'info_window': {
                                     'content': 'somebla<br>somebla',
                                     'showOn': 'mouseover',
                                     'hideOn': 'mouseout',
-                                    }},
+                                }},
                             'london': {'position': 'London, UK'},
                         }}
     data['cate_pie_data'] = [
@@ -48,7 +53,22 @@ def test_data():
         ['2007',  1030,      540]]
 
     data['poi_pie_data'] = data['cate_pie_data']
-    return {k: json.dumps(v) for k, v in data.iteritems()}
+    data['topics'] = [{'name': 'Olympus', 'id': 't01'},
+                      {'name': 'Old Church', 'id': 't02'}]
+    return jsonfy(data, ['map_data',
+                         'cate_pie_data',
+                         'cate_timelines_data',
+                         'poi_pie_data'])
+
+
+def chart_format(screen_name):
+    """Return a set of data prepared for charting
+
+    :screen_name: @todo
+    :returns: @todo
+
+    """
+    expert = Expert.get_by_screen_name(screen_name)
 
 
 def home(request):
@@ -58,5 +78,31 @@ def home(request):
     :returns: @todo
 
     """
-    return render_to_response('viewer.html', test_data(),
+    data = {'screen_names': Expert.get_all_screen_names()}
+    return render_to_response('main.html', data,
+                              context_instance=RequestContext(request))
+
+
+@csrf_protect
+def upload(request):
+    """Upload the data to dbstore
+
+    :request: @todo
+    :returns: @todo
+
+    """
+    if 'csv_text' in request.REQUEST:
+        Expert.upload(request.REQUEST['csv_text'])
+    return redirect('/')
+
+
+def view_profile(request, screen_name):
+    """Return a specific profile give a user's screen_name
+
+    :request: @todo
+    :screen_name: @todo
+    :returns: @todo
+
+    """
+    return render_to_response('viewer.html', test_data(screen_name),
                               context_instance=RequestContext(request))

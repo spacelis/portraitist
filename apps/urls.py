@@ -8,6 +8,8 @@ from django.views.generic import RedirectView
 urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'apps.profileviewer.views.home', name='home'),
+    url(r'^view_profile/(.*)$', 'apps.profileviewer.views.view_profile', name='view_profile'),
+    url(r'^upload$', 'apps.profileviewer.views.upload', name='upload'),
     url(r'^favicon\.ico$', RedirectView.as_view(url='/static/images/profileviewer/socialmining.ico')),
     # url(r'^profileviewer/', include('profileviewer.foo.urls')),
 

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GeoExpert Judgment System</title>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="/static/css/profileviewer/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
+</head>
+<body>
+    {% for n in screen_names %}
+    <div class='judgment-list-item'>
+        <div class="judgment-list-item-judged">
+          {% if n.judged %}
+            <img src="/static/images/profileviewer/tick.png"></img>
+          {% endif %}
+        </div>
+      <a href="/view_profile/{{n.screen_name}}">{{n.screen_name}}</a>
+    </div>
+    {% endfor %}
+    <div id="upload" class="upload">
+       <form action="upload" method="post" accept-charset="utf-8">
+         {% csrf_token %}
+         <textarea name="csv_text" rows="8" cols="80"></textarea>
+         <p><input type="submit" value="Upload"></p>
+       </form>
+    </div>
+</body>
+</html>

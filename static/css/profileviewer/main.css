@@ -1,3 +1,13 @@
+body {
+	font-family: Verdana, Helvetica, sans-serif;
+	background-color: #DDDDDD;
+}
+
+A:link {text-decoration: none}
+A:visited {text-decoration: none}
+A:active {text-decoration: none}
+A:hover {text-decoration: none}
+
 div#banner{
 	width: 1024px;
 	border-width: 1px;
@@ -13,4 +23,12 @@ div.pane{
 div#map-canvas{
 	height: 512px;
 	width: 512px;
+}
+div.judgment-list-item {
+	text-align: left;
+}
+div.judgment-list-item-judged {
+	width: 16px;
+	height: 16px;
+	float: left;
 }
