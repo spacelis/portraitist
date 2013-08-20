@@ -1,5 +1,19 @@
 function init_map(map_data){
-  $('#map-canvas').initMap(map_data);
+  var data = {'center': [41, 100]};
+  var markers = {};
+  for(var i in map_data) {
+    var poi = map_data[i];
+    markers[poi.id] = {
+      position: [poi.lat, poi.lng],
+      info_window: {
+        content: poi.name + '<br>' + poi.cate,
+        showOn: 'mouseover',
+        hideOn: 'mouseout'
+      }
+    };
+  }
+  data.markers = markers;
+  $('#map-canvas').initMap(data);
 }
 
 function init_cate_pie(cate_pie_data) {

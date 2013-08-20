@@ -60,7 +60,13 @@ class Expert(ndb.Model):
         :returns: @todo
 
         """
-        return cls.query(screen_name=screen_name).fetch(1)[0]
+        e = cls.query(Expert.screen_name == screen_name).fetch(1)[0]
+        d = dict()
+        for p in e._properties:
+            d[p] = getattr(e, p)
+            if not isinstance(d[p], str):
+                d[p] = json.dumps(d[p])
+        return d
 
     @classmethod
     def get_all_screen_names(cls):

@@ -16,14 +16,14 @@
   <script type="text/javascript" charset="utf-8">
     google.load("visualization", "1", {packages:["corechart"]});
     $(document).ready(function () {
-      var map_data = JSON.parse("{{ map_data | escapejs }}");
-      var cate_pie_data = JSON.parse("{{ cate_pie_data | escapejs }}");
-      var cate_timelines_data = JSON.parse("{{ cate_timelines_data | escapejs }}");
-      var poi_pie_data = JSON.parse("{{ poi_pie_data | escapejs }}");
-      init_map(map_data);
-      init_cate_pie(cate_pie_data);
-      init_cate_timelines(cate_timelines_data);
-      init_poi_pie(poi_pie_data);
+      var pois = JSON.parse("{{ pois | escapejs }}");
+      var cate_timelines = JSON.parse("{{ cate_timelines | escapejs }}");
+      var poi_timelines = JSON.parse("{{ poi_timelines | escapejs }}");
+      init_map(pois);
+      init_cate_pie(cate_timelines);
+      init_cate_timelines(cate_timelines);
+      init_poi_pie(poi_timelines);
+      init_poi_timelines(poi_timelines);
     });
   </script>
 </head>
