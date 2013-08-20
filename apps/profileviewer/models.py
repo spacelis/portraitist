@@ -35,7 +35,7 @@ class Expert(ndb.Model):
     # pylint: disable-msg=E1101
     screen_name = ndb.StringProperty()
 
-    expertise = ndb.StringProperty()
+    expertise = ndb.JsonProperty(compressed=False)
     pois = ndb.JsonProperty(compressed=False)
     cate_timelines = ndb.JsonProperty(compressed=False)
     poi_timelines = ndb.JsonProperty(compressed=False)
@@ -81,7 +81,7 @@ class Expert(ndb.Model):
         for row in csv.reader(csv_in):
             cls(parent=parent_key('judgment'),
                 screen_name=row[0],
-                expertise=row[1],
+                expertise=json.loads(row[1]),
                 pois=json.loads(row[2]),
                 cate_timelines=json.loads(row[3]),
                 poi_timelines=json.loads(row[4]),

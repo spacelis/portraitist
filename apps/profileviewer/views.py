@@ -86,7 +86,7 @@ def upload(request):
     return redirect('/')
 
 
-def import_data(_):
+def import_data(request, filename):
     """Upload the data to dbstore
 
     :request: @todo
@@ -95,7 +95,7 @@ def import_data(_):
     """
     from apps import APP_PATH
     import os.path
-    datapath = os.path.join(APP_PATH, 'data', 'geoexpert.crowdsource.csv')
+    datapath = os.path.join(APP_PATH, 'data', filename)
     Expert.upload(open(datapath).read())
     return redirect('/')
 
