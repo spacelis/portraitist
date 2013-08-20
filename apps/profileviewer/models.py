@@ -32,8 +32,9 @@ class Expert(ndb.Model):
 
     """Candidate Expert for judging"""
 
-    uid = ndb.StringProperty()
+    # pylint: disable-msg=E1101
     screen_name = ndb.StringProperty()
+
     expertise = ndb.StringProperty()
     pois = ndb.JsonProperty(compressed=False)
     cate_timelines = ndb.JsonProperty(compressed=False)
@@ -41,6 +42,7 @@ class Expert(ndb.Model):
 
     judged = ndb.BooleanProperty(indexed=True)
     judgment = ndb.JsonProperty()
+    # pylint: enable-msg=E1101
 
     @classmethod
     def get_one_unjudged(cls):
@@ -78,12 +80,11 @@ class Expert(ndb.Model):
         csv_in = StringIO(csv_string)
         for row in csv.reader(csv_in):
             cls(parent=parent_key('judgment'),
-                uid=row[0],
-                screen_name=row[1],
-                expertise=row[2],
-                pois=json.loads(row[3]),
-                cate_timelines=json.loads(row[4]),
-                poi_timelines=json.loads(row[5]),
+                screen_name=row[0],
+                expertise=row[1],
+                pois=json.loads(row[2]),
+                cate_timelines=json.loads(row[3]),
+                poi_timelines=json.loads(row[4]),
                 judged=False,
                 judgment=json.loads('null')).put()
 # TODO using key.urlsafe as a serialization in relating pages and judgments
