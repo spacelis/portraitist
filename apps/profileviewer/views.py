@@ -61,16 +61,6 @@ def test_data(screen_name):
                          'poi_pie_data'])
 
 
-def chart_format(screen_name):
-    """Return a set of data prepared for charting
-
-    :screen_name: @todo
-    :returns: @todo
-
-    """
-    expert = Expert.get_by_screen_name(screen_name)
-
-
 def home(request):
     """Return a homepage
 
@@ -93,6 +83,20 @@ def upload(request):
     """
     if 'csv_text' in request.REQUEST:
         Expert.upload(request.REQUEST['csv_text'])
+    return redirect('/')
+
+
+def import_data(_):
+    """Upload the data to dbstore
+
+    :request: @todo
+    :returns: @todo
+
+    """
+    from apps import APP_PATH
+    import os.path
+    datapath = os.path.join(APP_PATH, 'data', 'geoexpert.crowdsource.csv')
+    Expert.upload(open(datapath).read())
     return redirect('/')
 
 
