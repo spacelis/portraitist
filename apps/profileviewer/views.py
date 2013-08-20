@@ -86,7 +86,7 @@ def upload(request):
     return redirect('/')
 
 
-def import_data(request, filename):
+def import_data(_, filename):
     """Upload the data to dbstore
 
     :request: @todo
@@ -108,5 +108,6 @@ def view_profile(request, screen_name):
     :returns: @todo
 
     """
-    return render_to_response('viewer.html', test_data(screen_name),
+    return render_to_response('viewer.html',
+                              Expert.get_by_screen_name(screen_name),
                               context_instance=RequestContext(request))
