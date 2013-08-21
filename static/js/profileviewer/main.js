@@ -8,7 +8,7 @@ function sum (arr) {
 
 
 function init_map(map_data){
-  var data = {center: [41, -100]};
+  var data = {center: [41, -100], options: {zoom: 4}};
   var markers = {};
   for(var i in map_data) {
     var poi = map_data[i];

@@ -64,7 +64,7 @@ class Expert(ndb.Model):
         d = dict()
         for p in e._properties:
             d[p] = getattr(e, p)
-            if not isinstance(d[p], str):
+            if p in ['pois', 'cate_timelines', 'poi_timelines']:
                 d[p] = json.dumps(d[p])
         return d
 

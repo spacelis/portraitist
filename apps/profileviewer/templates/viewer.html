@@ -36,13 +36,13 @@
       <!--                            Left Pane-->
       <form action="judgment_submit" method="post" accept-charset="utf-8">
         {% csrf_token %}
-        {% for t in topics %}
+        {% for t in expertise %}
         <div class="title">
-          Relevance to <b>{{t.name}}</b><br>
+          Relevance to <b>{{ t.topic }}</b> in <b>{{ t.region }}</b><br>
         </div>
-        <input type="radio" name="{{t.id}}" value="0"><label for="Not_Relevant">0 (Not Relevant)</label>
-        <input type="radio" name="{{t.id}}" value="1"><label for="Relevant">1 (Relevant)</label>
-        <input type="radio" name="{{t.id}}" value="2"><label for="High_Relevant">2 (High Relevant)</label>
+        <input type="radio" name="{{t.topic_id}}" value="0"><label for="Not_Relevant">0 (Not Relevant)</label>
+        <input type="radio" name="{{t.topic_id}}" value="1"><label for="Relevant">1 (Relevant)</label>
+        <input type="radio" name="{{t.topic_id}}" value="2"><label for="High_Relevant">2 (High Relevant)</label>
         {% endfor %}
         <p><input type="submit" value="Submit"></p>
       </form>
