@@ -61,12 +61,25 @@ class Expert(ndb.Model):
 
         """
         e = cls.query(Expert.screen_name == screen_name).fetch(1)[0]
-        d = dict()
+        d = {'exp_id': e.key.urlsafe()}
         for p in e._properties:
             d[p] = getattr(e, p)
             if p in ['pois', 'cate_timelines', 'poi_timelines']:
                 d[p] = json.dumps(d[p])
         return d
+
+    @classmethod
+    def update_judgment(self, exp_id, judgment):
+        """Update the judgment about expert given exp_id
+
+        :exp_id: @todo
+        :judgment: @todo
+        :returns: @todo
+
+        """
+        e = ndb.Key(urlsafe=exp_id).get()
+        e.populate(judgment=judgment, judged=True)
+        e.put()
 
     @classmethod
     def get_all_screen_names(cls):

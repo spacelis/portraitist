@@ -43,6 +43,22 @@ def upload(request):
     return redirect('/')
 
 
+@csrf_protect
+def submit_judgment(request):
+    """Submit judgment into the database
+
+    :request: @todo
+    :returns: @todo
+
+    """
+    judgment = dict()
+    for v in request.REQUEST:
+        if v.startswith('topic-'):
+            judgment[v] = request.REQUEST[v]
+    e = Expert.update_judgment(request.REQUEST['exp-id'], judgment)
+    return redirect('/')
+
+
 def import_data(_, filename):
     """Upload the data to dbstore
 
