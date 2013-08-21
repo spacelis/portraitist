@@ -15,50 +15,7 @@ from django.shortcuts import render_to_response
 from django.shortcuts import redirect
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
-from apps.profileviewer.util import jsonfy
 from apps.profileviewer.models import Expert
-
-
-def test_data(screen_name):
-    """return mock data
-    :returns: @todo
-
-    """
-    _ = screen_name
-    data = dict()
-    data['map_data'] = {'center': [48.0, 2.35],
-                        'markers': {
-                            'paris_marker': {
-                                'position': 'Paris, France',
-                                'info_window': {
-                                    'content': 'somebla<br>somebla',
-                                    'showOn': 'mouseover',
-                                    'hideOn': 'mouseout',
-                                }},
-                            'london': {'position': 'London, UK'},
-                        }}
-    data['cate_pie_data'] = [
-        ['Task', 'Hours per Day'],
-        ['Work',     11],
-        ['Eat',      2],
-        ['Commute',  2],
-        ['Watch TV', 2],
-        ['Sleep',    7]]
-
-    data['cate_timelines_data'] = [
-        ['Year', 'Sales', 'Expenses'],
-        ['2004',  1000,      400],
-        ['2005',  1170,      460],
-        ['2006',  660,       1120],
-        ['2007',  1030,      540]]
-
-    data['poi_pie_data'] = data['cate_pie_data']
-    data['topics'] = [{'name': 'Olympus', 'id': 't01'},
-                      {'name': 'Old Church', 'id': 't02'}]
-    return jsonfy(data, ['map_data',
-                         'cate_pie_data',
-                         'cate_timelines_data',
-                         'poi_pie_data'])
 
 
 def home(request):
