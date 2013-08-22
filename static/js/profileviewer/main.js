@@ -8,7 +8,7 @@ function sum (arr) {
 
 
 function init_map(map_data){
-  var data = {center: [41, -100], options: {zoom: 4}};
+  var data = {center: [41, -100], options: {zoom: 3}};
   var markers = {};
   for(var i in map_data) {
     var poi = map_data[i];
@@ -34,7 +34,7 @@ function init_cate_pie(cate_timeline_data) {
   var data = google.visualization.arrayToDataTable(piedata);
 
   var options = {
-    //title: 'Category distribution'
+    title: 'Check-in Distribution over Categories'
   };
 
   var chart = new google.visualization.PieChart(
@@ -79,7 +79,7 @@ function init_poi_pie(poi_timelines_data) {
   var data = google.visualization.arrayToDataTable(piedata);
 
   var options = {
-    //title: 'Category distribution'
+    title: 'Check-in Distribution over the Top 10 POIs'
   };
 
   var chart = new google.visualization.PieChart(
