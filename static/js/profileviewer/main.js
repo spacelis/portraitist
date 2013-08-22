@@ -60,7 +60,7 @@ function init_cate_timelines(cate_timelines_data) {
 
   var options = {
     title: 'Category Timelines',
-    hAxis: {title: 'Time',  titleTextStyle: {color: 'red'}},
+    hAxis: {title: 'Months ago',  titleTextStyle: {color: 'red'}},
     isStacked: true
   };
 
@@ -105,7 +105,7 @@ function init_poi_timelines(poi_timelines_data) {
 
   var options = {
     title: 'POI timelines',
-    hAxis: {title: 'Time',  titleTextStyle: {color: 'red'}},
+    hAxis: {title: 'Month(s) ago',  titleTextStyle: {color: 'red'}},
     isStacked: true
   };
 
