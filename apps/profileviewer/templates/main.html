@@ -27,22 +27,24 @@
         </ul>
       </div>
     </nav>
-    {% for n in screen_names|slice:":10" %}
     <div class='judgment-list-item'>
-        <div class="judgment-list-item-judged">
-          {% if n.judged %}
-            <img src="/static/images/profileviewer/tick.png"></img>
-          {% endif %}
-        </div>
-      <a href="/view_profile/{{n.screen_name}}">{{n.screen_name}}</a>
+      <ul class="list-group">
+        {% for n in screen_names|slice:":10" %}
+          <li class="list-group-item">
+            {% if n.judged %}
+              <span class="glyphicon glyphicon-ok"></span>
+            {% endif %}
+            <a href="/view_profile/{{n.screen_name}}">{{n.screen_name}}</a>
+          </li>
+        {% endfor %}
+      </ul>
     </div>
-    {% endfor %}
-    <div id="upload" class="upload">
-       <form action="upload" method="post" accept-charset="utf-8">
-         {% csrf_token %}
-         <textarea name="csv_text" rows="8" cols="80"></textarea>
-         <p><input type="submit" value="Upload"></p>
-       </form>
-    </div>
+    <!--<div id="upload" class="upload">-->
+       <!--<form action="upload" method="post" accept-charset="utf-8">-->
+         <!--{% csrf_token %}-->
+         <!--<textarea name="csv_text" rows="8" cols="80"></textarea>-->
+         <!--<p><input type="submit" value="Upload"></p>-->
+       <!--</form>-->
+    <!--</div>-->
 </body>
 </html>
