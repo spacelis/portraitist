@@ -1,50 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>GeoExpert Judgment System</title>
-  <meta charset="utf-8" />
-  <script src="static/bower_components/bootstrap/dist/js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
-  <link rel="stylesheet" href="static/bower_components/bootstrap/dist/css/bootstrap.css" type="text/css" media="screen" title="no title" charset="utf-8">
-  <!--<link rel="stylesheet" href="/static/css/profileviewer/main.css" type="text/css" media="screen" title="no title" charset="utf-8">-->
-</head>
-<body>
-    <nav class="navbar navbar-default" role="navigation">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a href="#" class="navbar-brand">GeoExpert Judgment System</a>
-      </div>
-      <div class="collapse navbar-collapse navbar-ex1-collapse">
-        <ul class="nav navbar-nav">
-          <li class="active"><a href="#">Unjudged</a></li>
-          <li><a href="#">Judged</a></li>
-          <li><a href="#">Upload/Import Tasks</a></li>
-          <li><a href="#">Download Judgments</a></li>
-        </ul>
-      </div>
-    </nav>
-    <div class='judgment-list-item'>
-      <ul class="list-group">
-        {% for n in screen_names|slice:":10" %}
-          <li class="list-group-item">
-            {% if n.judged %}
-              <span class="glyphicon glyphicon-ok"></span>
-            {% endif %}
-            <a href="/view_profile/{{n.screen_name}}">{{n.screen_name}}</a>
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
-    <!--<div id="upload" class="upload">-->
-       <!--<form action="upload" method="post" accept-charset="utf-8">-->
-         <!--{% csrf_token %}-->
-         <!--<textarea name="csv_text" rows="8" cols="80"></textarea>-->
-         <!--<p><input type="submit" value="Upload"></p>-->
-       <!--</form>-->
-    <!--</div>-->
-</body>
-</html>
+{% extends "frame.html" %}
+{% block content %}
+<ul class="list-group">
+  {% for n in screen_names|slice:":10" %}
+    <li class="list-group-item">
+      {% if n.judged %}
+        <span class="glyphicon glyphicon-ok"></span>
+      {% endif %}
+      <a href="/view_profile/{{n.screen_name}}">{{n.screen_name}}</a>
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}

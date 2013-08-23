@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GeoExpert Judgment System</title>
+  <meta charset="utf-8" />
+  <script src="/static/bower_components/jquery/jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/bower_components/bootstrap/dist/js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
+
+  <link rel="stylesheet" href="/static/bower_components/bootstrap/dist/css/bootstrap.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  {% block extra_header %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a href="#" class="navbar-brand">GeoExpert Judgment System</a>
+      </div>
+      <div class="collapse navbar-collapse navbar-ex1-collapse">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Unjudged</a></li>
+          <li><a href="#">Judged</a></li>
+          <li><a href="#">Upload/Import Tasks</a></li>
+          <li><a href="#">Download Judgments</a></li>
+        </ul>
+      </div>
+    </nav>
+    <div id="pv-content">
+      {% block content %}{% endblock %}
+    </div>
+    <!--<div id="upload" class="upload">-->
+       <!--<form action="upload" method="post" accept-charset="utf-8">-->
+         <!--{% csrf_token %}-->
+         <!--<textarea name="csv_text" rows="8" cols="80"></textarea>-->
+         <!--<p><input type="submit" value="Upload"></p>-->
+       <!--</form>-->
+    <!--</div>-->
+</body>
+</html>

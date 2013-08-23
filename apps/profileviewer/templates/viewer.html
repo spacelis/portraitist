@@ -1,21 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Geoexpert Judgment System</title>
-  <meta charset="utf-8" />
-  <script src="/static/bower_components/jquery/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+{% extends "frame.html" %}
+{% block extra_header %}
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4oLS7DjhME0pLuTTauJw3rjs1_n4TuKM&sensor=false" type="text/javascript" charset="utf-8"></script>
   <script src="/static/js/initmap.min.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/js/d3.v3.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/bower_components/d3/d3.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/bower_components/crossfilter/crossfilter.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/bower_components/dcjs/dc.js" type="text/javascript" charset="utf-8"></script>
-  <script src="static/bower_components/bootstrap/dist/js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/js/profileviewer/main.js" type="text/javascript" charset="utf-8"></script>
 
   <link rel="stylesheet" href="/static/bower_components/dcjs/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
-  <link rel="stylesheet" href="static/bower_components/bootstrap/dist/css/bootstrap.css" type="text/css" media="screen" title="no title" charset="utf-8">
-  <link rel="stylesheet" href="/static/css/profileviewer/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function () {
       var data = JSON.parse("{{ checkins | escapejs }}");
@@ -23,29 +15,27 @@
       init_charts(data);
     });
   </script>
-</head>
-<body>
-  <div id="banner" class="frame">
-    <H1> GeoExpert Judgment System </H1>
-  </div>
-  <div id="content">
-    <div id="left-pane" class="pane">
+{% endblock %}
+{% block content %}
+  <div id="pv-panes" class="row">
+    <div id="left-pane" class="col-lg-6">
       <!--                            Left Pane-->
-      <form action="/submit_judgment" method="post" accept-charset="utf-8">
+      <form action="/submit_judgment" method="post" accept-charset="utf-8" role="form">
         {% csrf_token %}
-        {% for t in expertise %}
-        <div class="title">
-          Relevance to <b>{{ t.topic }}</b> in <b>{{ t.region }}</b><br>
+        <div class="col-lg-1"></div>
+        <div id="py-judgments" class="col-lg-11">
+          {% for t in expertise %}
+            <div> Relevance to <b>{{ t.topic }}</b> in <b>{{ t.region }}</b> </div>
+            <div class="radio"><label for="Not_Relevant"><input type="radio" name="topic-{{t.topic_id}}" value="0">0 (Not Relevant)</label></div>
+            <div class="radio"><label for="Relevant"><input type="radio" name="topic-{{t.topic_id}}" value="1">1 (Relevant)</label></div>
+            <div class="radio"><label for="High_Relevant"><input type="radio" name="topic-{{t.topic_id}}" value="2">2 (High Relevant)</label></div>
+          {% endfor %}
+          <input type="hidden" name="exp-id" value="{{ exp_id }}">
+          <button type="submit" class="btn btn-primary">Submit &amp; Continue</button>
         </div>
-        <input type="radio" name="topic-{{t.topic_id}}" value="0"><label for="Not_Relevant">0 (Not Relevant)</label>
-        <input type="radio" name="topic-{{t.topic_id}}" value="1"><label for="Relevant">1 (Relevant)</label>
-        <input type="radio" name="topic-{{t.topic_id}}" value="2"><label for="High_Relevant">2 (High Relevant)</label>
-        <input type="hidden" name="exp-id" value="{{ exp_id }}">
-        {% endfor %}
-        <p><input type="submit" value="Submit"></p>
       </form>
     </div>
-    <div id="right-pane" class="pane">
+    <div id="right-pane" class="col-lg-6">
       <!--                            Right Pane-->
       <div class="title">
         Last 60 places checked-in
@@ -69,6 +59,4 @@
       <div id="chart-poi-timeline"> </div>
     </div>
   </div>
-
-</body>
-</html>
+{% endblock %}
