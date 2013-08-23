@@ -7,23 +7,20 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4oLS7DjhME0pLuTTauJw3rjs1_n4TuKM&sensor=false" type="text/javascript" charset="utf-8"></script>
   <script src="/static/js/initmap.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/js/d3.v3.js" type="text/javascript" charset="utf-8"></script>
-  <!--<script src="/static/js/nv.d3.min.js" type="text/javascript" charset="utf-8"></script>-->
-  <!--<link rel="stylesheet" href="/static/css/nv.d3.css" type="text/css" media="screen" title="no title" charset="utf-8">-->
-  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-
+  <script src="/static/bower_components/d3/d3.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/bower_components/crossfilter/crossfilter.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/bower_components/dcjs/dc.js" type="text/javascript" charset="utf-8"></script>
+  <script src="static/bower_components/bootstrap/dist/js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/js/profileviewer/main.js" type="text/javascript" charset="utf-8"></script>
+
+  <link rel="stylesheet" href="/static/bower_components/dcjs/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <link rel="stylesheet" href="static/bower_components/bootstrap/dist/css/bootstrap.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <link rel="stylesheet" href="/static/css/profileviewer/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <script type="text/javascript" charset="utf-8">
-    google.load("visualization", "1", {packages:["corechart"]});
     $(document).ready(function () {
-      var pois = JSON.parse("{{ pois | escapejs }}");
-      var cate_timelines = JSON.parse("{{ cate_timelines | escapejs }}");
-      var poi_timelines = JSON.parse("{{ poi_timelines | escapejs }}");
-      init_map(pois);
-      init_cate_pie(cate_timelines);
-      init_cate_timelines(cate_timelines);
-      init_poi_pie(poi_timelines);
-      init_poi_timelines(poi_timelines);
+      var data = JSON.parse("{{ checkins | escapejs }}");
+      init_map(data);
+      init_charts(data);
     });
   </script>
 </head>

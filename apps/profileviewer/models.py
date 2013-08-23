@@ -15,6 +15,7 @@ from StringIO import StringIO
 from google.appengine.ext import ndb
 
 DEFAULT_APP_NAME = 'geo-expertise'
+csv.field_size_limit(500000)
 
 
 def parent_key(name, appname=DEFAULT_APP_NAME):
@@ -36,9 +37,7 @@ class Expert(ndb.Model):
     screen_name = ndb.StringProperty()
 
     expertise = ndb.JsonProperty(compressed=False)
-    pois = ndb.JsonProperty(compressed=False)
-    cate_timelines = ndb.JsonProperty(compressed=False)
-    poi_timelines = ndb.JsonProperty(compressed=False)
+    checkins = ndb.JsonProperty(compressed=True, indexed=False)
 
     judged = ndb.BooleanProperty(indexed=True)
     judgment = ndb.JsonProperty()
@@ -101,9 +100,7 @@ class Expert(ndb.Model):
             cls(parent=parent_key('judgment'),
                 screen_name=row[0],
                 expertise=json.loads(row[1]),
-                pois=json.loads(row[2]),
-                cate_timelines=json.loads(row[3]),
-                poi_timelines=json.loads(row[4]),
+                checkins=json.loads(row[2]),
                 judged=False,
                 judgment=json.loads('null')).put()
 # TODO using key.urlsafe as a serialization in relating pages and judgments
