@@ -1,115 +1,98 @@
-function sum (arr) {
-  var s = 0;
-  for (var i = arr.length - 1; i >= 0; i--) {
-    s += arr[i];
-  }
-  return s;
-}
+/* global dc */
+/* global d3 */
+/* global crossfilter */
+
+var profileviewer_ns = (function(){
+  var init_map = function (checkins){
+    var data = {center: [41, -100], options: {zoom: 3}};
+    var markers = {};
+    for(var i in map_data) {
+      var poi = map_data[i];
+      markers[poi.id] = {
+        position: [poi.lat, poi.lng],
+        info_window: {
+          content: poi.name + '<br>' + poi.cate,
+          showOn: 'mouseover',
+          hideOn: 'mouseout'
+        }
+      };
+    }
+    data.markers = markers;
+    $('#map-canvas').initMap(data);
+  };
+
+  var time_parser = d3.time.format("%Y-%m-%dT%H:%M:%S").parse;
+  var year_month = d3.time.format("%Y-%m");
 
 
-function init_map(map_data){
-  var data = {center: [41, -100], options: {zoom: 3}};
-  var markers = {};
-  for(var i in map_data) {
-    var poi = map_data[i];
-    markers[poi.id] = {
-      position: [poi.lat, poi.lng],
-      info_window: {
-        content: poi.name + '<br>' + poi.cate,
-        showOn: 'mouseover',
-        hideOn: 'mouseout'
+  var data;
+
+
+  var render_charts = function (){
+    //var cate_tl = dc.pieChart('#chart-cate-timeline');
+    //var poi_pie = dc.pieChart('#chart-poi-pie');
+    //var poi_tl = dc.pieChart('#chart-poi-timeline');
+
+    var fact = crossfilter(data);
+
+    var by_month = fact.dimension(function(c){
+      return year_month(c.created_at);
+    });
+    var by_category = fact.dimension(function(c){
+      return c.place.zcate;
+    });
+    var by_poi = fact.dimension(function(c){
+      return c.place.id + "\t" + c.place.name;
+    });
+
+
+    var checkins_by_month = by_month.group().reduceCount();
+    var checkins_by_category = by_category.group().reduceCount();
+    var checkins_by_poi = by_poi.group().reduceCount();
+
+
+
+    dc.pieChart('#chart-cate-pie')
+      .width(200) // (optional) define chart width, :default = 200
+      .height(200) // (optional) define chart height, :default = 200
+      .transitionDuration(500) // (optional) define chart transition duration, :default = 350
+      // (optional) define color array for slices
+      .colors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb'])
+      // (optional) define color domain to match your data domain if you want to bind data or color
+      .colorDomain([-1750, 1644])
+      // (optional) define color value accessor
+      .colorAccessor(function(d, i){return d.value;})
+      .radius(90) // define pie radius
+      // (optional) if inner radius is used then a donut chart will
+      // be generated instead of pie chart
+      .innerRadius(40)
+      .dimension(by_category) // set dimension
+      .group(checkins_by_category) // set group
+      // (optional) whether chart should render titles, :default = false
+      .renderTitle(true);
+    dc.renderAll();
+  };
+
+  var init_charts = function  (screen_name) {
+    d3.json(
+      '/api/expert_checkins?screen_name=' + screen_name,
+      function(err, json){
+        if (err){
+          alert("Fail to get data for " + screen_name);
+        }
+        else{
+          data = json;
+          data.forEach(function (c){
+            c.created_at = time_parser(c.created_at);
+          });
+          render_charts();
+        }
       }
-    };
-  }
-  data.markers = markers;
-  $('#map-canvas').initMap(data);
-}
-
-
-function init_cate_pie(cate_timeline_data) {
-  var piedata = [['Category', '# of Check-ins']];
-  for (var i in cate_timeline_data) {
-    piedata.push([i, sum(cate_timeline_data[i])]);
-  }
-  var data = google.visualization.arrayToDataTable(piedata);
-
-  var options = {
-    title: 'Check-in Distribution over Categories'
+    );
   };
 
-  var chart = new google.visualization.PieChart(
-      document.getElementById('chart-cate-pie'));
-  chart.draw(data, options);
-}
-
-
-function init_cate_timelines(cate_timelines_data) {
-  var tldata = [['# of Check-ins']];
-  var i;
-  for(i in cate_timelines_data) {
-    tldata[0].push(i);
-  }
-  for(i in cate_timelines_data[Object.keys(cate_timelines_data)[0]]){
-    var s = [i,];
-    for(var j in cate_timelines_data) {
-      s.push(cate_timelines_data[j][i]);
-    }
-    tldata.push(s);
-  }
-  var data = google.visualization.arrayToDataTable(tldata);
-
-  var options = {
-    title: 'Category Timelines',
-    hAxis: {title: 'Months ago',  titleTextStyle: {color: 'red'}},
-    isStacked: true
+  return {
+    initMap: init_map,
+    initCharts: init_charts,
   };
-
-  var chart = new google.visualization.ColumnChart(
-      document.getElementById('chart-cate-timeline'));
-  chart.draw(data, options);
-}
-
-
-function init_poi_pie(poi_timelines_data) {
-  var piedata = [['POI', '# of Check-ins']];
-  for (var i in poi_timelines_data) {
-    piedata.push(['['+ poi_timelines_data[i].category + ']' + poi_timelines_data[i].name,
-                  sum(poi_timelines_data[i].timeline)]);
-  }
-  var data = google.visualization.arrayToDataTable(piedata);
-
-  var options = {
-    title: 'Check-in Distribution over the Top 10 POIs'
-  };
-
-  var chart = new google.visualization.PieChart(
-      document.getElementById('chart-poi-pie'));
-  chart.draw(data, options);
-}
-
-
-function init_poi_timelines(poi_timelines_data) {
-  var tldata = [['# of Check-ins']];
-  var i;
-  for(i in poi_timelines_data) {
-    tldata[0].push('['+ poi_timelines_data[i].category + ']' + poi_timelines_data[i].name);
-  }
-  for(i in poi_timelines_data[Object.keys(poi_timelines_data)[0]].timeline){
-    var s = [i,];
-    for(var j in poi_timelines_data) {
-      s.push(poi_timelines_data[j].timeline[i]);
-    }
-    tldata.push(s);
-  }
-  var data = google.visualization.arrayToDataTable(tldata);
-
-  var options = {
-    title: 'POI timelines',
-    hAxis: {title: 'Month(s) ago',  titleTextStyle: {color: 'red'}},
-    isStacked: true
-  };
-
-  var chart = new google.visualization.ColumnChart(
-      document.getElementById('chart-poi-timeline'));
-  chart.draw(data, options);
-}
+})();

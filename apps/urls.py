@@ -12,7 +12,7 @@ urlpatterns = patterns('',
     url(r'^upload$', 'apps.profileviewer.views.upload'),
     url(r'^import/(.*)$', 'apps.profileviewer.views.import_data'),
     url(r'^submit_judgment$', 'apps.profileviewer.views.submit_judgment'),
-    url(r'^api/(.*)$', 'apps.profileviewer.api.endpoint'),
+    url(r'^api/(.*)$', 'apps.profileviewer.api.endpoints'),
     url(r'^favicon\.ico$', RedirectView.as_view(url='/static/images/profileviewer/socialmining.ico')),
     # url(r'^profileviewer/', include('profileviewer.foo.urls')),
 

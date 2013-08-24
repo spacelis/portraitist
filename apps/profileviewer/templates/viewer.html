@@ -10,9 +10,7 @@
   <link rel="stylesheet" href="/static/bower_components/dcjs/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function () {
-      var data = JSON.parse("{{ checkins | escapejs }}");
-      init_map(data);
-      init_charts(data);
+      profileviewer_ns.initCharts("{{ screen_name | safe }}");
     });
   </script>
 {% endblock %}
