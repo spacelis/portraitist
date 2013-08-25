@@ -57,11 +57,11 @@ var profileviewer_ns = (function(){
       .height(200) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
       // (optional) define color array for slices
-      .colors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb'])
-      // (optional) define color domain to match your data domain if you want to bind data or color
-      .colorDomain([-1750, 1644])
-      // (optional) define color value accessor
-      .colorAccessor(function(d, i){return d.value;})
+      .colors(d3.scale.category20())
+      //// (optional) define color domain to match your data domain if you want to bind data or color
+      //.colorDomain([-1750, 1644])
+      //// (optional) define color value accessor
+      //.colorAccessor(function(d, i){return d.value;})
       .radius(90) // define pie radius
       // (optional) if inner radius is used then a donut chart will
       // be generated instead of pie chart
@@ -70,10 +70,31 @@ var profileviewer_ns = (function(){
       .group(checkins_by_category) // set group
       // (optional) whether chart should render titles, :default = false
       .renderTitle(true);
+
+    dc.pieChart('#chart-poi-pie')
+      .width(200) // (optional) define chart width, :default = 200
+      .height(200) // (optional) define chart height, :default = 200
+      .transitionDuration(500) // (optional) define chart transition duration, :default = 350
+      // (optional) define color array for slices
+      .colors(d3.scale.category20())
+      //// (optional) define color domain to match your data domain if you want to bind data or color
+      //.colorDomain([-1750, 1644])
+      //// (optional) define color value accessor
+      //.colorAccessor(function(d, i){return d.value;})
+      .radius(90) // define pie radius
+      // (optional) if inner radius is used then a donut chart will
+      // be generated instead of pie chart
+      .innerRadius(40)
+      .dimension(by_poi) // set dimension
+      .group(checkins_by_poi) // set group
+      .slicesCap(10)
+      // (optional) whether chart should render titles, :default = false
+      .renderTitle(true);
+
     dc.renderAll();
   };
 
-  var init_charts = function  (screen_name) {
+  var init_charts = function (screen_name) {
     d3.json(
       '/api/expert_checkins?screen_name=' + screen_name,
       function(err, json){
