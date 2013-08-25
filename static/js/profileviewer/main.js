@@ -3,11 +3,11 @@
 /* global crossfilter */
 
 var profileviewer_ns = (function(){
-  var init_map = function (checkins){
+  var init_map = function (pois){
     var data = {center: [41, -100], options: {zoom: 3}};
     var markers = {};
-    for(var i in map_data) {
-      var poi = map_data[i];
+    for(var i in pois) {
+      var poi = pois[i];
       markers[poi.id] = {
         position: [poi.lat, poi.lng],
         info_window: {
@@ -25,7 +25,7 @@ var profileviewer_ns = (function(){
   var year_month = d3.time.format("%Y-%m");
 
 
-  var data;
+  var data;  // holding the data for visualization
 
 
   var render_charts = function (){
@@ -42,6 +42,7 @@ var profileviewer_ns = (function(){
       return c.place.zcate;
     });
     var by_poi = fact.dimension(function(c){
+      //return c.place.id + "\t" + c.place.name;
       return c.place.id + "\t" + c.place.name;
     });
 
@@ -87,7 +88,17 @@ var profileviewer_ns = (function(){
       .innerRadius(40)
       .dimension(by_poi) // set dimension
       .group(checkins_by_poi) // set group
+      .keyAccessor(function (obj){
+        var x = obj.key.split("\t")[1];
+        if(x){
+          return x;
+        }
+        else {
+          return obj.key;
+        }
+      })
       .slicesCap(10)
+      .othersLabel('Others')
       // (optional) whether chart should render titles, :default = false
       .renderTitle(true);
 
