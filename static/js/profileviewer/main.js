@@ -102,8 +102,8 @@ var profileviewer_ns = (function(){
       // (optional) whether chart should render titles, :default = false
       .renderTitle(true);
     dc.barChart("#chart-timeline")
-      .width(700) // (optional) define chart width, :default = 200
-      .height(200) // (optional) define chart height, :default = 200
+      .width(600) // (optional) define chart width, :default = 200
+      .height(150) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 500
       .dimension(by_week) // set dimension
       .group(checkins_by_week) // set group
