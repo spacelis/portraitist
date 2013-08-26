@@ -14,15 +14,24 @@ from apps.profileviewer.models import Expert
 from django.http import HttpResponse
 
 
-def expert_checkins(screen_name):
+def expert_checkins(screen_name=None, names=None):
     """Return all checkins for the expert
 
     :screen_name: @todo
     :returns: @todo
 
     """
-    e = Expert.get_by_screen_name(screen_name)
-    return e['checkins']
+    if screen_name:
+        e = Expert.get_by_screen_name(screen_name)
+        return e['checkins']
+    elif names:
+        r = dict()
+        for n in names.split(','):
+            r[n] = Expert.get_by_screen_name(n)
+        return r
+    else:
+        return {'error': 'Please specify either a screen_name '
+                'or comma separated names.'}
 
 
 APIENDPOINTS = {

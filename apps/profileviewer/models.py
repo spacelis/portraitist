@@ -29,6 +29,47 @@ def parent_key(name, appname=DEFAULT_APP_NAME):
     return ndb.Key(appname, name)
 
 
+class Topic(ndb.Model):
+
+    """Judgment tasks"""
+
+    # pylint: disable-msg=E1101
+    topic_id = ndb.StringProperty(indexed=True)
+    topic = ndb.StringProperty(compressed=False)
+    region = ndb.StringProperty(compressed=False)
+
+    expert_names = ndb.JsonProperty()
+
+    judgment_number = ndb.IntegerProperty(indexed=True)
+    judgments = ndb.JsonProperty() # [[1, 1, 1, 0, 0], [0, 1, 0, 0, 1]]
+    # pylint: enable-msg=E1101
+
+    @classmethod
+    def getTopicById(cls, tid):
+        """Return topic by id
+
+        :tid: @todo
+        :returns: @todo
+
+        """
+        return cls.query(topic_id=tid).fetch(1)[0]
+
+
+    @classmethod
+    def upload(cls, fin):
+        """Upload data to dbs by reading from csv_string
+        :returns: @todo
+
+        """
+        for row in csv.reader(fin):
+            cls(parent=parent_key('judgment'),
+                screen_name=row[0],
+                expertise=json.loads(row[1]),
+                checkins=json.loads(row[2]),
+                judged=False,
+                judgment=json.loads('null')).put()
+
+
 class Expert(ndb.Model):
 
     """Candidate Expert for judging"""
@@ -36,7 +77,7 @@ class Expert(ndb.Model):
     # pylint: disable-msg=E1101
     screen_name = ndb.StringProperty()
 
-    expertise = ndb.JsonProperty(compressed=False)
+    expertise = ndb.JsonProperty(compressed=False) # [tid1, tid2, tid3, ...]
     checkins = ndb.JsonProperty(compressed=True, indexed=False)
 
     judged = ndb.BooleanProperty(indexed=True)

@@ -3,11 +3,14 @@
 /* global crossfilter */
 
 var profileviewer_ns = (function(){
-  var init_map = function (pois){
-    var data = {center: [41, -100], options: {zoom: 3}};
+  var fact; // crossfilter object holding data
+  var map;
+  var map_markers;
+
+  var update_map = function (poi_groups){
     var markers = {};
-    for(var i in pois) {
-      var poi = pois[i];
+    for(var i in poi_groups) {
+      var poi = poi_groups[i];
       markers[poi.id] = {
         position: [poi.lat, poi.lng],
         info_window: {
@@ -21,33 +24,36 @@ var profileviewer_ns = (function(){
     $('#map-canvas').initMap(data);
   };
 
+  var init_map = function (pois){
+    var map_opts = {center: google.maps.LatLng(41, -100),
+                    zoom: 3,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP};
+    map = new google.maps.Map(document.getElementById('map-canvas'), map_opts);
+    update_map();
+  };
+
   var time_parser = d3.time.format("%Y-%m-%dT%H:%M:%S").parse;
-  var year_month = d3.time.format("%Y-%m");
-
-
-  var data;  // holding the data for visualization
-
 
   var render_charts = function (){
-    //var cate_tl = dc.pieChart('#chart-cate-timeline');
-    //var poi_pie = dc.pieChart('#chart-poi-pie');
-    //var poi_tl = dc.pieChart('#chart-poi-timeline');
+    fact = crossfilter(data);
 
-    var fact = crossfilter(data);
-
-    var by_month = fact.dimension(function(c){
-      return year_month(c.created_at);
+    var by_week = fact.dimension(function(c){
+      //return year_month(c.created_at);
+      return d3.time.week(c.created_at);
     });
     var by_category = fact.dimension(function(c){
       return c.place.zcate;
     });
     var by_poi = fact.dimension(function(c){
       //return c.place.id + "\t" + c.place.name;
-      return c.place.id + "\t" + c.place.name;
+      c.place.valueOf = function(){
+        return c.place.id;
+      };
+      return c.place;
     });
 
 
-    var checkins_by_month = by_month.group().reduceCount();
+    var checkins_by_week = by_week.group().reduceCount();
     var checkins_by_category = by_category.group().reduceCount();
     var checkins_by_poi = by_poi.group().reduceCount();
 
@@ -57,49 +63,51 @@ var profileviewer_ns = (function(){
       .width(200) // (optional) define chart width, :default = 200
       .height(200) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
-      // (optional) define color array for slices
       .colors(d3.scale.category20())
-      //// (optional) define color domain to match your data domain if you want to bind data or color
-      //.colorDomain([-1750, 1644])
-      //// (optional) define color value accessor
-      //.colorAccessor(function(d, i){return d.value;})
       .radius(90) // define pie radius
-      // (optional) if inner radius is used then a donut chart will
-      // be generated instead of pie chart
       .innerRadius(40)
       .dimension(by_category) // set dimension
       .group(checkins_by_category) // set group
-      // (optional) whether chart should render titles, :default = false
       .renderTitle(true);
 
     dc.pieChart('#chart-poi-pie')
       .width(200) // (optional) define chart width, :default = 200
       .height(200) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
-      // (optional) define color array for slices
       .colors(d3.scale.category20())
-      //// (optional) define color domain to match your data domain if you want to bind data or color
-      //.colorDomain([-1750, 1644])
-      //// (optional) define color value accessor
-      //.colorAccessor(function(d, i){return d.value;})
       .radius(90) // define pie radius
-      // (optional) if inner radius is used then a donut chart will
-      // be generated instead of pie chart
       .innerRadius(40)
       .dimension(by_poi) // set dimension
       .group(checkins_by_poi) // set group
-      .keyAccessor(function (obj){
-        var x = obj.key.split("\t")[1];
+      .label(function (obj){
+        var x = obj.data.key.name;
         if(x){
           return x;
         }
-        else {
-          return obj.key;
+        else{
+          return obj.data.key;
         }
       })
       .slicesCap(10)
-      .othersLabel('Others')
-      // (optional) whether chart should render titles, :default = false
+      .renderTitle(true);
+
+    dc.barChart("#chart-timeline")
+      .width(700) // (optional) define chart width, :default = 200
+      .height(200) // (optional) define chart height, :default = 200
+      .transitionDuration(500) // (optional) define chart transition duration, :default = 500
+      .dimension(by_week) // set dimension
+      .group(checkins_by_week) // set group
+      .elasticY(true)
+      .elasticX(true)
+      .x(d3.time.scale().domain([new Date(2000, 0, 1), new Date(2013, 7, 31)]))
+      .round(d3.time.week.round)
+      .xUnits(d3.time.weeks)
+      .centerBar(true)
+      .gap(1)
+      .renderHorizontalGridLines(true)
+      .renderVerticalGridLines(true)
+      .brushOn(true)
+      .title(function(d) { return "Value: " + d.value; })
       .renderTitle(true);
 
     dc.renderAll();

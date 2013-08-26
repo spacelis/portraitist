@@ -16,6 +16,7 @@ from django.shortcuts import redirect
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
 from apps.profileviewer.models import Expert
+from apps.profileviewer.models import Topic
 
 
 def home(request):
@@ -69,7 +70,23 @@ def import_data(_, filename):
     from apps import APP_PATH
     import os.path
     datapath = os.path.join(APP_PATH, 'data', filename)
-    Expert.upload(open(datapath).read())
+    with open(datapath) as fin:
+        Expert.upload(fin)
+    return redirect('/')
+
+
+def import_topic(_, filename):
+    """Upload the data to dbstore
+
+    :request: @todo
+    :returns: @todo
+
+    """
+    from apps import APP_PATH
+    import os.path
+    datapath = os.path.join(APP_PATH, 'data', filename)
+    with open(datapath) as fin:
+        Topic.upload(fin)
     return redirect('/')
 
 
