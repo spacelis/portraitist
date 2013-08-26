@@ -22,7 +22,6 @@ var profileviewer_ns = (function(){
   };
 
   var time_parser = d3.time.format("%Y-%m-%dT%H:%M:%S").parse;
-  var year_month = d3.time.format("%Y-%m");
 
 
   var data;  // holding the data for visualization
@@ -35,19 +34,26 @@ var profileviewer_ns = (function(){
 
     var fact = crossfilter(data);
 
-    var by_month = fact.dimension(function(c){
-      return year_month(c.created_at);
+    var by_week = fact.dimension(function(c){
+      return d3.time.week(c.created_at);
     });
     var by_category = fact.dimension(function(c){
       return c.place.zcate;
     });
     var by_poi = fact.dimension(function(c){
       //return c.place.id + "\t" + c.place.name;
-      return c.place.id + "\t" + c.place.name;
+      
+      return {
+        pid: c.place.id,
+        name: c.place.name,
+        valueOf: function(){
+          return c.place.name;
+        }
+      };
     });
 
 
-    var checkins_by_month = by_month.group().reduceCount();
+    var checkins_by_week = by_week.group().reduceCount();
     var checkins_by_category = by_category.group().reduceCount();
     var checkins_by_poi = by_poi.group().reduceCount();
 
@@ -88,20 +94,32 @@ var profileviewer_ns = (function(){
       .innerRadius(40)
       .dimension(by_poi) // set dimension
       .group(checkins_by_poi) // set group
-      .keyAccessor(function (obj){
-        var x = obj.key.split("\t")[1];
-        if(x){
-          return x;
-        }
-        else {
-          return obj.key;
-        }
+      .label(function (obj){
+        return obj.data.key.name;
       })
       .slicesCap(10)
       .othersLabel('Others')
       // (optional) whether chart should render titles, :default = false
       .renderTitle(true);
-
+    dc.barChart("#chart-timeline")
+      .width(700) // (optional) define chart width, :default = 200
+      .height(200) // (optional) define chart height, :default = 200
+      .transitionDuration(500) // (optional) define chart transition duration, :default = 500
+      .dimension(by_week) // set dimension
+      .group(checkins_by_week) // set group
+      .elasticY(true)
+      .elasticX(true)
+      .x(d3.time.scale().domain([new Date(2000, 0, 1), new Date(2013, 7, 31)]))
+      .round(d3.time.week.round)
+      .xUnits(d3.time.weeks)
+      .centerBar(true)
+      .gap(1)
+      .renderHorizontalGridLines(true)
+      .renderVerticalGridLines(true)
+      .brushOn(true)
+      .title(function(d) { return "Value: " + d.value; })
+        .renderTitle(true);
+  
     dc.renderAll();
   };
 
