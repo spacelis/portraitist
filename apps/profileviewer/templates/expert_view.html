@@ -1,49 +1,77 @@
 {% extends "frame.html" %}
 {% block extra_header %}
+  <script src="/static/bower_components/sticky-kit/jquery.sticky-kit.js" type="text/javascript" charset="utf-8"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4oLS7DjhME0pLuTTauJw3rjs1_n4TuKM&sensor=false" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/js/initmap.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/bower_components/d3/d3.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/bower_components/crossfilter/crossfilter.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/bower_components/dcjs/dc.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/bower_components/gmaps/gmaps.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/js/profileviewer/expert_view.js" type="text/javascript" charset="utf-8"></script>
 
   <link rel="stylesheet" href="/static/bower_components/dcjs/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function () {
       profileviewer_ns.initCharts("{{ screen_name | safe }}");
+      $("#judgment-panel").stick_in_parent();
     });
   </script>
 {% endblock %}
 {% block content %}
-  <form action="/judge_expert" method="post" accept-charset="utf-8" role="form">
-    {% csrf_token %}
-    {% for t in expertise %}
-    <div id="judge-pane" class="panel panel-default">
-      <div class="panel-heading"> Relevance to <b>{{ t.topic }}</b> in <b>{{ t.region }}</b> </div>
+     
+<div id="judgment-panel" class="panel panel-default" style="z-index: 100">
+  <!--<div class="panel-heading">Judgments</div>-->
+  <div class="panel-body">
+    <form action="/judge_expert" method="post" accept-charset="utf-8" role="form">
+      {% csrf_token %}
+      <div class="row" style="overflow-x: auto; white-space: nowrap;">
+        {% for t in expertise %}
+        <div class="col-lg-4" style="display: inline-block; float: none;">
+          <div id="judge-pane" class="panel panel-default ">
+            <div class="panel-heading"> Relevance to <b>{{ t.topic }}</b> <br> in <b>{{ t.region }}</b> </div>
+            <div class="panel-body">
+              <div id="py-judgments">
+                  <div class="radio"><label><input type="radio" name="topic-{{t.topic_id}}" value="0">Not Relevant</label></div>
+                  <div class="radio"><label><input type="radio" name="topic-{{t.topic_id}}" value="1">Relevant</label></div>
+                  <div class="radio"><label><input type="radio" name="topic-{{t.topic_id}}" value="2">High Relevant</label></div>
+                  <input type="hidden" name="exp-id" value="{{ exp_id }}">
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="row" style="margin-top: 10px;">
+        <div class="col-lg-4">
+          <button type="submit" class="btn btn-primary">Submit &amp; Continue</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <!--<div class="panel-heading"> Statistics for {{screen_name | safe}}</div>-->
+  <div class="panel-body">
+    <div class="panel panel-default">
       <div class="panel-body">
-        <div id="py-judgments">
-            <div class="radio"><label for="Not_Relevant"><input type="radio" name="topic-{{t.topic_id}}" value="0">0 (Not Relevant)</label></div>
-            <div class="radio"><label for="Relevant"><input type="radio" name="topic-{{t.topic_id}}" value="1">1 (Relevant)</label></div>
-            <div class="radio"><label for="High_Relevant"><input type="radio" name="topic-{{t.topic_id}}" value="2">2 (High Relevant)</label></div>
-          <input type="hidden" name="exp-id" value="{{ exp_id }}">
+        <div id="pv-charts" class="row">
+          <div class="col-lg-2">
+            <div id="chart-cate-pie" > </div>
+          </div>
+          <div class="col-lg-2">
+            <div id="chart-poi-pie"> </div>
+          </div>
+          <div class="col-lg-8">
+            <div id="chart-timeline"> </div>
+          </div>
         </div>
       </div>
     </div>
-    {% endfor %}
-    <button type="submit" class="btn btn-primary">Submit &amp; Continue</button>
-  </form>
-
-  <div id="stats-pane-{{ screen_name | safe }}" class="panel panel-default">
-    <div class="panel-heading"> Statistics for {{screen_name | safe}}</div>
-    <div class="panel-body">
-      <div id="pv-pies" class="row">
-        <div id="chart-cate-pie" class="col-lg-2"> </div>
-        <div id="chart-poi-pie" class="col-lg-2"> </div>
-        <div id="chart-timeline" class="col-lg-8"> </div>
-      </div>
-      <div id="pv-pies" class="row">
-        <div id="map-canvas" class="col-lg-12"></div>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <div id="map-canvas" style="height: 500px;width: 100%"></div>
       </div>
     </div>
   </div>
+</div>
 {% endblock %}
