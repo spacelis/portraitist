@@ -5,7 +5,7 @@
   <script src="/static/bower_components/d3/d3.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/bower_components/crossfilter/crossfilter.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/bower_components/dcjs/dc.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/js/profileviewer/main.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/expert_view.js" type="text/javascript" charset="utf-8"></script>
 
   <link rel="stylesheet" href="/static/bower_components/dcjs/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <script type="text/javascript" charset="utf-8">
@@ -15,42 +15,35 @@
   </script>
 {% endblock %}
 {% block content %}
-  <div id="pv-panes" class="row">
-    <div id="left-pane" class="col-lg-6">
-      <!--                            Left Pane-->
-      <form action="/submit_judgment" method="post" accept-charset="utf-8" role="form">
-        {% csrf_token %}
-        <div class="col-lg-1"></div>
-        <div id="py-judgments" class="col-lg-11">
-          {% for t in expertise %}
-            <div> Relevance to <b>{{ t.topic }}</b> in <b>{{ t.region }}</b> </div>
+  <form action="/judge_expert" method="post" accept-charset="utf-8" role="form">
+    {% csrf_token %}
+    {% for t in expertise %}
+    <div id="judge-pane" class="panel panel-default">
+      <div class="panel-heading"> Relevance to <b>{{ t.topic }}</b> in <b>{{ t.region }}</b> </div>
+      <div class="panel-body">
+        <div id="py-judgments">
             <div class="radio"><label for="Not_Relevant"><input type="radio" name="topic-{{t.topic_id}}" value="0">0 (Not Relevant)</label></div>
             <div class="radio"><label for="Relevant"><input type="radio" name="topic-{{t.topic_id}}" value="1">1 (Relevant)</label></div>
             <div class="radio"><label for="High_Relevant"><input type="radio" name="topic-{{t.topic_id}}" value="2">2 (High Relevant)</label></div>
-          {% endfor %}
           <input type="hidden" name="exp-id" value="{{ exp_id }}">
-          <button type="submit" class="btn btn-primary">Submit &amp; Continue</button>
         </div>
-      </form>
-    </div>
-    <div id="right-pane" class="col-lg-6">
-      <!--                            Right Pane-->
-      <!--<div class="title">-->
-        <!--Category Distribution-->
-      <!--</div>-->
-      <div id="chart-cate-pie"> </div>
-      <!--<div class="title">-->
-        <!--10 Top POIs-->
-      <!--</div>-->
-      <div id="chart-poi-pie"> </div>
-      <!--<div class="title">-->
-        <!--Timeline-->
-      <!--</div>-->
-      <div id="chart-timeline"> </div>
-      <div class="title">
-        Last 60 places checked-in
       </div>
-      <div id="map-canvas"></div>
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Submit &amp; Continue</button>
+  </form>
+
+  <div id="stats-pane-{{ screen_name | safe }}" class="panel panel-default">
+    <div class="panel-heading"> Statistics for {{screen_name | safe}}</div>
+    <div class="panel-body">
+      <div id="pv-pies" class="row">
+        <div id="chart-cate-pie" class="col-lg-2"> </div>
+        <div id="chart-poi-pie" class="col-lg-2"> </div>
+        <div id="chart-timeline" class="col-lg-8"> </div>
+      </div>
+      <div id="pv-pies" class="row">
+        <div id="map-canvas" class="col-lg-12"></div>
+      </div>
     </div>
   </div>
 {% endblock %}

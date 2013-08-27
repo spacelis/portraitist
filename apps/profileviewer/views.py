@@ -11,6 +11,7 @@ Description:
 
 #import twitter
 #from django.http import HttpResponse
+import json
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
 from django.template import RequestContext
@@ -26,26 +27,41 @@ def home(request):
     :returns: @todo
 
     """
-    data = {'screen_names': Expert.get_all_screen_names()}
+    data = {'topics': Topic.query().fetch(10)}
     return render_to_response('main.html', data,
                               context_instance=RequestContext(request))
 
 
-@csrf_protect
-def upload(request):
-    """Upload the data to dbstore
+def import_expert(_, filename):
+    """Upload the expert to dbstore
 
     :request: @todo
     :returns: @todo
 
     """
-    if 'csv_text' in request.REQUEST:
-        Expert.upload(request.REQUEST['csv_text'])
+    from apps import APP_PATH
+    import os.path
+    datapath = os.path.join(APP_PATH, 'data', filename)
+    with open(datapath) as fin:
+        Expert.upload(fin)
     return redirect('/')
 
 
+def expert_view(request, screen_name):
+    """Return a specific profile give a user's screen_name
+
+    :request: @todo
+    :screen_name: @todo
+    :returns: @todo
+
+    """
+    return render_to_response('expert_view.html',
+                              Expert.get_by_screen_name(screen_name),
+                              context_instance=RequestContext(request))
+
+
 @csrf_protect
-def submit_judgment(request):
+def submit_expert_judgment(request):
     """Submit judgment into the database
 
     :request: @todo
@@ -57,21 +73,6 @@ def submit_judgment(request):
         if v.startswith('topic-'):
             judgment[v] = request.REQUEST[v]
     e = Expert.update_judgment(request.REQUEST['exp-id'], judgment)
-    return redirect('/')
-
-
-def import_data(_, filename):
-    """Upload the data to dbstore
-
-    :request: @todo
-    :returns: @todo
-
-    """
-    from apps import APP_PATH
-    import os.path
-    datapath = os.path.join(APP_PATH, 'data', filename)
-    with open(datapath) as fin:
-        Expert.upload(fin)
     return redirect('/')
 
 
@@ -90,14 +91,31 @@ def import_topic(_, filename):
     return redirect('/')
 
 
-def view_profile(request, screen_name):
-    """Return a specific profile give a user's screen_name
+def topic_view(request, topic_id):
+    """Show a page for judging this topic
 
     :request: @todo
-    :screen_name: @todo
+    :topic_id: @todo
     :returns: @todo
 
     """
-    return render_to_response('viewer.html',
-                              Expert.get_by_screen_name(screen_name),
+    data = {'topic': Topic.query(Topic.topic_id==topic_id).fetch(1)[0]}
+    data['names'] = json.dumps(data['topic'].experts[:3])
+    return render_to_response('topic_view.html',
+                              data,
                               context_instance=RequestContext(request))
+
+
+@csrf_protect
+def submit_topic_judgment(request):
+    """Submit a judgment on a topic
+
+    :request: @todo
+    :topic_id: @todo
+    :returns: @todo
+
+    """
+    j = request.REQUEST['judgment']
+    jid = request.REQUEST['jid']
+    Topic.update_judgment(jid, j)
+    return redirect('/')

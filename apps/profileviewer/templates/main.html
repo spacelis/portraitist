@@ -1,12 +1,12 @@
 {% extends "frame.html" %}
 {% block content %}
 <ul class="list-group">
-  {% for n in screen_names|slice:":10" %}
+  {% for t in topics %}
     <li class="list-group-item">
-      {% if n.judged %}
-        <span class="glyphicon glyphicon-ok"></span>
+      <a href="/topic_view/{{t.topic_id}}">{{t.topic}} in {{t.region}}</a>
+      {% if t.judgment_number > 0 %}
+        <span class="badge">{{ t.judgment_number }}</span>
       {% endif %}
-      <a href="/view_profile/{{n.screen_name}}">{{n.screen_name}}</a>
     </li>
   {% endfor %}
 </ul>

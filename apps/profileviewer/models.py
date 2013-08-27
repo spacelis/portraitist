@@ -35,10 +35,11 @@ class Topic(ndb.Model):
 
     # pylint: disable-msg=E1101
     topic_id = ndb.StringProperty(indexed=True)
-    topic = ndb.StringProperty(compressed=False)
-    region = ndb.StringProperty(compressed=False)
+    topic = ndb.StringProperty()
+    region = ndb.StringProperty()
 
-    expert_names = ndb.JsonProperty()
+    experts = ndb.JsonProperty(compressed=False, indexed=False)
+    detail = ndb.JsonProperty(compressed=False, indexed=False)
 
     judgment_number = ndb.IntegerProperty(indexed=True)
     judgments = ndb.JsonProperty() # [[1, 1, 1, 0, 0], [0, 1, 0, 0, 1]]
@@ -54,20 +55,35 @@ class Topic(ndb.Model):
         """
         return cls.query(topic_id=tid).fetch(1)[0]
 
-
     @classmethod
-    def upload(cls, fin):
+    def upload(cls, fstream):
         """Upload data to dbs by reading from csv_string
         :returns: @todo
 
         """
-        for row in csv.reader(fin):
-            cls(parent=parent_key('judgment'),
-                screen_name=row[0],
-                expertise=json.loads(row[1]),
-                checkins=json.loads(row[2]),
-                judged=False,
-                judgment=json.loads('null')).put()
+        for row in csv.DictReader(fstream):
+            cls(parent=parent_key('topic'),
+                topic_id=row['topic_id'],
+                topic=row['topic'],
+                region=row['region'],
+                experts=json.loads(row['experts']),
+                detail=json.loads(row['detail']),
+                judgment_number=0,
+                judgments=[]).put()
+
+    @classmethod
+    def update_judgment(cls, exp_id, judgment):
+        """Update judgments on this topic
+
+        :judgment: @todo
+        :returns: @todo
+
+        """
+        t = ndb.Key(urlsafe=exp_id).get()
+        t['judgments'].append(judgment)
+        t['judgment_number'] += 1
+        t.put()
+        pass
 
 
 class Expert(ndb.Model):
@@ -77,11 +93,11 @@ class Expert(ndb.Model):
     # pylint: disable-msg=E1101
     screen_name = ndb.StringProperty()
 
-    expertise = ndb.JsonProperty(compressed=False) # [tid1, tid2, tid3, ...]
+    expertise = ndb.JsonProperty(compressed=False)
     checkins = ndb.JsonProperty(compressed=True, indexed=False)
 
     judged = ndb.BooleanProperty(indexed=True)
-    judgment = ndb.JsonProperty()
+    judgments = ndb.JsonProperty()
     # pylint: enable-msg=E1101
 
     @classmethod
@@ -118,7 +134,8 @@ class Expert(ndb.Model):
 
         """
         e = ndb.Key(urlsafe=exp_id).get()
-        e.populate(judgment=judgment, judged=True)
+        e['judgments'].append(judgment)
+        e.populate(judged=True)
         e.put()
 
     @classmethod
@@ -131,17 +148,15 @@ class Expert(ndb.Model):
                 for e in cls.query()]
 
     @classmethod
-    def upload(cls, csv_string):
+    def upload(cls, fstream):
         """Upload data to dbs by reading from csv_string
         :returns: @todo
 
         """
-        csv_in = StringIO(csv_string)
-        for row in csv.reader(csv_in):
-            cls(parent=parent_key('judgment'),
-                screen_name=row[0],
-                expertise=json.loads(row[1]),
-                checkins=json.loads(row[2]),
+        for row in csv.DictReader(fstream):
+            cls(parent=parent_key('expert'),
+                screen_name=row['screen_name'],
+                expertise=json.loads(row['expertise']),
+                checkins=json.loads(row['checkins']),
                 judged=False,
-                judgment=json.loads('null')).put()
-# TODO using key.urlsafe as a serialization in relating pages and judgments
+                judgments=[]).put()

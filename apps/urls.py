@@ -8,13 +8,16 @@ from django.views.generic import RedirectView
 urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'apps.profileviewer.views.home'),
-    url(r'^view_profile/(.*)$', 'apps.profileviewer.views.view_profile'),
-    url(r'^upload$', 'apps.profileviewer.views.upload'),
-    url(r'^import/(.*)$', 'apps.profileviewer.views.import_data'),
-    url(r'^import_topic/(.*)$', 'apps.profileviewer.views.import_topic'),
-    url(r'^submit_judgment$', 'apps.profileviewer.views.submit_judgment'),
-    url(r'^api/(.*)$', 'apps.profileviewer.api.endpoints'),
     url(r'^favicon\.ico$', RedirectView.as_view(url='/static/images/profileviewer/socialmining.ico')),
+
+    url(r'^import_expert/(.*)$', 'apps.profileviewer.views.import_expert'),
+    url(r'^expert_view/(.*)$', 'apps.profileviewer.views.expert_view'),
+    url(r'^judge_expert$', 'apps.profileviewer.views.submit_expert_judgment'),
+
+    url(r'^import_topic/(.*)$', 'apps.profileviewer.views.import_topic'),
+    url(r'^topic_view/(.*)$', 'apps.profileviewer.views.topic_view'),
+    url(r'^judge_topic$', 'apps.profileviewer.views.submit_topic_judgment'),
+    url(r'^api/(.*)$', 'apps.profileviewer.api.endpoints'),
     # url(r'^profileviewer/', include('profileviewer.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
