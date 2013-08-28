@@ -27,8 +27,8 @@ var profileviewer_ns = (function(){
       });
     }
     map.fitZoom();
-    if(map.getZoom() > 19){
-      map.setZoom(19);
+    if(map.getZoom() > 17){
+      map.setZoom(17);
     }
   }
 
@@ -209,12 +209,17 @@ var profileviewer_ns = (function(){
     dc.redrawAll();
   }
 
-  var charts = {
-    poi_chart: poi_chart,
-    cate_chart: cate_chart,
-    zcate_chart: zcate_chart,
-    timeline_chart: timeline_chart
-  };
+  function focusTopic(d, t){
+    if(t === 'p'){
+      focusPOI(d);
+    }
+    else if(t === 'c'){
+      focusCate(d);
+    }
+    else if(t === 'z'){
+      focusZCate(d);
+    }
+  }
 
   function getChart(name){
     return poi_chart;
@@ -222,9 +227,7 @@ var profileviewer_ns = (function(){
 
   return {
     initCharts: initCharts,
-    focusCate: focusCate,
-    focusPOI: focusPOI,
-    focusZCate: focusZCate,
+    focusTopic: focusTopic,
     getChart: getChart
   };
 })();

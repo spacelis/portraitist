@@ -57,8 +57,33 @@ def expert_view(request, screen_name):
     """
     expert = Expert.get_by_screen_name(screen_name)
     for e in expert['expertise']:
-        e['detail'] = json.dumps(Topic.getTopicById(e['topic_id'])['detail'])
+        detail = Topic.getTopicById(e['topic_id'])['detail']
+        e['detail'] = json.dumps(detail)
+        if 'poi' in e['topic_id']:  # For poi topics
+            e['focus_name'] = [e['topic'],
+                               detail['category']['name'],
+                               detail['category']['zero_category_name']]
+            e['focus_id'] = [detail['id'],
+                             detail['category']['name'],
+                             detail['category']['zero_category_name']]
+        elif 'zcate' not in e['topic_id']:  # For cate topics
+            e['focus_name'] = [detail['name'], detail['zero_category_name']]
+            e['focus_id'] = [detail['name'], detail['zero_category_name']]
+        else:  # For zcate topics
+            e['focus_name'] = [detail['name']]
+            e['focus_id'] = [detail['name']]
+
+        e['focus_name_json'] = json.dumps(e['focus_name'])
+        e['focus_id_json'] = json.dumps(e['focus_id'])
     return render_to_response('expert_view.html', expert,
+                              context_instance=RequestContext(request))
+
+
+def test_view(request):
+    """ a test view """
+    return render_to_response('test_view.html',
+                              {'test': [{'x': ['food', 'bar', 'haha']},
+                                        {'x': ['xxx', 'yyy']}]},
                               context_instance=RequestContext(request))
 
 

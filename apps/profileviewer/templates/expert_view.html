@@ -13,23 +13,47 @@
     $(document).ready(function () {
       profileviewer_ns.initCharts("{{ screen_name | safe }}");
       <!--$("#pv-judgment-panel").stick_in_parent();-->
+      
       {% for t in expertise %}
-        $("#pv-topic-{{ t.topic_id }}").click(
-          function(){
+        (function(){
+          var focus_name = JSON.parse("{{ t.focus_name_json | escapejs }}");
+          var focus_id = JSON.parse("{{ t.focus_id_json | escapejs }}");
           {% if 'zcate' in t.topic_id %}
-            profileviewer_ns.focusZCate(JSON.parse("{{ t.detail | escapejs }}").name);
+          $("#pv-topic-{{ t.topic_id }}").click(
+            function(){
+              profileviewer_ns.focusTopic(focus_id[0], 'z');
+            });
           {% elif 'cate' in t.topic_id %}
-            profileviewer_ns.focusCate(JSON.parse("{{ t.detail | escapejs }}").name);
+          $("#pv-topic-{{ t.topic_id }}").click(
+            function(){
+              profileviewer_ns.focusTopic(focus_id[0], 'c');
+            });
+          $("#pv-topic-{{ t.topic_id }}-z").click(
+            function(){
+              profileviewer_ns.focusTopic(focus_id[1], 'z');
+            });
           {% elif 'poi' in t.topic_id %}
-            profileviewer_ns.focusPOI(JSON.parse("{{ t.detail | escapejs }}").id);
+          $("#pv-topic-{{ t.topic_id }}").click(
+            function(){
+              profileviewer_ns.focusTopic(focus_id[0], 'p');
+            });
+          $("#pv-topic-{{ t.topic_id }}-c").click(
+            function(){
+              profileviewer_ns.focusTopic(focus_id[1], 'c');
+            });
+          $("#pv-topic-{{ t.topic_id }}-z").click(
+            function(){
+              profileviewer_ns.focusTopic(focus_id[2], 'z');
+            });
           {% endif %}
-          });
+        })();
       {% endfor %}
     });
   </script>
   <style type="text/css" media="screen">
     a:hover {
       cursor: pointer;
+      text-decoration: none;
     }
   </style>
 {% endblock %}
@@ -51,6 +75,20 @@
               </a>
               in
               <b>{{ t.region }}</b>
+              {% if 'zcate' not in t.topic_id %} <!-- show zcate if it is a poi or category topic -->
+                (
+                {% if 'poi' in t.topic_id %} <!-- show category if it is a poi topic -->
+                  <a id="pv-topic-{{ t.topic_id }}-c">
+                    <b>{{ t.focus_name | slice:"1:" | first }}</b>
+                    <span class="glyphicon glyphicon-search"></span>
+                  </a>,
+                {% endif %}
+                <a id="pv-topic-{{ t.topic_id }}-z">
+                  <b>{{ t.focus_name | last }}</b>
+                  <span class="glyphicon glyphicon-search"></span>
+                </a>
+                )
+              {% endif %}
             </div>
             <div class="col-lg-3">
               <div class="btn-group btn-group-xs" data-toggle="buttons">
