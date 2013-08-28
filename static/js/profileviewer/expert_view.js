@@ -11,6 +11,15 @@ var profileviewer_ns = (function(){
   //});
   var data;
 
+  var REGIONS = {
+      'Chicago': {lat: [41.4986, 42.0232],
+                  lng: [-88.1586, -87.3573]},
+      'New York': {lat: [40.4110, 40.9429],
+                   lng: [-74.2918, -73.7097]},
+      'Los Angeles': {lat: [33.7463, 34.2302],
+                      lng: [-118.6368, -117.9053]},
+      'San Francisco': {lat: [37.7025, 37.8045],
+                        lng: [-122.5349, -122.3546]}};
   function update_map (poi_groups){
     var pois = poi_groups.top(30);
     map.removeMarkers();
@@ -20,7 +29,7 @@ var profileviewer_ns = (function(){
       map.addMarker({
         lat: poi.lat,
         lng: poi.lng,
-        title: '[' + poi.id + '] ' + poi.name,
+        title: poi.name + '\n' + poi.category + ', ' + poi.zcate,
         infoWindow: {
           content: poi.name + '<br>' + poi.category + ', ' + poi.zcate,
         }
@@ -66,11 +75,21 @@ var profileviewer_ns = (function(){
       };
       return c.place;
     });
+    var by_region = fact.dimension(function(c){
+      for(var r in REGIONS){
+        if ((REGIONS[r].lat[0] < c.place.lat && c.place.lat < REGIONS[r].lat[1] &&
+             REGIONS[r].lng[0] < c.place.lng && c.place.lng < REGIONS[r].lng[1] )){
+          return r;
+        }
+      }
+      return 'Other';
+    });
 
     var checkins_by_week = by_week.group().reduceCount();
     var checkins_by_category = by_category.group().reduceCount();
     var checkins_by_zcate = by_zcate.group().reduceCount();
     var checkins_by_poi = by_poi.group().reduceCount();
+    var checkins_by_region = by_region.group().reduceCount();
     allpois = checkins_by_poi.all();
 
     var w = $("#chart-zcate-pie").width();
@@ -98,6 +117,22 @@ var profileviewer_ns = (function(){
       .innerRadius(40)
       .dimension(by_category) // set dimension
       .group(checkins_by_category) // set group
+      .slicesCap(10)
+      .on("filtered", function(chart, filter){
+        update_map(checkins_by_poi);
+      })
+      .renderTitle(true);
+
+    w = $("#chart-region-pie").width();
+    cate_chart = dc.pieChart("#chart-region-pie")
+      .width(w) // (optional) define chart width, :default = 200
+      .height(200) // (optional) define chart height, :default = 200
+      .transitionDuration(500) // (optional) define chart transition duration, :default = 350
+      .colors(d3.scale.category20())
+      .radius(90) // define pie radius
+      .innerRadius(40)
+      .dimension(by_region) // set dimension
+      .group(checkins_by_region) // set group
       .slicesCap(10)
       .on("filtered", function(chart, filter){
         update_map(checkins_by_poi);
