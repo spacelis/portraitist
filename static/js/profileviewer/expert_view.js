@@ -44,6 +44,7 @@ var profileviewer_ns = (function(){
 
   var time_parser = d3.time.format("%Y-%m-%dT%H:%M:%S").parse;
   var zcate_chart, cate_chart, poi_chart, timeline_chart;
+  var allpois;
 
   function render_charts (){
     fact = crossfilter(data);
@@ -70,6 +71,7 @@ var profileviewer_ns = (function(){
     var checkins_by_category = by_category.group().reduceCount();
     var checkins_by_zcate = by_zcate.group().reduceCount();
     var checkins_by_poi = by_poi.group().reduceCount();
+    allpois = checkins_by_poi.all();
 
     var w = $("#chart-zcate-pie").width();
     zcate_chart = dc.pieChart("#chart-zcate-pie")
@@ -139,7 +141,6 @@ var profileviewer_ns = (function(){
           update_map(checkins_by_poi);
         }
       })
-      .legend(dc.legend().x(300).y(10).itemHeight(13).gap(5))
       .renderTitle(true);
 
     w = $("#chart-timeline").width();
@@ -188,9 +189,12 @@ var profileviewer_ns = (function(){
   }
 
   function focusPOI(place) {
-    place.valueOf = function(){
-      return place.id;
-    };
+    for(var i in allpois){
+      if(place === allpois[i].key.valueOf()){
+        place = allpois[i].key;
+        break;
+      }
+    }
     poi_chart.filter(place);
     dc.redrawAll();
   }
@@ -205,10 +209,22 @@ var profileviewer_ns = (function(){
     dc.redrawAll();
   }
 
+  var charts = {
+    poi_chart: poi_chart,
+    cate_chart: cate_chart,
+    zcate_chart: zcate_chart,
+    timeline_chart: timeline_chart
+  };
+
+  function getChart(name){
+    return poi_chart;
+  }
+
   return {
     initCharts: initCharts,
     focusCate: focusCate,
     focusPOI: focusPOI,
-    focusZCate: focusZCate
+    focusZCate: focusZCate,
+    getChart: getChart
   };
 })();

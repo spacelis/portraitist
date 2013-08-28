@@ -21,7 +21,7 @@
           {% elif 'cate' in t.topic_id %}
             profileviewer_ns.focusCate(JSON.parse("{{ t.detail | escapejs }}").name);
           {% elif 'poi' in t.topic_id %}
-            profileviewer_ns.focusPOI(JSON.parse("{{ t.detail | escapejs }}"));
+            profileviewer_ns.focusPOI(JSON.parse("{{ t.detail | escapejs }}").id);
           {% endif %}
           });
       {% endfor %}
@@ -34,7 +34,6 @@
   </style>
 {% endblock %}
 {% block content %}
-     
 <div id="pv-judgment-panel" class="panel panel-default" style="z-index: 100">
   <!--<div class="panel-heading">Judgments</div>-->
   <div class="panel-body">
@@ -44,10 +43,10 @@
         {% for t in expertise %}
         <div class="list-group-item">
           <div class="row">
-            <div class="col-lg-9"> 
+            <div class="col-lg-9">
               <a id="pv-topic-{{ t.topic_id }}">
                 <span class="glyphicon glyphicon-search" ></span>
-                Relevance to <b>{{ t.topic }}</b> in <b>{{ t.region }}</b> 
+                Relevance to <b>{{ t.topic }}</b> in <b>{{ t.region }}</b>
               </a>
             </div>
             <div class="col-lg-3">
