@@ -44,7 +44,13 @@
         <div class="list-group-item">
           <div class="row">
             <div class="col-lg-9">
-              Relevance to <a id="pv-topic-{{ t.topic_id }}"><b>{{ t.topic }}</b> <span class="glyphicon glyphicon-search" ></span></a> in <b>{{ t.region }}</b>
+              Relevance to
+              <a id="pv-topic-{{ t.topic_id }}">
+                <b>{{ t.topic }}</b>
+                <span class="glyphicon glyphicon-search"></span>
+              </a>
+              in
+              <b>{{ t.region }}</b>
             </div>
             <div class="col-lg-3">
               <div class="btn-group btn-group-xs" data-toggle="buttons">
@@ -64,7 +70,8 @@
         {% endfor %}
       </div>
       <div class="row">
-        <div class="col-lg-12" style="align: justify;">
+        <div class="col-lg-10"> </div>
+        <div class="col-lg-2">
           <button type="submit" class="btn btn-primary">Submit &amp; Continue</button>
         </div>
       </div>
@@ -73,7 +80,16 @@
 </div>
 
 <div class="panel panel-default">
-  <div class="panel-heading"> Statistics for {{screen_name | safe}}</div>
+  <div class="panel-heading">
+    <div class="row">
+      <div class="col-lg-11">
+        Statistics for <a href="https://twitter.com/{{screen_name | safe}}">@{{screen_name | safe}}</a>
+      </div>
+      <div class="col-lg-1">
+        <button type="button" class="btn btn-default btn-xs" onClick="dc.filterAll();dc.redrawAll();"><span class="glyphicon glyphicon-repeat"></span> Reset</button>
+      </div>
+    </div>
+  </div>
   <div class="panel-body">
     <div class="panel panel-default">
       <div class="panel-body">
