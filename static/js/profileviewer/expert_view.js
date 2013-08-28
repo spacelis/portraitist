@@ -15,6 +15,7 @@ var profileviewer_ns = (function(){
     var pois = poi_groups.top(30);
     map.removeMarkers();
     for(var i in pois) {
+      if(pois[i].value === 0) {continue;}
       var poi = pois[i].key;
       map.addMarker({
         lat: poi.lat,
