@@ -22,7 +22,7 @@ var profileviewer_ns = (function(){
         lng: poi.lng,
         title: '[' + poi.id + '] ' + poi.name,
         infoWindow: {
-          content: poi.name + '<br>' + poi.zcate,
+          content: poi.name + '<br>' + poi.category + ', ' + poi.zcate,
         }
       });
     }
@@ -43,6 +43,7 @@ var profileviewer_ns = (function(){
   }
 
   var time_parser = d3.time.format("%Y-%m-%dT%H:%M:%S").parse;
+  var zcate_chart, cate_chart, poi_chart, timeline_chart;
 
   function render_charts (){
     fact = crossfilter(data);
@@ -52,6 +53,9 @@ var profileviewer_ns = (function(){
       return d3.time.week(c.created_at);
     });
     var by_category = fact.dimension(function(c){
+      return c.place.category;
+    });
+    var by_zcate = fact.dimension(function(c){
       return c.place.zcate;
     });
     var by_poi = fact.dimension(function(c){
@@ -64,10 +68,27 @@ var profileviewer_ns = (function(){
 
     var checkins_by_week = by_week.group().reduceCount();
     var checkins_by_category = by_category.group().reduceCount();
+    var checkins_by_zcate = by_zcate.group().reduceCount();
     var checkins_by_poi = by_poi.group().reduceCount();
 
-    dc.pieChart('#chart-cate-pie')
-      .width(200) // (optional) define chart width, :default = 200
+    var w = $("#chart-zcate-pie").width();
+    zcate_chart = dc.pieChart("#chart-zcate-pie")
+      .width(w) // (optional) define chart width, :default = 200
+      .height(200) // (optional) define chart height, :default = 200
+      .transitionDuration(500) // (optional) define chart transition duration, :default = 350
+      .colors(d3.scale.category20())
+      .radius(90) // define pie radius
+      .innerRadius(40)
+      .dimension(by_zcate) // set dimension
+      .group(checkins_by_zcate) // set group
+      .on("filtered", function(chart, filter){
+        update_map(checkins_by_poi);
+      })
+      .renderTitle(true);
+
+    w = $("#chart-cate-pie").width();
+    cate_chart = dc.pieChart("#chart-cate-pie")
+      .width(w) // (optional) define chart width, :default = 200
       .height(200) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
       .colors(d3.scale.category20())
@@ -75,13 +96,15 @@ var profileviewer_ns = (function(){
       .innerRadius(40)
       .dimension(by_category) // set dimension
       .group(checkins_by_category) // set group
+      .slicesCap(10)
       .on("filtered", function(chart, filter){
         update_map(checkins_by_poi);
       })
       .renderTitle(true);
 
-    dc.pieChart('#chart-poi-pie')
-      .width(200) // (optional) define chart width, :default = 200
+    w = $("#chart-poi-pie").width();
+    poi_chart = dc.pieChart("#chart-poi-pie")
+      .width(w) // (optional) define chart width, :default = 200
       .height(200) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
       .colors(d3.scale.category20())
@@ -116,18 +139,19 @@ var profileviewer_ns = (function(){
           update_map(checkins_by_poi);
         }
       })
-      .legend(dc.legend().x(400).y(10).itemHeight(13).gap(5))
+      .legend(dc.legend().x(300).y(10).itemHeight(13).gap(5))
       .renderTitle(true);
 
-    dc.barChart("#chart-timeline")
-      .width(700) // (optional) define chart width, :default = 200
+    w = $("#chart-timeline").width();
+    timeline_chart = dc.barChart("#chart-timeline")
+      .width(w) // (optional) define chart width, :default = 200
       .height(200) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 500
       .dimension(by_week) // set dimension
       .group(checkins_by_week) // set group
-      .elasticY(true)
-      .elasticX(true)
-      .x(d3.time.scale().domain([new Date(2000, 0, 1), new Date(2013, 7, 31)]))
+      .elasticY(false)
+      .elasticX(false)
+      .x(d3.time.scale().domain([new Date(2009, 0, 1), new Date(2013, 7, 0)]))
       .round(d3.time.week.round)
       .xUnits(d3.time.weeks)
       .centerBar(true)
@@ -163,7 +187,28 @@ var profileviewer_ns = (function(){
     );
   }
 
+  function focusPOI(place) {
+    place.valueOf = function(){
+      return place.id;
+    };
+    poi_chart.filter(place);
+    dc.redrawAll();
+  }
+
+  function focusCate(cate){
+    cate_chart.filter(cate);
+    dc.redrawAll();
+  }
+
+  function focusZCate(zcate){
+    zcate_chart.filter(zcate);
+    dc.redrawAll();
+  }
+
   return {
     initCharts: initCharts,
+    focusCate: focusCate,
+    focusPOI: focusPOI,
+    focusZCate: focusZCate
   };
 })();

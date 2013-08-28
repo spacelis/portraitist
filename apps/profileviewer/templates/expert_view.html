@@ -12,9 +12,26 @@
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function () {
       profileviewer_ns.initCharts("{{ screen_name | safe }}");
-      $("#pv-judgment-panel").stick_in_parent();
+      <!--$("#pv-judgment-panel").stick_in_parent();-->
+      {% for t in expertise %}
+        $("#pv-topic-{{ t.topic_id }}").click(
+          function(){
+          {% if 'zcate' in t.topic_id %}
+            profileviewer_ns.focusZCate(JSON.parse("{{ t.detail | escapejs }}").name);
+          {% elif 'cate' in t.topic_id %}
+            profileviewer_ns.focusCate(JSON.parse("{{ t.detail | escapejs }}").name);
+          {% elif 'poi' in t.topic_id %}
+            profileviewer_ns.focusPOI(JSON.parse("{{ t.detail | escapejs }}"));
+          {% endif %}
+          });
+      {% endfor %}
     });
   </script>
+  <style type="text/css" media="screen">
+    a:hover {
+      cursor: pointer;
+    }
+  </style>
 {% endblock %}
 {% block content %}
      
@@ -27,33 +44,31 @@
         {% for t in expertise %}
         <div class="list-group-item">
           <div class="row">
-            <div class="col-lg-9"> Relevance to <b>{{ t.topic }}</b> in <b>{{ t.region }}</b> 
+            <div class="col-lg-9"> 
+              <a id="pv-topic-{{ t.topic_id }}">
+                <span class="glyphicon glyphicon-search" ></span>
+                Relevance to <b>{{ t.topic }}</b> in <b>{{ t.region }}</b> 
+              </a>
             </div>
             <div class="col-lg-3">
-              <div class="btn-group">
-                <button id="btn-focus-{{ t.topic_id  }}" type="button" class="btn btn-default dropdown-toggle btn-xs" data-toggle="dropdown">
-                  Focus
-                </button>
-                <div id="pv-judgments" class="btn-group">
-                  <button id="btn-judgements-{{ t.topic_id  }}" type="button" class="btn btn-danger dropdown-toggle btn-xs" data-toggle="dropdown">
-                    Not Selected <span class="caret"></span>
-                  </button>
-                  <ul class="dropdown-menu" role="menu">
-                    <li><a href="javascript:void(0)" onClick="(function(){var $btn = $('#btn-judgements-{{ t.topic_id }}'); var $caret = $btn.find('span'); $btn.html('Not Relevant ').removeClass('btn-danger').addClass('btn-success'); $btn.append($caret); $('#pv-relevance-{{ t.topic_id }}').val('0');})();">Not Relevant</a></li>
-                    <li><a href="javascript:void(0)" onClick="(function(){var $btn = $('#btn-judgements-{{ t.topic_id }}'); var $caret = $btn.find('span'); $btn.html('Relevant ').removeClass('btn-danger').addClass('btn-success'); $btn.append($caret); $('#pv-relevance-{{ t.topic_id }}').val('1');})();">Relevant</a></li>
-                    <li><a href="javascript:void(0)" onClick="(function(){var $btn = $('#btn-judgements-{{ t.topic_id }}'); var $caret = $btn.find('span'); $btn.html('High Relevant ').removeClass('btn-danger').addClass('btn-success'); $btn.append($caret); $('#pv-relevance-{{ t.topic_id }}').val('2');})();">High Relevant</a></li>
-                  </ul>
-                  <input type="hidden" name="pv-relevance-{{ t.topic_id }}" value="-1" id="pv-relevance-{{ t.topic_id }}">
-                  <input type="hidden" name="exp-id" value="{{ exp_id }}">
-                </div>
+              <div class="btn-group btn-group-xs" data-toggle="buttons">
+                <label class="btn btn-default" for="">
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}"> Not Relevant
+                </label>
+                <label class="btn btn-default" for="">
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}"> Relevant
+                </label>
+                <label class="btn btn-default" for="">
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}"> High Relevant
+                </label>
               </div>
             </div>
           </div>
         </div>
         {% endfor %}
       </div>
-      <div class="row" style="margin-top: 10px;">
-        <div class="col-lg-12">
+      <div class="row">
+        <div class="col-lg-12" style="align: justify;">
           <button type="submit" class="btn btn-primary">Submit &amp; Continue</button>
         </div>
       </div>
@@ -67,13 +82,18 @@
     <div class="panel panel-default">
       <div class="panel-body">
         <div id="pv-charts" class="row">
-          <div class="col-lg-2">
-            <div id="chart-cate-pie" > </div>
+          <div class="col-lg-4">
+            <div id="chart-zcate-pie" > </div>
           </div>
-          <div class="col-lg-2">
+          <div class="col-lg-4">
+            <div id="chart-cate-pie"> </div>
+          </div>
+          <div class="col-lg-4">
             <div id="chart-poi-pie"> </div>
           </div>
-          <div class="col-lg-8">
+        </div>
+        <div class="row">
+          <div class="col-lg-12">
             <div id="chart-timeline"> </div>
           </div>
         </div>

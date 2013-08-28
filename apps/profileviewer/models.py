@@ -11,7 +11,6 @@ Description:
 
 import csv
 import json
-from StringIO import StringIO
 from google.appengine.ext import ndb
 
 DEFAULT_APP_NAME = 'geo-expertise'
@@ -42,7 +41,7 @@ class Topic(ndb.Model):
     detail = ndb.JsonProperty(compressed=False, indexed=False)
 
     judgment_number = ndb.IntegerProperty(indexed=True)
-    judgments = ndb.JsonProperty() # [[1, 1, 1, 0, 0], [0, 1, 0, 0, 1]]
+    judgments = ndb.JsonProperty()  # [[1, 1, 1, 0, 0], [0, 1, 0, 0, 1]]
     # pylint: enable-msg=E1101
 
     @classmethod
@@ -53,7 +52,10 @@ class Topic(ndb.Model):
         :returns: @todo
 
         """
-        return cls.query(topic_id=tid).fetch(1)[0]
+        d = cls.query(cls.topic_id == tid).fetch(1)[0]
+        e = {'_key': d.key}
+        e.update(d.to_dict())
+        return e
 
     @classmethod
     def upload(cls, fstream):
@@ -83,7 +85,6 @@ class Topic(ndb.Model):
         t['judgments'].append(judgment)
         t['judgment_number'] += 1
         t.put()
-        pass
 
 
 class Expert(ndb.Model):
@@ -116,16 +117,14 @@ class Expert(ndb.Model):
         :returns: @todo
 
         """
-        e = cls.query(Expert.screen_name == screen_name).fetch(1)[0]
-        d = {'exp_id': e.key.urlsafe()}
-        for p in e._properties:
-            d[p] = getattr(e, p)
-            if p in ['pois', 'cate_timelines', 'poi_timelines']:
-                d[p] = json.dumps(d[p])
-        return d
+        d = cls.query(Expert.screen_name == screen_name)\
+            .fetch(1)[0]
+        e = {'exp_id': d.key.urlsafe(), '_key': d.key}
+        e.update(d.to_dict())
+        return e
 
     @classmethod
-    def update_judgment(self, exp_id, judgment):
+    def update_judgment(cls, exp_id, judgment):
         """Update the judgment about expert given exp_id
 
         :exp_id: @todo

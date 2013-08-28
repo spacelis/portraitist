@@ -55,8 +55,10 @@ def expert_view(request, screen_name):
     :returns: @todo
 
     """
-    return render_to_response('expert_view.html',
-                              Expert.get_by_screen_name(screen_name),
+    expert = Expert.get_by_screen_name(screen_name)
+    for e in expert['expertise']:
+        e['detail'] = json.dumps(Topic.getTopicById(e['topic_id'])['detail'])
+    return render_to_response('expert_view.html', expert,
                               context_instance=RequestContext(request))
 
 
@@ -72,7 +74,7 @@ def submit_expert_judgment(request):
     for v in request.REQUEST:
         if v.startswith('topic-'):
             judgment[v] = request.REQUEST[v]
-    e = Expert.update_judgment(request.REQUEST['exp-id'], judgment)
+    Expert.update_judgment(request.REQUEST['exp-id'], judgment)
     return redirect('/')
 
 
@@ -99,7 +101,7 @@ def topic_view(request, topic_id):
     :returns: @todo
 
     """
-    data = {'topic': Topic.query(Topic.topic_id==topic_id).fetch(1)[0]}
+    data = {'topic': Topic.query(Topic.topic_id == topic_id).fetch(1)[0]}
     data['names'] = json.dumps(data['topic'].experts[:3])
     return render_to_response('topic_view.html',
                               data,
