@@ -31,7 +31,7 @@ var profileviewer_ns = (function(){
         lng: poi.lng,
         title: poi.name + ' (' + pois[i].value + ' check-ins)\n' + poi.category + ', ' + poi.zcate,
         infoWindow: {
-          content: poi.name + ' (' + pois[i].value + 'check-ins)<br>' + poi.category + ', ' + poi.zcate,
+          content: poi.name + ' (' + pois[i].value + ' check-ins)<br>' + poi.category + ', ' + poi.zcate,
         },
         icon: '/static/images/profileviewer/map_icons/' + poi.cate_id + '_black.png',
       });

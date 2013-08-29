@@ -13,7 +13,7 @@
     $(document).ready(function () {
       profileviewer_ns.initCharts("{{ screen_name | safe }}");
       <!--$("#pv-judgment-panel").stick_in_parent();-->
-      
+
       {% for t in expertise %}
         (function(){
           var focus_name = JSON.parse("{{ t.focus_name_json | escapejs }}");
@@ -66,13 +66,14 @@
   <!--<div class="panel-heading">Judgments</div>-->
   <div class="panel-body">
     <form action="/judge_expert" method="post" accept-charset="utf-8" role="form">
+      <input type="hidden" name="exp_id" value="{{ exp_id }}">
       {% csrf_token %}
       <div class="list-group">
         {% for t in expertise %}
         <div class="list-group-item">
           <div class="row">
             <div class="col-lg-9">
-              Relevance to
+              Expertise about
               <a id="pv-topic-{{ t.topic_id }}">
                 <b>{{ t.topic }}</b>
                 <span class="glyphicon glyphicon-search"></span>
@@ -95,17 +96,25 @@
               {% endif %}
             </div>
             <div class="col-lg-3">
-              <div class="btn-group btn-group-xs" data-toggle="buttons">
+              Novice&nbsp;
+              <div class="btn-group btn-group-sm" data-toggle="buttons">
                 <label class="btn btn-default" for="">
-                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}"> Not Relevant
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="1"> 1
                 </label>
                 <label class="btn btn-default" for="">
-                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}"> Relevant
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="2"> 2
                 </label>
                 <label class="btn btn-default" for="">
-                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}"> High Relevant
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="3"> 3
+                </label>
+                <label class="btn btn-default" for="">
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="4"> 4
+                </label>
+                <label class="btn btn-default" for="">
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="5"> 5
                 </label>
               </div>
+              &nbsp;Expert
             </div>
           </div>
         </div>
@@ -125,7 +134,7 @@
   <div class="panel-heading">
     <div class="row">
       <div class="col-lg-11">
-        Statistics for <a href="https://twitter.com/{{screen_name | safe}}">@{{screen_name | safe}}</a>
+        <b>Statistics for <a href="https://twitter.com/{{screen_name | safe}}">@{{screen_name | safe}}</a></b>
       </div>
       <div class="col-lg-1">
         <button type="button" class="btn btn-default btn-xs" onClick="dc.filterAll();dc.redrawAll();"><span class="glyphicon glyphicon-repeat"></span> Reset</button>
@@ -137,26 +146,54 @@
       <div class="panel-body">
         <div id="pv-charts" class="row">
           <div class="col-lg-3">
-            <div id="chart-zcate-pie" > </div>
+            <div class="panel panel-info">
+              <div class="panel-body">
+                <div id="chart-zcate-pie" > </div>
+              </div>
+              <div class="panel-footer"> Major Categories </div>
+            </div>
           </div>
           <div class="col-lg-3">
-            <div id="chart-cate-pie"> </div>
+            <div class="panel panel-info">
+              <div class="panel-body">
+                <div id="chart-cate-pie"> </div>
+              </div>
+              <div class="panel-footer"> Minor Categories </div>
+            </div>
           </div>
           <div class="col-lg-3">
-            <div id="chart-poi-pie"> </div>
+            <div class="panel panel-info">
+              <div class="panel-body">
+                <div id="chart-poi-pie"> </div>
+              </div>
+              <div class="panel-footer"> POI Distribution</div>
+            </div>
           </div>
           <div class="col-lg-3">
-            <div id="chart-region-pie"> </div>
+            <div class="panel panel-info">
+              <div class="panel-body">
+                <div id="chart-region-pie"> </div>
+              </div>
+              <div class="panel-footer"> Region Distribution </div>
+            </div>
           </div>
         </div>
         <div class="row">
           <div class="col-lg-12">
-            <div id="chart-timeline"> </div>
+            <div class="panel panel-info">
+              <div class="panel-heading"> Check-ins per week (after filtering)</div>
+              <div class="panel-body">
+                <div id="chart-timeline"> </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="panel panel-default">
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        Top 30 places (after filtering)
+      </div>
       <div class="panel-body">
         <div id="map-canvas" style="height: 500px;width: 100%"></div>
       </div>

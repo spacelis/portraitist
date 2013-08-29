@@ -12,8 +12,11 @@ Description:
 import csv
 import json
 from google.appengine.ext import ndb
+from datetime import timedelta
+from datetime import datetime as dt
 
 DEFAULT_APP_NAME = 'geo-expertise'
+MIN30 = timedelta(minutes=30)
 csv.field_size_limit(500000)
 
 
@@ -97,17 +100,19 @@ class Expert(ndb.Model):
     expertise = ndb.JsonProperty(compressed=False)
     checkins = ndb.JsonProperty(compressed=True, indexed=False)
 
-    judged = ndb.BooleanProperty(indexed=True)
+    judgment_number = ndb.IntegerProperty(indexed=True)
     judgments = ndb.JsonProperty()
+    assigned = ndb.DateTimeProperty()
     # pylint: enable-msg=E1101
 
     @classmethod
-    def get_one_unjudged(cls):
-        """Get one unjudged
+    def get_by_priority(cls, limit=10):
+        """Get a list of experts sorted by their priority for judging
         :returns: @todo
 
         """
-        return cls.query(judged=False).sort(-cls.screen_name).fetch(1)[0]
+        return cls.query(Expert.assigned < (dt.now() - MIN30))\
+                .sort(-cls.judgment_number)
 
     @classmethod
     def get_by_screen_name(cls, screen_name):
@@ -133,8 +138,8 @@ class Expert(ndb.Model):
 
         """
         e = ndb.Key(urlsafe=exp_id).get()
-        e['judgments'].append(judgment)
-        e.populate(judged=True)
+        e.judgments.append(judgment)
+        e.judgment_number += 1
         e.put()
 
     @classmethod
@@ -143,8 +148,8 @@ class Expert(ndb.Model):
         :returns: @todo
 
         """
-        return [{'screen_name': e.screen_name, 'judged': e.judged}
-                for e in cls.query()]
+        return [{'screen_name': e.screen_name}
+                for e in cls.get_by_priority()]
 
     @classmethod
     def upload(cls, fstream):
@@ -157,5 +162,7 @@ class Expert(ndb.Model):
                 screen_name=row['screen_name'],
                 expertise=json.loads(row['expertise']),
                 checkins=json.loads(row['checkins']),
-                judged=False,
-                judgments=[]).put()
+                judgment_number=0,
+                judgments=[],
+                assigned=dt(2013, 1, 1),
+                ).put()

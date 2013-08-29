@@ -99,7 +99,7 @@ def submit_expert_judgment(request):
     for v in request.REQUEST:
         if v.startswith('topic-'):
             judgment[v] = request.REQUEST[v]
-    Expert.update_judgment(request.REQUEST['exp-id'], judgment)
+    Expert.update_judgment(request.REQUEST['exp_id'], judgment)
     return redirect('/')
 
 
