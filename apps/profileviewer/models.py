@@ -111,8 +111,10 @@ class Expert(ndb.Model):
         :returns: @todo
 
         """
+        assert limit > 0
         return cls.query(Expert.assigned < (dt.now() - MIN30))\
-                .sort(-cls.judgment_number)
+                .order(Expert.assigned, -Expert.judgment_number)\
+                .fetch(limit)
 
     @classmethod
     def get_by_screen_name(cls, screen_name):
@@ -143,13 +145,12 @@ class Expert(ndb.Model):
         e.put()
 
     @classmethod
-    def get_all_screen_names(cls):
+    def get_screen_names(cls, limit=10):
         """Return all screen_names with whether they have been judged or not
         :returns: @todo
 
         """
-        return [{'screen_name': e.screen_name}
-                for e in cls.get_by_priority()]
+        return [e.screen_name for e in cls.get_by_priority(limit=limit)]
 
     @classmethod
     def upload(cls, fstream):

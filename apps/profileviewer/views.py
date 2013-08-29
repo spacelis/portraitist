@@ -27,9 +27,13 @@ def home(request):
     :returns: @todo
 
     """
-    data = {'topics': Topic.query().fetch(10)}
-    return render_to_response('main.html', data,
-                              context_instance=RequestContext(request))
+    no_inst = request.COOKIES.get('no_inst', 0) or request.REQUEST.get('no_inst', 0)
+    expert = Expert.get_screen_names(1)[0]
+    if no_inst:
+        return redirect('/expert_view/' + expert)
+    else:
+        return render_to_response('instructions.html', {'expert': expert},
+                                  context_instance=RequestContext(request))
 
 
 def import_expert(_, filename):
@@ -79,14 +83,6 @@ def expert_view(request, screen_name):
                               context_instance=RequestContext(request))
 
 
-def test_view(request):
-    """ a test view """
-    return render_to_response('test_view.html',
-                              {'test': [{'x': ['food', 'bar', 'haha']},
-                                        {'x': ['xxx', 'yyy']}]},
-                              context_instance=RequestContext(request))
-
-
 @csrf_protect
 def submit_expert_judgment(request):
     """Submit judgment into the database
@@ -97,10 +93,14 @@ def submit_expert_judgment(request):
     """
     judgment = dict()
     for v in request.REQUEST:
-        if v.startswith('topic-'):
-            judgment[v] = request.REQUEST[v]
+        if v.startswith('judgments-'):
+            topic_id = v[10:]
+            judgment[topic_id] = request.REQUEST[v]
     Expert.update_judgment(request.REQUEST['exp_id'], judgment)
-    return redirect('/')
+    return redirect('/?no_inst=1')
+
+
+# ------------------------ TOPIC VIEW ---------------------
 
 
 def import_topic(_, filename):
@@ -146,3 +146,13 @@ def submit_topic_judgment(request):
     jid = request.REQUEST['jid']
     Topic.update_judgment(jid, j)
     return redirect('/')
+
+
+# -------------------------- test view ------------------
+
+def test_view(request):
+    """ a test view """
+    return render_to_response('test_view.html',
+                              {'test': [{'x': ['food', 'bar', 'haha']},
+                                        {'x': ['xxx', 'yyy']}]},
+                              context_instance=RequestContext(request))

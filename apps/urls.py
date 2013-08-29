@@ -7,7 +7,8 @@ from django.views.generic import RedirectView
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^$', 'apps.profileviewer.views.home'),
+    url(r'^$', RedirectView.as_view(url='/home')),
+    url(r'^home$', 'apps.profileviewer.views.home'),
     url(r'^favicon\.ico$', RedirectView.as_view(url='/static/images/profileviewer/socialmining.ico')),
 
     url(r'^import_expert/(.*)$', 'apps.profileviewer.views.import_expert'),

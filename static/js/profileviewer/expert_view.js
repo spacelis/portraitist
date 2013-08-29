@@ -53,7 +53,7 @@ var profileviewer_ns = (function(){
   }
 
   var time_parser = d3.time.format("%Y-%m-%dT%H:%M:%S").parse;
-  var zcate_chart, cate_chart, poi_chart, timeline_chart;
+  var zcate_chart, cate_chart, poi_chart, region_chart, timeline_chart;
   var allpois;
 
   function render_charts (){
@@ -125,7 +125,7 @@ var profileviewer_ns = (function(){
       .renderTitle(true);
 
     w = $("#chart-region-pie").width();
-    cate_chart = dc.pieChart("#chart-region-pie")
+    region_chart = dc.pieChart("#chart-region-pie")
       .width(w) // (optional) define chart width, :default = 200
       .height(200) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
@@ -182,7 +182,7 @@ var profileviewer_ns = (function(){
     w = $("#chart-timeline").width();
     timeline_chart = dc.barChart("#chart-timeline")
       .width(w) // (optional) define chart width, :default = 200
-      .height(200) // (optional) define chart height, :default = 200
+      .height(120) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 500
       .dimension(by_week) // set dimension
       .group(checkins_by_week) // set group

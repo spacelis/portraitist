@@ -1,0 +1,95 @@
+{% extends "frame.html" %}
+{% block extra_header %}
+  <script src="static/bower_components/jquery.unslider/src/unslider.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript" charset="utf-8">
+    $(document).ready(function(){
+      $('#no_inst').change(function(){
+        if($(this).is(':checked')){
+          $.cookie('no_inst', 1);
+        }
+        else{
+          $.removeCookie('no_inst');
+        }
+      });
+      $('#slides').unslider({
+        keys: true,
+        dots: true
+      });
+    });
+  </script>
+  <style type="text/css" media="screen">
+    #slides { 
+      position: relative; 
+      overflow: auto; 
+    }
+    #slides li { 
+      list-style: none; 
+    }
+  </style>
+{% endblock %}
+{% block content %}
+<div class="panel panel-default">
+  <div id="slides" class="panel-body">
+    <ul>
+      <li>
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <div class="jumbotron" style="width: 800px; height: 500px;">
+                  <div class="container">
+                    <H1> Thank You! </H1>
+                    <p>For participating in the experiment!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+      </li>
+      <li>
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <img src="static/images/profileviewer/test_inst.png" alt="">
+              </div>
+            </div>
+      </li>
+      <li>
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <img src="static/images/profileviewer/test_inst.png" alt="">
+              </div>
+            </div>
+      </li>
+      <li>
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <div class="jumbotron" style="width: 800px; height: 500px;">
+                  <div class="container">
+                    <H1> Let's start </H1>
+                    <p>
+                      During the session, you may think of yourself as one who needs
+                      information about a place or a category of places (topics) and by
+                      reading the statistics (profile) of a given candidate, you judge
+                      the likelihood you may ask him or her for advice about the topic.
+                      There may be more than one topic to be judged for a candidate
+                      and you should judge each topic separately.
+                    </p>
+                    <p>
+                      With
+                      <a class="btn btn-primary btn-lg" href="/expert_view/{{ expert }}">
+                        &gt;&gt; @{{ expert }} &lt;&lt;
+                      </a>
+                    </p>
+                    <p>
+                      <div class="checkbox">
+                        <label>
+                          <input id="no_inst" type="checkbox"> Do not show me any more
+                        </label>
+                      </div>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+      </li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
