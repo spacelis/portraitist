@@ -6,12 +6,17 @@
   <script src="/static/bower_components/crossfilter/crossfilter.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/bower_components/dcjs/dc.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/bower_components/gmaps/gmaps.js" type="text/javascript" charset="utf-8"></script>
+  <script src="static/bower_components/jquery.cookie/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+  <script src="static/bower_components/jquery-uuid/jquery-uuid.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/js/profileviewer/expert_view.js" type="text/javascript" charset="utf-8"></script>
 
   <link rel="stylesheet" href="/static/bower_components/dcjs/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function () {
       profileviewer_ns.initCharts("{{ screen_name | safe }}");
+      if(! $.cookie('judger')){
+        $.cookie('judger', JSON.dumps({jid: $.uuid()}, {expires: 90});
+      }
       <!--$("#judgment-panel").stick_in_parent();-->
     });
   </script>

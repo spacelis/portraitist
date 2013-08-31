@@ -103,6 +103,9 @@ def submit_expert_judgment(request):
         if v.startswith('judgments-'):
             topic_id = v[10:]
             judgment[topic_id] = request.REQUEST[v]
+    judgment['_judger'] = json.loads(request.COOKIES.get('judge', None))
+    judgment['_judger']['ip'] = request.REQUEST.META.REMOTE_ADDR
+    judgment['_judger']['browser'] = request.REQUEST.META.HTTP_USER_AGENT
     Expert.update_judgment(request.REQUEST['exp_id'], judgment)
     return redirect('/?no_inst=1')
 
