@@ -10,14 +10,18 @@ Description:
 """
 
 #import twitter
-#from django.http import HttpResponse
 import json
+from collections import namedtuple
+from collections import defaultdict
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
 from apps.profileviewer.models import Expert
 from apps.profileviewer.models import Topic
+
+
+Focus = namedtuple('Focus', ['name', 'value', 'chart'], verbose=True)
 
 
 def home(request):
@@ -27,7 +31,8 @@ def home(request):
     :returns: @todo
 
     """
-    no_inst = request.COOKIES.get('no_inst', 0) or request.REQUEST.get('no_inst', 0)
+    no_inst = request.COOKIES.get('no_inst', 0) or \
+        request.REQUEST.get('no_inst', 0)
     expert = Expert.get_screen_names(1)[0]
     if no_inst:
         return redirect('/expert_view/' + expert)
@@ -60,25 +65,27 @@ def expert_view(request, screen_name):
 
     """
     expert = Expert.get_by_screen_name(screen_name)
+    focus = defaultdict(str)
     for e in expert['expertise']:
         detail = Topic.getTopicById(e['topic_id'])['detail']
-        e['detail'] = json.dumps(detail)
         if 'poi' in e['topic_id']:  # For poi topics
-            e['focus_name'] = [e['topic'],
-                               detail['category']['name'],
-                               detail['category']['zero_category_name']]
-            e['focus_id'] = [detail['id'],
-                             detail['category']['name'],
-                             detail['category']['zero_category_name']]
+            focus[Focus(detail['name'], detail['id'], 'p')] += '\n'
+            focus[Focus(detail['category']['name'],
+                        detail['category']['name'],
+                        'c')] += '\nThe minor category of ' + detail['name']
+            focus[Focus(detail['category']['zero_category_name'],
+                        detail['category']['zero_category_name'],
+                        'z')] += '\nThe category of ' + detail['name']
         elif 'zcate' not in e['topic_id']:  # For cate topics
-            e['focus_name'] = [detail['name'], detail['zero_category_name']]
-            e['focus_id'] = [detail['name'], detail['zero_category_name']]
+            focus[Focus(detail['name'], detail['name'], 'c')] += '\n'
+            focus[Focus(detail['zero_category_name'],
+                        detail['zero_category_name'],
+                        'z')] += '\nThe major category of ' + detail['name']
         else:  # For zcate topics
-            e['focus_name'] = [detail['name']]
-            e['focus_id'] = [detail['name']]
-
-        e['focus_name_json'] = json.dumps(e['focus_name'])
-        e['focus_id_json'] = json.dumps(e['focus_id'])
+            focus[Focus(detail['name'],
+                        detail['name'],
+                        'z')] += '\n'
+    expert['focus'] = {k: v.strip() for k, v in focus.iteritems()}
     return render_to_response('expert_view.html', expert,
                               context_instance=RequestContext(request))
 

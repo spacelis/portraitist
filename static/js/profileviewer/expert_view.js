@@ -96,58 +96,67 @@ var profileviewer_ns = (function(){
     var w = $("#chart-zcate-pie").width();
     zcate_chart = dc.pieChart("#chart-zcate-pie")
       .width(w) // (optional) define chart width, :default = 200
-      .height(200) // (optional) define chart height, :default = 200
+      .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
       .colors(d3.scale.category20())
-      .radius(90) // define pie radius
-      .innerRadius(40)
+      .radius(w / 200 * 90) // define pie radius
+      .innerRadius(w / 200 * 40)
       .dimension(by_zcate) // set dimension
       .group(checkins_by_zcate) // set group
       .on("filtered", function(chart, filter){
         update_map(checkins_by_poi);
+      })
+      .title(function (obj){
+        return obj.data.key + ":  " + obj.data.value + " check-in(s)";
       })
       .renderTitle(true);
 
     w = $("#chart-cate-pie").width();
     cate_chart = dc.pieChart("#chart-cate-pie")
       .width(w) // (optional) define chart width, :default = 200
-      .height(200) // (optional) define chart height, :default = 200
+      .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
       .colors(d3.scale.category20())
-      .radius(90) // define pie radius
-      .innerRadius(40)
+      .radius(w / 200 * 90) // define pie radius
+      .innerRadius(w / 200 * 40)
       .dimension(by_category) // set dimension
       .group(checkins_by_category) // set group
       .slicesCap(10)
       .on("filtered", function(chart, filter){
         update_map(checkins_by_poi);
       })
+      .title(function (obj){
+        return obj.data.key + ":  " + obj.data.value + " check-in(s)";
+      })
       .renderTitle(true);
 
     w = $("#chart-region-pie").width();
     region_chart = dc.pieChart("#chart-region-pie")
       .width(w) // (optional) define chart width, :default = 200
-      .height(200) // (optional) define chart height, :default = 200
+      .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
       .colors(d3.scale.category20())
-      .radius(90) // define pie radius
-      .innerRadius(40)
+      .radius(w / 200 * 90) // define pie radius
+      .innerRadius(w / 200 * 40)
       .dimension(by_region) // set dimension
       .group(checkins_by_region) // set group
       .slicesCap(10)
       .on("filtered", function(chart, filter){
         update_map(checkins_by_poi);
       })
+      .title(function (obj){
+        return obj.data.key + ":  " + obj.data.value + " check-in(s)";
+      })
       .renderTitle(true);
 
     w = $("#chart-poi-pie").width();
     poi_chart = dc.pieChart("#chart-poi-pie")
       .width(w) // (optional) define chart width, :default = 200
-      .height(200) // (optional) define chart height, :default = 200
+      .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
       .colors(d3.scale.category20())
-      .radius(90) // define pie radius
-      .innerRadius(40)
+      .radius(w / 200 * 90) // define pie radius
+      .innerRadius(w / 200 * 40)
       .dimension(by_poi) // set dimension
       .group(checkins_by_poi) // set group
       .label(function (obj){
@@ -162,10 +171,10 @@ var profileviewer_ns = (function(){
       .title(function (obj){
         var x = obj.data.key.name;
         if(x){
-          return x + ": " + obj.data.value;
+          return x + ":  " + obj.data.value + " check-in(s)";
         }
         else{
-          return obj.data.key + ": " + obj.data.value;
+          return obj.data.key + ":  " + obj.data.value + " check-in(s)";
         }
       })
       .slicesCap(10)
@@ -224,37 +233,27 @@ var profileviewer_ns = (function(){
     );
   }
 
-  function focusPOI(place) {
-    for(var i in allpois){
-      if(place === allpois[i].key.valueOf()){
-        place = allpois[i].key;
-        break;
+  function focusTopic(topic, chart){
+    if(chart === 'p'){
+      var p;
+      for(var i in allpois){
+        if(topic === allpois[i].key.valueOf()){
+          p = allpois[i].key;
+          break;
+        }
       }
+      poi_chart.filter(p);
     }
-    poi_chart.filter(place);
+    else if(chart === 'c'){
+      cate_chart.filter(topic);
+    }
+    else if(chart === 'z'){
+      zcate_chart.filter(topic);
+    }
+    else if(chart === 'r'){
+      region_chart.filter(topic);
+    }
     dc.redrawAll();
-  }
-
-  function focusCate(cate){
-    cate_chart.filter(cate);
-    dc.redrawAll();
-  }
-
-  function focusZCate(zcate){
-    zcate_chart.filter(zcate);
-    dc.redrawAll();
-  }
-
-  function focusTopic(d, t){
-    if(t === 'p'){
-      focusPOI(d);
-    }
-    else if(t === 'c'){
-      focusCate(d);
-    }
-    else if(t === 'z'){
-      focusZCate(d);
-    }
   }
 
   function getChart(name){

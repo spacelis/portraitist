@@ -1,20 +1,29 @@
 {% extends "frame.html" %}
 {% block extra_header %}
-  <script src="static/bower_components/jquery.unslider/src/unslider.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/bower_components/jquery.unslider/src/unslider.js" type="text/javascript" charset="utf-8"></script>
+  <link rel="stylesheet" href="/static/bower_components/jquery.unslider/site/style.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <script src="/static/bower_components/jquery.cookie/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+  <link rel="stylesheet" href="static/bower_components/jquery-popbox/popbox.css " type="text/css" media="screen" title="no title" charset="utf-8">
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function(){
       $('#no_inst').change(function(){
         if($(this).is(':checked')){
-          $.cookie('no_inst', 1);
+          $.cookie('no_inst', 1, {expires: 30});
         }
         else{
           $.removeCookie('no_inst');
         }
       });
       $('#slides').unslider({
+        delay: 30000000,
         keys: true,
-        dots: true
+        dots: true,
+        fluid: false
       });
+      slidey = $('#slides')
+      $('.click-to-next').click(function(e){
+        slidey.data('unslider').next();
+      })
     });
   </script>
   <style type="text/css" media="screen">
@@ -25,71 +34,112 @@
     #slides li { 
       list-style: none; 
     }
+    .slide-instruction {
+      background: #888888;
+      color: white;
+      width: 830px;
+      height: 580px;
+      margin-bottom: 0;
+    }
+    .slide-image-instruction {
+      padding-left: 10px !important;
+      padding-right: 0 !important;
+      padding-top: 10px;
+      padding-bottom: 0;
+    }
+    .click-to-next{
+
+    }
+    abbr[title] {
+      font-weight: bold;
+      border-bottom: 2px dotted white;
+    }
   </style>
 {% endblock %}
 {% block content %}
-<div class="panel panel-default">
-  <div id="slides" class="panel-body">
-    <ul>
-      <li>
-            <div class="panel panel-default">
-              <div class="panel-body">
-                <div class="jumbotron" style="width: 800px; height: 500px;">
-                  <div class="container">
-                    <H1> Thank You! </H1>
-                    <p>For participating in the experiment!</p>
-                  </div>
+<div id="slides" class="row banner">
+  <ul>
+    <li>
+            <div class="col-lg-12 click-to-next" align="center">
+              <div class="jumbotron slide-instruction">
+                <div class="container" style="text-align: left">
+                  <H1> Welcome </H1>
+                  <p>
+                    We are conducting a research on retrieving experts among active 
+                    users of location sharing services. You as a judge will evaluate 
+                    the retrieved users' <abbr title="Knowledge about places">expertise</abbr> 
+                    by studying their profiles and scoring their expertise in a scale 
+                    from 1 (Novice) to 5 (Expert).
+                  </p>
+                  <p>
+                    (Click to continue.)
+                  </p>
                 </div>
               </div>
             </div>
-      </li>
-      <li>
-            <div class="panel panel-default">
-              <div class="panel-body">
-                <img src="static/images/profileviewer/test_inst.png" alt="">
-              </div>
-            </div>
-      </li>
-      <li>
-            <div class="panel panel-default">
-              <div class="panel-body">
-                <img src="static/images/profileviewer/test_inst.png" alt="">
-              </div>
-            </div>
-      </li>
-      <li>
-            <div class="panel panel-default">
-              <div class="panel-body">
-                <div class="jumbotron" style="width: 800px; height: 500px;">
-                  <div class="container">
-                    <H1> Let's start </H1>
-                    <p>
-                      During the session, you may think of yourself as one who needs
-                      information about a place or a category of places (topics) and by
-                      reading the statistics (profile) of a given candidate, you judge
-                      the likelihood you may ask him or her for advice about the topic.
-                      There may be more than one topic to be judged for a candidate
-                      and you should judge each topic separately.
-                    </p>
-                    <p>
-                      With
-                      <a class="btn btn-primary btn-lg" href="/expert_view/{{ expert }}">
-                        &gt;&gt; @{{ expert }} &lt;&lt;
-                      </a>
-                    </p>
-                    <p>
-                      <div class="checkbox">
-                        <label>
-                          <input id="no_inst" type="checkbox"> Do not show me any more
-                        </label>
-                      </div>
-                    </p>
-                  </div>
+    </li>
+    <li>
+            <div class="col-lg-12 click-to-next" align="center">
+              <div class="jumbotron slide-instruction">
+                <div class="container" style="text-align: left">
+                  <H1> How </H1>
+                  <p>
+                    Since each user has huge a volume of 
+                    <abbr title="A message or tweet with location information">check-ins</abbr>,
+                    It is not possible to view them all. Thus we provide a comprehensive panel for
+                    judges to investigate users' expertise. By applying filters, you can zoom into
+                    a particular part of dimensions to study their check-in behavior. For example,
+                    you may apply a fiter to see only the check-ins at bars.
+                  </p>
+                  <p>
+                    (Click to continue.)
+                  </p>
                 </div>
               </div>
             </div>
-      </li>
-    </ul>
-  </div>
+    </li>
+    <li>
+            <div class="col-lg-12 click-to-next" align="center">
+              <div class="jumbotron slide-instruction slide-image-instruction">
+                <img src="static/images/profileviewer/inst_1.png" alt="">
+              </div>
+            </div>
+    </li>
+    <li>
+            <div class="col-lg-12 click-to-next" align="center">
+              <div class="jumbotron slide-instruction slide-image-instruction">
+                <img src="static/images/profileviewer/inst_2.png" alt="">
+              </div>
+            </div>
+    </li>
+    <li>
+            <div class="col-lg-12 click-to-next" align="center">
+              <div class="jumbotron slide-instruction slide-image-instruction">
+                <img src="static/images/profileviewer/inst_3.png" alt="">
+              </div>
+            </div>
+    </li>
+    <li>
+            <div class="col-lg-12" align="center">
+              <div class="jumbotron slide-instruction">
+                <div class="container" align="left">
+                  <H1> Let's start </H1>
+                  <p>
+                    Last Tip: Hovoring mouse over the panel for more information.
+                  </p>
+                  <p align="right">
+                    With
+                    <a class="btn btn-primary btn-lg" href="/expert_view/{{ expert }}">
+                      @{{ expert }}
+                    </a>
+                  </p>
+                  <p style="float: right; text-aligin: right; font-size: 14px">
+                    <input id="no_inst" type="checkbox"> Do not show me any more
+                  </p>
+                </div>
+              </div>
+            </div>
+    </li>
+  </ul>
 </div>
 {% endblock %}

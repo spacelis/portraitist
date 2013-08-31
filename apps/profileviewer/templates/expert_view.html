@@ -13,41 +13,6 @@
     $(document).ready(function () {
       profileviewer_ns.initCharts("{{ screen_name | safe }}");
       <!--$("#judgment-panel").stick_in_parent();-->
-
-      {% for t in expertise %}
-        (function(){
-          var focus_name = JSON.parse("{{ t.focus_name_json | escapejs }}");
-          var focus_id = JSON.parse("{{ t.focus_id_json | escapejs }}");
-          {% if 'zcate' in t.topic_id %}
-          $("#topic-{{ t.topic_id }}").click(
-            function(){
-              profileviewer_ns.focusTopic(focus_id[0], 'z');
-            });
-          {% elif 'cate' in t.topic_id %}
-          $("#topic-{{ t.topic_id }}").click(
-            function(){
-              profileviewer_ns.focusTopic(focus_id[0], 'c');
-            });
-          $("#z-extra-{{ t.topic_id }}").click(
-            function(){
-              profileviewer_ns.focusTopic(focus_id[1], 'z');
-            });
-          {% elif 'poi' in t.topic_id %}
-          $("#topic-{{ t.topic_id }}").click(
-            function(){
-              profileviewer_ns.focusTopic(focus_id[0], 'p');
-            });
-          $("#c-extra-{{ t.topic_id }}").click(
-            function(){
-              profileviewer_ns.focusTopic(focus_id[1], 'c');
-            });
-          $("#z-extra-{{ t.topic_id }}").click(
-            function(){
-              profileviewer_ns.focusTopic(focus_id[2], 'z');
-            });
-          {% endif %}
-        })();
-      {% endfor %}
     });
   </script>
   <style type="text/css" media="screen">
@@ -55,11 +20,14 @@
       cursor: pointer;
       text-decoration: none;
     }
-    .panel-footer {
+    .chart-label {
       cursor: help;
       text-align: center;
     }
-    .btn.active, .btn:active {
+    .btn-float-right {
+      float: right;
+    }
+    .btn-radio.active, .btn-radio:active {
       background-color: #428bca;
       color: white;
     }
@@ -67,7 +35,14 @@
 {% endblock %}
 {% block content %}
 <div id="judgment-panel" class="panel panel-default" style="z-index: 100">
-  <!--<div class="panel-heading">Judgments</div>-->
+  <div class="panel-heading">
+    <b>
+      How likely is
+      <a href="https://twitter.com/{{screen_name | safe}}" target="_blank">
+        @{{screen_name | safe}}
+      </a> an expert knowing about
+    </b>
+  </div>
   <div class="panel-body">
     <form action="/judge_expert" method="post" accept-charset="utf-8" role="form">
       <input type="hidden" name="exp_id" value="{{ exp_id }}">
@@ -76,58 +51,37 @@
         {% for t in expertise %}
         <div class="list-group-item">
           <div class="row">
-            <div class="col-lg-9">
-              Expertise about
-              <a id="topic-{{ t.topic_id }}">
-                <b>{{ t.topic }}</b>
-                <span class="glyphicon glyphicon-search"></span>
-              </a>
-              in
-              <b>{{ t.region }}</b>
-              {% if 'zcate' not in t.topic_id %} <!-- show zcate if it is a poi or category topic -->
-                (
-                {% if 'poi' in t.topic_id %} <!-- show category if it is a poi topic -->
-                  <a id="c-extra-{{ t.topic_id }}">
-                    <b>{{ t.focus_name | slice:"1:" | first }}</b>
-                    <span class="glyphicon glyphicon-search"></span>
-                  </a>,
-                {% endif %}
-                <a id="z-extra-{{ t.topic_id }}">
-                  <b>{{ t.focus_name | last }}</b>
-                  <span class="glyphicon glyphicon-search"></span>
-                </a>
-                )
-              {% endif %}
+            <div class="col-sm-9">
+              <b>{{ t.topic }}</b> in <b>{{ t.region }}</b>?
             </div>
-            <div class="col-lg-3">
-              Novice&nbsp;
-              <div class="btn-group btn-group-sm" data-toggle="buttons">
-                <label class="btn btn-default" for="">
-                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="1"> 1
+            <div class="col-sm-3" align="right">
+              <abbr title="He/she probably knows nothing">Unlikely</abbr>&nbsp;
+              <div class="btn-group btn-group-xs" data-toggle="buttons">
+                <label class="btn btn-default btn-radio" for="">
+                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="1"> &nbsp;1&nbsp;
                 </label>
-                <label class="btn btn-default" for="">
-                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="2"> 2
+                <label class="btn btn-default btn-radio" for="">
+                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="2"> &nbsp;2&nbsp;
                 </label>
-                <label class="btn btn-default" for="">
-                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="3"> 3
+                <label class="btn btn-default btn-radio" for="">
+                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="3"> &nbsp;3&nbsp;
                 </label>
-                <label class="btn btn-default" for="">
-                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="4"> 4
+                <label class="btn btn-default btn-radio" for="">
+                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="4"> &nbsp;4&nbsp;
                 </label>
-                <label class="btn btn-default" for="">
-                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="5"> 5
+                <label class="btn btn-default btn-radio" for="">
+                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="5"> &nbsp;5&nbsp;
                 </label>
               </div>
-              &nbsp;Expert
+              &nbsp;<abbr title="He/she definately knows a lot.">Likely</abbr>
             </div>
           </div>
         </div>
         {% endfor %}
       </div>
       <div class="row">
-        <div class="col-lg-10"> </div>
-        <div class="col-lg-2">
-          <button type="submit" class="btn btn-primary">Submit &amp; Continue</button>
+        <div class="col-sm-12">
+          <button type="submit" class="btn btn-primary btn-xs btn-float-right">Submit &amp; Continue</button>
         </div>
       </div>
     </form>
@@ -137,53 +91,64 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <div class="row">
-      <div class="col-lg-11">
-        <b>Statistics for <a href="https://twitter.com/{{screen_name | safe}}">@{{screen_name | safe}}</a></b>
+      <div class="col-sm-12">
+        <b>Statistics</b>
+        <div class="btn-toolbar btn-float-right">
+          <div class="btn-group">
+            {% for k, t in focus.items %}
+            <button type="button" class="btn btn-default btn-xs" onClick="profileviewer_ns.focusTopic('{{ k.value }}', '{{ k.chart }}')" title="{{ t }}">
+              <span class="glyphicon glyphicon-search"></span> {{ k.name }}
+            </button>
+            {% endfor %}
+          </div>
+          <div class="btn-group">
+            <button type="button" class="btn btn-default btn-xs" onClick="dc.filterAll();dc.redrawAll();" title="Remove all filters currently applied." >
+              <span class="glyphicon glyphicon-repeat"></span> Reset
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="col-lg-1">
-        <button type="button" class="btn btn-default btn-xs" onClick="dc.filterAll();dc.redrawAll();" title="Remove all filters currently applied.">
-          <span class="glyphicon glyphicon-repeat"></span> Reset
-        </button>
+      <div class="col-sm-1">
       </div>
     </div>
   </div>
   <div class="panel-body">
     <div class="row">
-      <div class="col-lg-3">
+      <div class="col-sm-3">
         <div class="panel panel-info" title="This chart shows the number of check-ins at each major category of places.">
           <div class="panel-body">
             <div id="chart-zcate-pie" > </div>
           </div>
-          <div class="panel-footer"> Major Categories </div>
+          <div class="panel-footer chart-label"> Major Categories </div>
         </div>
       </div>
-      <div class="col-lg-3">
+      <div class="col-sm-3">
         <div class="panel panel-info" title="This chart is similar to the one showing major category distribution except that it is for minor categories.">
           <div class="panel-body">
             <div id="chart-cate-pie"> </div>
           </div>
-          <div class="panel-footer"> Minor Categories </div>
+          <div class="panel-footer chart-label"> Minor Categories </div>
         </div>
       </div>
-      <div class="col-lg-3">
+      <div class="col-sm-3">
         <div class="panel panel-info" title="This chart shows the number of check-ins the candidate have made at each place.">
           <div class="panel-body">
             <div id="chart-poi-pie"> </div>
           </div>
-          <div class="panel-footer"> POI Distribution</div>
+          <div class="panel-footer chart-label"> Locations </div>
         </div>
       </div>
-      <div class="col-lg-3">
+      <div class="col-sm-3">
         <div class="panel panel-info" title="This chart shows the number of check-ins that were made at each of 4 cities.">
           <div class="panel-body">
             <div id="chart-region-pie"> </div>
           </div>
-          <div class="panel-footer"> Region Distribution </div>
+          <div class="panel-footer chart-label"> Regions </div>
         </div>
       </div>
     </div>
     <div class="row">
-      <div class="col-lg-12">
+      <div class="col-sm-12">
         <div class="panel panel-info" title="This chart shows the number of check-ins per week.">
           <div class="panel-heading"> Check-ins per week (after filtering)</div>
           <div class="panel-body">
@@ -202,4 +167,7 @@
     </div>
   </div>
 </div>
+<!--<div class="footer">-->
+  <!--<p> If you have any complaints or suggestions, please do not hesitate to contact us. <a href="mailto:wen.li@tudelft.nl?subject=Feedback%20on%20Geoexpert%20Judging%20System">Wen Li</a></p>-->
+<!--</div>-->
 {% endblock %}
