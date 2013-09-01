@@ -1,8 +1,7 @@
 {% extends "frame.html" %}
 {% block extra_header %}
-  <script src="/static/bower_components/jquery.unslider/src/unslider.js" type="text/javascript" charset="utf-8"></script>
-  <link rel="stylesheet" href="/static/css/profileviewer/instruction.css" type="text/css" media="screen" title="no title" charset="utf-8">
-  <script src="/static/bower_components/jquery.cookie/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/unslider.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
   <!--<link rel="stylesheet" href="static/bower_components/jquery-popbox/popbox.css " type="text/css" media="screen" title="no title" charset="utf-8">-->
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function(){
@@ -26,13 +25,15 @@
       })
     });
   </script>
+
+  <link rel="stylesheet" href="/static/css/profileviewer/instruction.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <style type="text/css" media="screen">
-    #slides { 
-      position: relative; 
-      overflow: auto; 
+    #slides {
+      position: relative;
+      overflow: auto;
     }
-    #slides li { 
-      list-style: none; 
+    #slides li {
+      list-style: none;
     }
     .slide-instruction {
       background: #888888;
@@ -65,11 +66,11 @@
                 <div class="container" style="text-align: left">
                   <H1> Welcome </H1>
                   <p>
-                    We are conducting a research on retrieving experts among active 
-                    users of location sharing services. You as a judge will evaluate 
-                    the retrieved users' <abbr title="Knowledge about places">expertise</abbr> 
-                    by studying their profiles and scoring their expertise in a scale 
-                    from 1 (<abbr title="Unlikely to be an expert">Novice</abbr>) to 5 
+                    We are conducting a research on retrieving experts among active
+                    users of location sharing services. You as a judge will evaluate
+                    the retrieved users' <abbr title="Knowledge about places">expertise</abbr>
+                    by studying their profiles and scoring their expertise in a scale
+                    from 1 (<abbr title="Unlikely to be an expert">Novice</abbr>) to 5
                     (<abbr title="Likely to be an expert">Expert</abbr>).
                   </p>
                   <p>
@@ -85,7 +86,7 @@
                 <div class="container" style="text-align: left">
                   <H1> How </H1>
                   <p>
-                    Since each user has huge a volume of 
+                    Since each user has huge a volume of
                     <abbr title="A message or tweet with location information">check-ins</abbr>,
                     It is not possible to view them all. Thus we provide a comprehensive panel for
                     judges to investigate users' expertise. By applying filters, you can zoom into

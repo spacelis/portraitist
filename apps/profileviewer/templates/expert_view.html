@@ -1,16 +1,16 @@
 {% extends "frame.html" %}
 {% block extra_header %}
-  <script src="/static/bower_components/sticky-kit/jquery.sticky-kit.js" type="text/javascript" charset="utf-8"></script>
+  <!--<script src="/static/bower_components/sticky-kit/jquery.sticky-kit.js" type="text/javascript" charset="utf-8"></script>-->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4oLS7DjhME0pLuTTauJw3rjs1_n4TuKM&sensor=false" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/bower_components/d3/d3.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/bower_components/crossfilter/crossfilter.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/bower_components/dcjs/dc.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/bower_components/gmaps/gmaps.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/bower_components/jquery.cookie/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/bower_components/jquery-uuid/jquery-uuid.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/expert_view/d3.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/crossfilter.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/dc.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/gmaps.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/jquery-uuid.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/js/profileviewer/expert_view.js" type="text/javascript" charset="utf-8"></script>
 
-  <link rel="stylesheet" href="/static/bower_components/dcjs/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <link rel="stylesheet" href="/static/css/profileviewer/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function () {
       profileviewer_ns.initCharts("{{ screen_name | safe }}");
