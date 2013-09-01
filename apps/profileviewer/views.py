@@ -12,13 +12,16 @@ Description:
 #import twitter
 import json
 import gzip
+from urllib import unquote
 from collections import namedtuple
 from collections import defaultdict
+
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
-from urllib import unquote
+from django.http import HttpResponse
+
 from apps.profileviewer.models import Expert
 from apps.profileviewer.models import Topic
 
@@ -41,6 +44,20 @@ def home(request):
     else:
         return render_to_response('instructions.html', {'expert': expert},
                                   context_instance=RequestContext(request))
+
+
+def list_data_dir(_):
+    """List the content of dir
+
+    :request: @todo
+    :returns: @todo
+
+    """
+    from apps import APP_PATH
+    import os
+    from os import path
+    return HttpResponse('\n'.join(os.listdir(path.join(APP_PATH, 'data'))),
+                        mimetype="application/json")
 
 
 def flexopen(filename):
@@ -152,7 +169,7 @@ def import_topic(_, filename):
     from apps import APP_PATH
     import os.path
     datapath = os.path.join(APP_PATH, 'data', filename)
-    with open(datapath) as fin:
+    with flexopen(datapath) as fin:
         Topic.upload(fin)
     return redirect('/')
 
