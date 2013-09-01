@@ -17,6 +17,7 @@ from django.shortcuts import render_to_response
 from django.shortcuts import redirect
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
+from urllib import unquote
 from apps.profileviewer.models import Expert
 from apps.profileviewer.models import Topic
 
@@ -90,6 +91,18 @@ def expert_view(request, screen_name):
                               context_instance=RequestContext(request))
 
 
+def get_client(request):
+    """ Return the judge's IP and Browser
+    """
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    user_agent = request.META.get('HTTP_USER_AGENT')
+    return ip, user_agent
+
+
 @csrf_protect
 def submit_expert_judgment(request):
     """Submit judgment into the database
@@ -98,16 +111,18 @@ def submit_expert_judgment(request):
     :returns: @todo
 
     """
-    judgment = dict()
+    judgment = {'judgments': {}}
     for v in request.REQUEST:
         if v.startswith('judgments-'):
             topic_id = v[10:]
-            judgment[topic_id] = request.REQUEST[v]
-    judgment['_judger'] = json.loads(request.COOKIES.get('judge', None))
-    judgment['_judger']['ip'] = request.REQUEST.META.REMOTE_ADDR
-    judgment['_judger']['browser'] = request.REQUEST.META.HTTP_USER_AGENT
+            judgment['judgments'][topic_id] = request.REQUEST[v]
+    judgment['judger'] = json.loads(unquote(
+        request.COOKIES.get('judge', '{}')))
+    ip, user_agent = get_client(request)
+    judgment['judger']['ip'] = ip
+    judgment['judger']['user_agent'] = user_agent
     Expert.update_judgment(request.REQUEST['exp_id'], judgment)
-    return redirect('/?no_inst=1')
+    return redirect('/home?no_inst=1')
 
 
 # ------------------------ TOPIC VIEW ---------------------

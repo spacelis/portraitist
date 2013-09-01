@@ -113,7 +113,7 @@ class Expert(ndb.Model):
         """
         assert limit > 0
         return cls.query(Expert.assigned < (dt.now() - MIN30))\
-                .order(Expert.assigned, -Expert.judgment_number)\
+                .order(Expert.assigned, Expert.judgment_number)\
                 .fetch(limit)
 
     @classmethod
