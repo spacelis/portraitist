@@ -11,6 +11,7 @@ Description:
 
 #import twitter
 import json
+import gzip
 from collections import namedtuple
 from collections import defaultdict
 from django.shortcuts import render_to_response
@@ -42,6 +43,19 @@ def home(request):
                                   context_instance=RequestContext(request))
 
 
+def flexopen(filename):
+    """@todo: Docstring for flexopen.
+
+    :filename: @todo
+    :returns: @todo
+
+    """
+    if filename.endswith('.gz'):
+        return gzip.open(filename)
+    else:
+        return open(filename)
+
+
 def import_expert(_, filename):
     """Upload the expert to dbstore
 
@@ -52,7 +66,7 @@ def import_expert(_, filename):
     from apps import APP_PATH
     import os.path
     datapath = os.path.join(APP_PATH, 'data', filename)
-    with open(datapath) as fin:
+    with flexopen(datapath) as fin:
         Expert.upload(fin)
     return redirect('/')
 
