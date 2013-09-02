@@ -14,10 +14,6 @@ handlers:
 - url: /.*
   script: main.application
 
-- url: /_ah/remote_api.*
-  script: google.appengine.ext.remote_api.handler.app
-  login: admin
-
 libraries:
 - name: django
   version: '1.5'
