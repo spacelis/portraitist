@@ -40,11 +40,11 @@ class Topic(ndb.Model):
     topic = ndb.StringProperty()
     region = ndb.StringProperty()
 
-    experts = ndb.JsonProperty(compressed=True, indexed=False)
-    detail = ndb.JsonProperty(compressed=True, indexed=False)
+    experts = ndb.JsonProperty()
+    detail = ndb.JsonProperty()
 
     judgment_number = ndb.IntegerProperty(indexed=True)
-    judgments = ndb.JsonProperty(compressed=True, indexed=False)  # [[1, 1, 1, 0, 0], [0, 1, 0, 0, 1]]
+    judgments = ndb.JsonProperty()  # [[1, 1, 1, 0, 0], [0, 1, 0, 0, 1]]
     # pylint: enable-msg=E1101
 
     @classmethod
@@ -100,14 +100,14 @@ class Expert(ndb.Model):
     """Candidate Expert for judging"""
 
     # pylint: disable-msg=E1101
-    screen_name = ndb.StringProperty()
+    screen_name = ndb.StringProperty(indexed=True)
 
-    expertise = ndb.JsonProperty(compressed=True)
-    checkins = ndb.JsonProperty(compressed=True, indexed=False)
+    expertise = ndb.JsonProperty()
+    checkins = ndb.JsonProperty()
 
     judgment_number = ndb.IntegerProperty(indexed=True)
-    judgments = ndb.JsonProperty(compressed=True)
-    assigned = ndb.DateTimeProperty()
+    judgments = ndb.JsonProperty()
+    assigned = ndb.DateTimeProperty(indexed=True)
     # pylint: enable-msg=E1101
 
     @classmethod
@@ -166,6 +166,17 @@ class Expert(ndb.Model):
 
         """
         return [e.screen_name for e in cls.get_by_priority(limit=limit)]
+
+    @classmethod
+    def get_one_assigned(cls):
+        """Return all screen_names with whether they have been judged or not
+        :returns: @todo
+
+        """
+        e = cls.get_by_priority(1)[0]
+        e.assigned = dt.now()
+        e.put()
+        return e.screen_name
 
     @classmethod
     def upload(cls, fstream):

@@ -15,18 +15,34 @@ import gzip
 from urllib import unquote
 from collections import namedtuple
 from collections import defaultdict
+from functools import wraps
 
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
 from django.http import HttpResponse
+from django.core.exceptions import PermissionDenied
 
 from apps.profileviewer.models import Expert
 from apps.profileviewer.models import Topic
 
 
 Focus = namedtuple('Focus', ['name', 'value', 'chart'], verbose=True)
+MAGIC_PW = 'dmir2013'
+
+
+def magic_prtected(request, magic_pw=MAGIC_PW):
+    """ Protected by MAGIC_PW
+
+    :vf: @todo
+    :returns: @todo
+
+    """
+    magic = request.COOKIES.get(magic_pw, 0) or \
+        request.REQUEST.get(magic_pw, 0)
+    if not magic:
+        raise PermissionDenied()
 
 
 def home(request):
@@ -36,15 +52,17 @@ def home(request):
     :returns: @todo
 
     """
+    magic_prtected(request)
     no_inst = request.COOKIES.get('no_inst', 0) or \
         request.REQUEST.get('no_inst', 0)
-    expert = Expert.get_screen_names(1)[0]
+    expert = Expert.get_one_assigned()
     if no_inst:
         return redirect('/expert_view/' + expert)
     else:
-        return render_to_response('instructions.html', {'expert': expert},
+        r = render_to_response('instructions.html', {'expert': expert},
                                   context_instance=RequestContext(request))
-
+        r.set_cookie(MAGIC_PW, 1, 2592000) #expires in 10 days
+        return r
 
 def list_data_dir(_):
     """List the content of dir
@@ -53,6 +71,7 @@ def list_data_dir(_):
     :returns: @todo
 
     """
+    magic_prtected(request)
     from apps import APP_PATH
     import os
     from os import path
@@ -80,6 +99,7 @@ def import_expert(_, filename):
     :returns: @todo
 
     """
+    magic_prtected(request)
     from apps import APP_PATH
     import os.path
     datapath = os.path.join(APP_PATH, 'data', filename)
@@ -96,6 +116,7 @@ def expert_view(request, screen_name):
     :returns: @todo
 
     """
+    magic_prtected(request)
     expert = Expert.get_by_screen_name(screen_name)
     focus = defaultdict(str)
     for e in expert['expertise']:
