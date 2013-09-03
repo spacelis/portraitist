@@ -15,7 +15,6 @@ import gzip
 from urllib import unquote
 from collections import namedtuple
 from collections import defaultdict
-from functools import wraps
 
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
@@ -26,13 +25,11 @@ from django.core.exceptions import PermissionDenied
 
 from apps.profileviewer.models import Expert
 from apps.profileviewer.models import Topic
-
-
 Focus = namedtuple('Focus', ['name', 'value', 'chart'], verbose=True)
 MAGIC_PW = 'dmir2013'
 
 
-def magic_prtected(request, magic_pw=MAGIC_PW):
+def assert_magic_signed(request, magic_pw=MAGIC_PW):
     """ Protected by MAGIC_PW
 
     :vf: @todo
@@ -52,7 +49,7 @@ def home(request):
     :returns: @todo
 
     """
-    magic_prtected(request)
+    assert_magic_signed(request)
     no_inst = request.COOKIES.get('no_inst', 0) or \
         request.REQUEST.get('no_inst', 0)
     expert = Expert.get_one_assigned()
@@ -60,18 +57,19 @@ def home(request):
         return redirect('/expert_view/' + expert)
     else:
         r = render_to_response('instructions.html', {'expert': expert},
-                                  context_instance=RequestContext(request))
-        r.set_cookie(MAGIC_PW, 1, 2592000) #expires in 10 days
+                               context_instance=RequestContext(request))
+        r.set_cookie(MAGIC_PW, 1, 2592000)  # expires in 10 days
         return r
 
-def list_data_dir(_):
+
+def list_data_dir(request):
     """List the content of dir
 
     :request: @todo
     :returns: @todo
 
     """
-    magic_prtected(request)
+    assert_magic_signed(request)
     from apps import APP_PATH
     import os
     from os import path
@@ -92,14 +90,14 @@ def flexopen(filename):
         return open(filename)
 
 
-def import_expert(_, filename):
+def import_expert(request, filename):
     """Upload the expert to dbstore
 
     :request: @todo
     :returns: @todo
 
     """
-    magic_prtected(request)
+    assert_magic_signed(request)
     from apps import APP_PATH
     import os.path
     datapath = os.path.join(APP_PATH, 'data', filename)
@@ -116,7 +114,7 @@ def expert_view(request, screen_name):
     :returns: @todo
 
     """
-    magic_prtected(request)
+    assert_magic_signed(request)
     expert = Expert.get_by_screen_name(screen_name)
     focus = defaultdict(str)
     for e in expert['expertise']:
@@ -180,13 +178,14 @@ def submit_expert_judgment(request):
 # ------------------------ TOPIC VIEW ---------------------
 
 
-def import_topic(_, filename):
+def import_topic(request, filename):
     """Upload the data to dbstore
 
     :request: @todo
     :returns: @todo
 
     """
+    assert_magic_signed(request)
     from apps import APP_PATH
     import os.path
     datapath = os.path.join(APP_PATH, 'data', filename)
@@ -203,6 +202,7 @@ def topic_view(request, topic_id):
     :returns: @todo
 
     """
+    assert_magic_signed(request)
     data = {'topic': Topic.query(Topic.topic_id == topic_id).fetch(1)[0]}
     data['names'] = json.dumps(data['topic'].experts[:3])
     return render_to_response('topic_view.html',
@@ -219,6 +219,7 @@ def submit_topic_judgment(request):
     :returns: @todo
 
     """
+    assert_magic_signed(request)
     j = request.REQUEST['judgment']
     jid = request.REQUEST['jid']
     Topic.update_judgment(jid, j)
