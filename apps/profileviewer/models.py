@@ -44,7 +44,8 @@ class Topic(ndb.Model):
     detail = ndb.JsonProperty(compressed=True)
 
     judgment_number = ndb.IntegerProperty(indexed=True)
-    judgments = ndb.JsonProperty(compressed=True)  # [[1, 1, 1, 0, 0], [0, 1, 0, 0, 1]]
+    judgments = ndb.JsonProperty(compressed=True)
+    # [[1, 1, 1, 0, 0], [0, 1, 0, 0, 1]]
     # pylint: enable-msg=E1101
 
     @classmethod
@@ -57,9 +58,11 @@ class Topic(ndb.Model):
         """
         d = cls.query(cls.topic_id == tid).fetch(1)[0]
         ############# FIXME: Work around for restoring compressed data
-        if not isinstance(d._values.get("detail").b_val, ndb.model._CompressedValue):
+        if not isinstance(d._values.get("detail").b_val,
+                          ndb.model._CompressedValue):
             for p in ['experts', 'detail', 'judgments']:
-                d._values.get(p).b_val = ndb.model._CompressedValue(d._values.get(p).b_val)
+                d._values.get(p).b_val = ndb.model._CompressedValue(
+                    d._values.get(p).b_val)
         ############
         e = {'_key': d.key}
         e.update(d.to_dict())
@@ -119,8 +122,8 @@ class Expert(ndb.Model):
         """
         assert limit > 0
         return cls.query(Expert.assigned < (dt.now() - MIN30))\
-                .order(Expert.assigned, Expert.judgment_number)\
-                .fetch(limit)
+            .order(Expert.assigned, Expert.judgment_number)\
+            .fetch(limit)
 
     @classmethod
     def get_by_screen_name(cls, screen_name):
@@ -133,9 +136,11 @@ class Expert(ndb.Model):
         d = cls.query(Expert.screen_name == screen_name)\
             .fetch(1)[0]
         ############# FIXME: Work around for restoring compressed data
-        if not isinstance(d._values.get("checkins").b_val, ndb.model._CompressedValue):
+        if not isinstance(d._values.get("checkins").b_val,
+                          ndb.model._CompressedValue):
             for p in ['checkins', 'expertise', 'judgments']:
-                d._values.get(p).b_val = ndb.model._CompressedValue(d._values.get(p).b_val)
+                d._values.get(p).b_val = ndb.model._CompressedValue(
+                    d._values.get(p).b_val)
         ############
         e = {'exp_id': d.key.urlsafe(), '_key': d.key}
         e.update(d.to_dict())
@@ -152,9 +157,11 @@ class Expert(ndb.Model):
         """
         e = ndb.Key(urlsafe=exp_id).get()
         ############# FIXME: Work around for restoring compressed data
-        if not isinstance(e._values.get("checkins").b_val, ndb.model._CompressedValue):
+        if not isinstance(e._values.get("checkins").b_val,
+                          ndb.model._CompressedValue):
             for p in ['checkins', 'expertise', 'judgments']:
-                e._values.get(p).b_val = ndb.model._CompressedValue(e._values.get(p).b_val)
+                e._values.get(p).b_val = ndb.model._CompressedValue(
+                    e._values.get(p).b_val)
         ############
         e.judgments.append(judgment)
         e.judgment_number += 1
