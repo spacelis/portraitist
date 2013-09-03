@@ -40,11 +40,11 @@ class Topic(ndb.Model):
     topic = ndb.StringProperty()
     region = ndb.StringProperty()
 
-    experts = ndb.JsonProperty()
-    detail = ndb.JsonProperty()
+    experts = ndb.JsonProperty(compressed=True)
+    detail = ndb.JsonProperty(compressed=True)
 
     judgment_number = ndb.IntegerProperty(indexed=True)
-    judgments = ndb.JsonProperty()  # [[1, 1, 1, 0, 0], [0, 1, 0, 0, 1]]
+    judgments = ndb.JsonProperty(compressed=True)  # [[1, 1, 1, 0, 0], [0, 1, 0, 0, 1]]
     # pylint: enable-msg=E1101
 
     @classmethod
@@ -102,11 +102,12 @@ class Expert(ndb.Model):
     # pylint: disable-msg=E1101
     screen_name = ndb.StringProperty(indexed=True)
 
-    expertise = ndb.JsonProperty()
-    checkins = ndb.JsonProperty()
+    expertise = ndb.JsonProperty(compressed=True)
+    checkins = ndb.JsonProperty(compressed=True)
 
+    judgments = ndb.JsonProperty(compressed=True)
     judgment_number = ndb.IntegerProperty(indexed=True)
-    judgments = ndb.JsonProperty()
+
     assigned = ndb.DateTimeProperty(indexed=True)
     # pylint: enable-msg=E1101
 
