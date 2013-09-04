@@ -38,6 +38,9 @@
     .has-explanation {
       border-bottom: 1px dotted
     }
+    .has-no-explanation {
+      border-bottom: 1px solid white;
+    }
   </style>
 {% endblock %}
 {% block content %}
@@ -67,13 +70,13 @@
                   <input type="radio" name="judgments-{{ t.topic_id  }}" value="1"> <div class="has-explanation">&nbsp;1&nbsp;</div>
                 </label>
                 <label class="btn btn-default btn-radio" for="">
-                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="2"> &nbsp;2&nbsp;
+                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="2"> <div class="has-no-explanation">&nbsp;2&nbsp;</div>
                 </label>
                 <label class="btn btn-default btn-radio" for="">
-                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="3"> &nbsp;3&nbsp;
+                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="3"> <div class="has-no-explanation">&nbsp;3&nbsp;</div>
                 </label>
                 <label class="btn btn-default btn-radio" for="">
-                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="4"> &nbsp;4&nbsp;
+                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="4"> <div class="has-no-explanation">&nbsp;4&nbsp;</div>
                 </label>
                 <label class="btn btn-default btn-radio" for="" title="He/she definately knows a lot.">
                   <input type="radio" name="judgments-{{ t.topic_id  }}" value="5"> <div class="has-explanation">&nbsp;5&nbsp;</div>
