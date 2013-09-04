@@ -128,8 +128,8 @@ def expert_view(request, screen_name):
                         detail['category']['zero_category_name'],
                         'z')] += '\nThe category of ' + detail['name']
             e['topic_type'] = 'A place in the category [%s, %s]'\
-                % (detail['zero_category_name']['name'],
-                   detail['zero_category_name']['name'])
+                % (detail['category']['name'],
+                   detail['category']['zero_category_name'])
         elif 'zcate' not in e['topic_id']:  # For cate topics
             focus[Focus(detail['name'], detail['name'], 'c')] += '\n'
             focus[Focus(detail['zero_category_name'],
