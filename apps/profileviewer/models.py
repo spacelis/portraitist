@@ -182,6 +182,13 @@ class Expert(ndb.Model):
 
         """
         e = cls.get_by_priority(1)[0]
+        ############# FIXME: Work around for restoring compressed data
+        if not isinstance(e._values.get("checkins").b_val,
+                          ndb.model._CompressedValue):
+            for p in ['checkins', 'expertise', 'judgments']:
+                e._values.get(p).b_val = ndb.model._CompressedValue(
+                    e._values.get(p).b_val)
+        ############################################################
         e.assigned = dt.now()
         e.put()
         return e.screen_name
