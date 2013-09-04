@@ -35,6 +35,9 @@
       background-color: #428bca;
       color: white;
     }
+    .has-explanation {
+      border-bottom: 1px dotted
+    }
   </style>
 {% endblock %}
 {% block content %}
@@ -55,14 +58,13 @@
         {% for t in expertise %}
         <div class="list-group-item">
           <div class="row">
-            <div class="col-sm-9">
+            <div class="col-sm-8">
               <b>{{ t.topic }}</b> in <b>{{ t.region }}</b>?
             </div>
-            <div class="col-sm-3" align="right">
-              <abbr title="He/she probably knows nothing">Unlikely</abbr>&nbsp;
+            <div class="col-sm-4" align="right">
               <div class="btn-group btn-group-xs" data-toggle="buttons">
-                <label class="btn btn-default btn-radio" for="">
-                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="1"> &nbsp;1&nbsp;
+                <label class="btn btn-default btn-radio" for="" title="He/she probably knows nothing">
+                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="1"> <div class="has-explanation">&nbsp;1&nbsp;</div>
                 </label>
                 <label class="btn btn-default btn-radio" for="">
                   <input type="radio" name="judgments-{{ t.topic_id  }}" value="2"> &nbsp;2&nbsp;
@@ -73,11 +75,16 @@
                 <label class="btn btn-default btn-radio" for="">
                   <input type="radio" name="judgments-{{ t.topic_id  }}" value="4"> &nbsp;4&nbsp;
                 </label>
-                <label class="btn btn-default btn-radio" for="">
-                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="5"> &nbsp;5&nbsp;
+                <label class="btn btn-default btn-radio" for="" title="He/she definately knows a lot.">
+                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="5"> <div class="has-explanation">&nbsp;5&nbsp;</div>
+                  <!--&nbsp;<abbr title="He/she definately knows a lot.">(Likely)</abbr>&nbsp;-->
+                </label>
+                <label class="btn btn-default btn-radio" for="" title="Not sure what the topic is really about.">
+                  <input type="radio" name="judgments-{{ t.topic_id  }}" value="-1"> <div class="has-explanation">Not Sure</div>
                 </label>
               </div>
-              &nbsp;<abbr title="He/she definately knows a lot.">Likely</abbr>
+            </div>
+            <div class="col-sm-1" align="right">
             </div>
           </div>
         </div>
