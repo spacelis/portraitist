@@ -7,6 +7,7 @@
   <script src="/static/js/profileviewer/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
 
   <link rel="stylesheet" href="/static/css/profileviewer/bootstrap.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <link rel="stylesheet" href="/static/css/profileviewer/sticky-footer.css" type="text/css" media="screen" title="no title" charset="utf-8">
   {% block extra_header %}{% endblock %}
 </head>
 <body>
@@ -32,5 +33,15 @@
     <div id="pv-content" class="container">
       {% block content %}{% endblock %}
     </div>
+    <footer>
+      <div class="foot-fixed-bottom">
+        <div class="container" align="right">
+        
+        <hr />
+        <img src="/static/images/profileviewer/dmirlogo.svg" height="24px">
+        © tudelft.nl • Delft 2013</div>
+        </div>
+      </div>
+    </footer>
 </body>
 </html>
