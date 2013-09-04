@@ -63,7 +63,7 @@ class Topic(ndb.Model):
             for p in ['experts', 'detail', 'judgments']:
                 d._values.get(p).b_val = ndb.model._CompressedValue(
                     d._values.get(p).b_val)
-        ############
+        ############################################################
         e = {'_key': d.key}
         e.update(d.to_dict())
         return e
@@ -141,7 +141,7 @@ class Expert(ndb.Model):
             for p in ['checkins', 'expertise', 'judgments']:
                 d._values.get(p).b_val = ndb.model._CompressedValue(
                     d._values.get(p).b_val)
-        ############
+        ############################################################
         e = {'exp_id': d.key.urlsafe(), '_key': d.key}
         e.update(d.to_dict())
         return e
@@ -162,7 +162,7 @@ class Expert(ndb.Model):
             for p in ['checkins', 'expertise', 'judgments']:
                 e._values.get(p).b_val = ndb.model._CompressedValue(
                     e._values.get(p).b_val)
-        ############
+        ############################################################
         e.judgments.append(judgment)
         e.judgment_number += 1
         e.put()

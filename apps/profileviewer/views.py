@@ -127,15 +127,21 @@ def expert_view(request, screen_name):
             focus[Focus(detail['category']['zero_category_name'],
                         detail['category']['zero_category_name'],
                         'z')] += '\nThe category of ' + detail['name']
+            e['topic_type'] = 'A place in the category [%s, %s]'\
+                % (detail['zero_category_name']['name'],
+                   detail['zero_category_name']['name'])
         elif 'zcate' not in e['topic_id']:  # For cate topics
             focus[Focus(detail['name'], detail['name'], 'c')] += '\n'
             focus[Focus(detail['zero_category_name'],
                         detail['zero_category_name'],
                         'z')] += '\nThe major category of ' + detail['name']
+            e['topic_type'] = 'A lower-level category in the category [%s]'\
+                % detail['zero_category_name']
         else:  # For zcate topics
             focus[Focus(detail['name'],
                         detail['name'],
                         'z')] += '\n'
+            e['topic_type'] = 'A top-level category.'
     expert['focus'] = {k: v.strip() for k, v in focus.iteritems()}
     return render_to_response('expert_view.html', expert,
                               context_instance=RequestContext(request))
