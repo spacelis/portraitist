@@ -119,28 +119,35 @@ def expert_view(request, screen_name):
     focus = defaultdict(str)
     for e in expert['expertise']:
         detail = Topic.getTopicById(e['topic_id'])['detail']
+
         if 'poi' in e['topic_id']:  # For poi topics
             focus[Focus(detail['name'], detail['id'], 'p')] += '\n'
+            helpmsg = '\nThe lower-level category belonging to %s.'\
+                % (detail['name'], )
             focus[Focus(detail['category']['name'],
                         detail['category']['name'],
-                        'c')] += '\nThe minor category of ' + detail['name']
+                        'c')] += helpmsg
+            helpmsg = '\nThe category that %s belongs to.' \
+                % (detail['name'],)
             focus[Focus(detail['category']['zero_category_name'],
                         detail['category']['zero_category_name'],
-                        'z')] += '\nThe category of ' + detail['name']
-            e['topic_type'] = 'A place in the category [%s, %s]'\
+                        'z')] += helpmsg
+            e['topic_type'] = 'A place belonging to the category [%s, %s].' \
                 % (detail['category']['name'],
                    detail['category']['zero_category_name'])
+
         elif 'zcate' not in e['topic_id']:  # For cate topics
             focus[Focus(detail['name'], detail['name'], 'c')] += '\n'
             focus[Focus(detail['zero_category_name'],
                         detail['zero_category_name'],
-                        'z')] += '\nThe major category of ' + detail['name']
-            e['topic_type'] = 'A lower-level category in the category [%s]'\
-                % detail['zero_category_name']
+                        'z')] += '\nThe top-level category that %s belongs to.' \
+                % (detail['name'],)
+            e['topic_type'] = ('A lower-level category belonging'
+                               ' to the category [%s].') \
+                % (detail['zero_category_name'], )
+
         else:  # For zcate topics
-            focus[Focus(detail['name'],
-                        detail['name'],
-                        'z')] += '\n'
+            focus[Focus(detail['name'], detail['name'], 'z')] += '\n'
             e['topic_type'] = 'A top-level category.'
     expert['focus'] = {k: v.strip() for k, v in focus.iteritems()}
     return render_to_response('expert_view.html', expert,
