@@ -13,6 +13,7 @@ Description:
 import json
 import gzip
 from urllib import unquote
+from datetime import datetime as dt
 from collections import namedtuple
 from collections import defaultdict
 
@@ -140,7 +141,8 @@ def expert_view(request, screen_name):
             focus[Focus(detail['name'], detail['name'], 'c')] += '\n'
             focus[Focus(detail['zero_category_name'],
                         detail['zero_category_name'],
-                        'z')] += '\nThe top-level category that %s belongs to.' \
+                        'z')] += ('\nThe top-level category'
+                                  ' that %s belongs to.') \
                 % (detail['name'],)
             e['topic_type'] = ('A lower-level category belonging'
                                ' to the category [%s].') \
@@ -183,6 +185,7 @@ def submit_expert_judgment(request):
         request.COOKIES.get('judge', '{}')))
     ip, user_agent = get_client(request)
     judgment['judger']['ip'] = ip
+    judgment['judger']['created_at'] = dt.now().isoformat()
     judgment['judger']['user_agent'] = user_agent
     Expert.update_judgment(request.REQUEST['exp_id'], judgment)
     return redirect('/home?no_inst=1')
