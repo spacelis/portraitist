@@ -194,6 +194,22 @@ class Expert(ndb.Model):
         return e.screen_name
 
     @classmethod
+    def get_judged_expert(cls):
+        """Return judged Experts
+        :returns: @todo
+
+        """
+        es = list(cls.query(Expert.judgment_number > 0).fetch())
+        for e in es:
+            ############# FIXME: Work around for restoring compressed data
+            if not isinstance(e._values.get("checkins").b_val,
+                              ndb.model._CompressedValue):
+                e._values.get('judgments').b_val = ndb.model._CompressedValue(
+                    e._values.get('judgments').b_val)
+            ############################################################
+        return es
+
+    @classmethod
     def upload(cls, fstream):
         """Upload data to dbs by reading from csv_string
         :returns: @todo

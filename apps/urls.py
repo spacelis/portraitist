@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     url(r'^$', RedirectView.as_view(url='/home', query_string=True)),
     url(r'^home$', 'apps.profileviewer.views.home'),
     url(r'^favicon\.ico$', RedirectView.as_view(url='/static/images/profileviewer/socialmining.ico')),
+    url(r'^judgment_overview$', 'apps.profileviewer.views.judgment_overview'),
 
     url(r'^import_expert/(.*)$', 'apps.profileviewer.views.import_expert'),
     url(r'^expert_view/(.*)$', 'apps.profileviewer.views.expert_view'),

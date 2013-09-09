@@ -13,8 +13,8 @@
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function () {
       profileviewer_ns.initCharts("{{ screen_name | safe }}");
-      if(! $.cookie('judger')){
-        $.cookie('judge', JSON.stringify({jid: $.uuid()}), {expires: 90, path: "/"});
+      if(! $.cookie('judge_id')){
+        $.cookie('judge_id', $.uuid(), {expires: 90, path: "/"});
       }
       <!--$("#judgment-panel").stick_in_parent();-->
     });

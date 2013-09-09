@@ -53,6 +53,7 @@ def home(request):
     assert_magic_signed(request)
     no_inst = request.COOKIES.get('no_inst', 0) or \
         request.REQUEST.get('no_inst', 0)
+
     expert = Expert.get_one_assigned()
     if no_inst:
         return redirect('/expert_view/' + expert)
@@ -176,16 +177,20 @@ def submit_expert_judgment(request):
     :returns: @todo
 
     """
-    judgment = {'judgments': {}}
+    judgment = dict()
+    judgment['created_at'] = dt.now().isoformat()
+
+    judgment['judgments'] = dict()
     for v in request.REQUEST:
         if v.startswith('judgments-'):
             topic_id = v[10:]
             judgment['judgments'][topic_id] = request.REQUEST[v]
-    judgment['judger'] = json.loads(unquote(
-        request.COOKIES.get('judge', '{}')))
     ip, user_agent = get_client(request)
+
+    judgment['judger'] = dict()
+    judgment['judger']['judge_id'] = unquote(
+        request.COOKIES.get('judge_id', None))
     judgment['judger']['ip'] = ip
-    judgment['judger']['created_at'] = dt.now().isoformat()
     judgment['judger']['user_agent'] = user_agent
     Expert.update_judgment(request.REQUEST['exp_id'], judgment)
     return redirect('/home?no_inst=1')
@@ -237,9 +242,36 @@ def submit_topic_judgment(request):
     """
     assert_magic_signed(request)
     j = request.REQUEST['judgment']
-    jid = request.REQUEST['jid']
+    jid = request.COOKIES['judge_id']
     Topic.update_judgment(jid, j)
     return redirect('/')
+
+
+# ------------------------ TOPIC VIEW ---------------------
+
+def judgment_overview(request):
+    """@todo: Docstring for judgment_overview.
+
+    :request: @todo
+    :returns: @todo
+
+    """
+    assert_magic_signed(request)
+    data = dict()
+    es = Expert.get_judged_expert()
+    data['judgments'] = sum([e.judgment_number for e in es])
+    data['judgers'] = set()
+    for e in es:
+        for j in e.judgments:
+            data['judgers'].add(j['judger']['jid'])
+    data['topics'] = set()
+    for e in es:
+        for j in e.judgments:
+            for t in j['judgments'].iterkeys():
+                data['topics'].add(t)
+    return render_to_response('judgment_overview.html',
+                              data,
+                              context_instance=RequestContext(request))
 
 
 # -------------------------- test view ------------------
