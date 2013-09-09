@@ -5,20 +5,29 @@
   <meta charset="utf-8" />
   <script src="/static/js/profileviewer/jquery.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/js/profileviewer/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
 
   <link rel="stylesheet" href="/static/css/profileviewer/bootstrap.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <link rel="stylesheet" href="/static/css/profileviewer/sticky-footer.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <script>
+    $(document).ready(function () {
+      if(! $.cookie('submitted_tasks')){
+        $.cookie('submitted_tasks', 0, {expires: 90, path: "/"});
+      }
+      $('#submitted_tasks').text($.cookie('submitted_tasks'))
+    })
+  </script>
   {% block extra_header %}{% endblock %}
 </head>
 <body>
     <nav class="navbar navbar-default" role="navigation">
       <div class="navbar-header">
-        <!--<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">-->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
           <!--<span class="icon-bar"></span>-->
           <!--<span class="icon-bar"></span>-->
           <!--<span class="icon-bar"></span>-->
-          <!--<span class="icon-bar"></span>-->
-        <!--</button>-->
+          <span class="icon-bar"></span>
+        </button>
         <a href="/" class="navbar-brand">GeoExpert Judgment System</a>
       </div>
       <div class="collapse navbar-collapse navbar-ex1-collapse">
@@ -28,6 +37,9 @@
           <!--<li><a href="#">Upload/Import Tasks</a></li>-->
           <!--<li><a href="#">Download Judgments</a></li>-->
         <!--</ul>-->
+        <ul class="nav navbar-nav navbar-right">
+          <li><a>Submitted Tasks <span id="submitted_tasks" class="badge"></span></a></li>
+        </ul>
       </div>
     </nav>
     <div id="pv-content" class="container">

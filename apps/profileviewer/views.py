@@ -14,8 +14,6 @@ import json
 import gzip
 from urllib import unquote
 from datetime import datetime as dt
-from collections import namedtuple
-from collections import defaultdict
 
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
@@ -26,7 +24,9 @@ from django.core.exceptions import PermissionDenied
 
 from apps.profileviewer.models import Expert
 from apps.profileviewer.models import Topic
-Focus = namedtuple('Focus', ['name', 'value', 'chart'], verbose=True)
+from apps.profileviewer.view_utils import prepare_focus
+from apps.profileviewer.view_utils import get_client
+
 MAGIC_PW = 'dmir2013'
 
 
@@ -60,7 +60,7 @@ def home(request):
     else:
         r = render_to_response('instructions.html', {'expert': expert},
                                context_instance=RequestContext(request))
-        r.set_cookie(MAGIC_PW, 1, 2592000)  # expires in 10 days
+        r.set_cookie(MAGIC_PW, 1, 90 * 24 * 3600)
         return r
 
 
@@ -117,56 +117,9 @@ def expert_view(request, screen_name):
 
     """
     assert_magic_signed(request)
-    expert = Expert.get_by_screen_name(screen_name)
-    focus = defaultdict(str)
-    for e in expert['expertise']:
-        detail = Topic.getTopicById(e['topic_id'])['detail']
-
-        if 'poi' in e['topic_id']:  # For poi topics
-            focus[Focus(detail['name'], detail['id'], 'p')] += '\n'
-            helpmsg = '\nThe lower-level category belonging to %s.'\
-                % (detail['name'], )
-            focus[Focus(detail['category']['name'],
-                        detail['category']['name'],
-                        'c')] += helpmsg
-            helpmsg = '\nThe category that %s belongs to.' \
-                % (detail['name'],)
-            focus[Focus(detail['category']['zero_category_name'],
-                        detail['category']['zero_category_name'],
-                        'z')] += helpmsg
-            e['topic_type'] = 'A place belonging to the category [%s, %s].' \
-                % (detail['category']['name'],
-                   detail['category']['zero_category_name'])
-
-        elif 'zcate' not in e['topic_id']:  # For cate topics
-            focus[Focus(detail['name'], detail['name'], 'c')] += '\n'
-            focus[Focus(detail['zero_category_name'],
-                        detail['zero_category_name'],
-                        'z')] += ('\nThe top-level category'
-                                  ' that %s belongs to.') \
-                % (detail['name'],)
-            e['topic_type'] = ('A lower-level category belonging'
-                               ' to the category [%s].') \
-                % (detail['zero_category_name'], )
-
-        else:  # For zcate topics
-            focus[Focus(detail['name'], detail['name'], 'z')] += '\n'
-            e['topic_type'] = 'A top-level category.'
-    expert['focus'] = {k: v.strip() for k, v in focus.iteritems()}
-    return render_to_response('expert_view.html', expert,
+    data = Expert.get_by_screen_name(screen_name)
+    return render_to_response('expert_view.html', prepare_focus(data),
                               context_instance=RequestContext(request))
-
-
-def get_client(request):
-    """ Return the judge's IP and Browser
-    """
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    user_agent = request.META.get('HTTP_USER_AGENT')
-    return ip, user_agent
 
 
 @csrf_protect
@@ -193,7 +146,11 @@ def submit_expert_judgment(request):
     judgment['judger']['ip'] = ip
     judgment['judger']['user_agent'] = user_agent
     Expert.update_judgment(request.REQUEST['exp_id'], judgment)
-    return redirect('/home?no_inst=1')
+    r = redirect('/home?no_inst=1')
+    r.set_cookie('submitted_tasks',
+                 int(request.COOKIES.get('submitted_tasks', 0)) + 1,
+                 90 * 24 * 3600)
+    return r
 
 
 # ------------------------ TOPIC VIEW ---------------------
@@ -263,7 +220,7 @@ def judgment_overview(request):
     data['judgers'] = set()
     for e in es:
         for j in e.judgments:
-            data['judgers'].add(j['judger']['jid'])
+            data['judgers'].add(j['judger']['ip'])
     data['topics'] = set()
     for e in es:
         for j in e.judgments:

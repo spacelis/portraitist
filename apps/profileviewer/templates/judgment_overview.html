@@ -3,9 +3,8 @@
 {% endblock %}
 {% block content %}
 <ul class="list-group">
-  <li class="list-group-item">Total Judgements<span class="badge">{{ judgments }}</span></li>
-  <li class="list-group-item">Total Judges<span class="badge">{{ judgers | length }}</span></li>
-  <li class="list-group-item">Total Topics<span class="badge">{{ topics | length }}</span></li>
+  <li class="list-group-item">Submitted Judgements<span class="badge">{{ judgments }}</span></li>
+  <li class="list-group-item">IP addresses<span class="badge">{{ judgers | length }}</span></li>
+  <li class="list-group-item">Judged Topics<span class="badge">{{ topics | length }}</span></li>
 </ul>
-{% debug %}
 {% endblock %}
