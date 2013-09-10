@@ -11,11 +11,15 @@ Description:
 
 import csv
 import json
-from google.appengine.ext import ndb
+from uuid import uuid4
 from datetime import timedelta
 from datetime import datetime as dt
+from zlib import compress
+from zlib import decompress
 
-DEFAULT_APP_NAME = 'geo-expertise'
+from google.appengine.ext import ndb
+
+DEFAULT_APP_NAME = 'geo-expertise-2'
 MIN30 = timedelta(minutes=30)
 csv.field_size_limit(500000)
 
@@ -31,47 +35,113 @@ def parent_key(name, appname=DEFAULT_APP_NAME):
     return ndb.Key(appname, name)
 
 
+class Judge(ndb.Model):
+
+    """ A class representing users as judges."""
+
+    # pylint: disable-msg=E1101
+    email = ndb.StringProperty(indexed=True)
+    judge_id = ndb.StringProperty(indexed=True)
+    judgement_no = ndb.IntegerProperty(indexed=True)
+    judgements = ndb.JsonProperty()
+    # pylint: enable-msg=E1101
+
+    @classmethod
+    def newJudge(cls, email):
+        """ Create a new judge user
+
+        :email: An email address associate with this judge
+        :returns: A newly created ndb judge object
+
+        """
+        return cls(parent_key=parent_key('judge'),
+                   judge_id=uuid4(),
+                   judgement_no=0,
+                   email=email,
+                   judgements=list())
+
+    @classmethod
+    def getJudgeById(cls, judge_id):
+        """Return the judge object by given judge_id
+
+        :judge_id: An string id assigned to each judge
+        :returns: return the judge ndb object
+
+        """
+        return Judge.query(Judge.judge_id == judge_id).fetch(1)[0]
+
+    @classmethod
+    def addJudgement(cls, judge_id, judgement):
+        """@todo: Docstring for addJudgement.
+
+        :judge_id: The id of the judge
+        :judgement: A dict object holding the judgement made by the judge
+        :returns: The ndb object of the judge
+
+        """
+        j = Judge.getJudgeById(judge_id)
+        Expert.getExpertByScreenName(judgement['screen_name'])\
+            .judged_by.append(judge_id)
+        j.judgements.append(judgement)
+        j.submission_no += 1
+        j.put()
+        return j
+
+    @classmethod
+    def statistics(cls):
+        """ Return a dict object filled with statistics information
+
+        :returns: {'judge_no', 'judgement_no'}
+
+        """
+        js = [j.judgement_no for j in
+              Judge.query(projection=[Judge.judgement_no])]
+        return {'judge_no': len(js),
+                'judgement_no': sum(js)}
+
+
 class Topic(ndb.Model):
 
     """Judgment tasks"""
+    ZCATE_TOPIC = 'A topic about a top-level category.'
+    CATE_TOPIC = 'A topic about a lower-level category.'
+    POI_TOPIC = 'A topic about a specific place.'
 
     # pylint: disable-msg=E1101
     topic_id = ndb.StringProperty(indexed=True)
     topic = ndb.StringProperty()
     region = ndb.StringProperty()
+    topic_type = ndb.ComputedProperty(
+        lambda self: Topic.ZCATE_TOPIC if 'zcate' in self.topic_id
+        else (Topic.CATE_TOPIC if 'cate' in self.topic_id
+              else Topic.POI_TOPIC))
 
-    experts = ndb.JsonProperty(compressed=True)
-    detail = ndb.JsonProperty(compressed=True)
+    experts = ndb.JsonProperty()
+    related_to = ndb.JsonProperty()
 
-    judgment_number = ndb.IntegerProperty(indexed=True)
-    judgments = ndb.JsonProperty(compressed=True)
-    # [[1, 1, 1, 0, 0], [0, 1, 0, 0, 1]]
+    assigned = ndb.DateTimeProperty(indexed=True)
     # pylint: enable-msg=E1101
 
     @classmethod
-    def getTopicById(cls, tid):
-        """Return topic by id
+    def getTopicById(cls, topic_id):
+        """ Return topic by topic_id
 
-        :tid: @todo
-        :returns: @todo
+        :topic_id: A given topic_id, e.g. "poi-0001", "zcate-0009"
+        :returns: A dict object representing a Topic
 
         """
-        d = cls.query(cls.topic_id == tid).fetch(1)[0]
-        ############# FIXME: Work around for restoring compressed data
-        if not isinstance(d._values.get("detail").b_val,
-                          ndb.model._CompressedValue):
-            for p in ['experts', 'detail', 'judgments']:
-                d._values.get(p).b_val = ndb.model._CompressedValue(
-                    d._values.get(p).b_val)
-        ############################################################
-        e = {'_key': d.key}
-        e.update(d.to_dict())
-        return e
+        t = cls.query(cls.topic_id == topic_id).fetch(1)[0]
+        return {'topic_id': t.topic_id,
+                'topic': t.topic,
+                'retion': t.region,
+                'topic_type': t.topic_type,
+                'related_to': t.related_to}
 
     @classmethod
     def upload(cls, fstream):
-        """Upload data to dbs by reading from csv_string
-        :returns: @todo
+        """ Upload data to dbs by reading from a stream
+        :fstream: A stream like object
+        :returns: None
 
         """
         for row in csv.DictReader(fstream):
@@ -80,22 +150,8 @@ class Topic(ndb.Model):
                 topic=row['topic'],
                 region=row['region'],
                 experts=json.loads(row['experts']),
-                detail=json.loads(row['detail']),
-                judgment_number=0,
-                judgments=[]).put()
-
-    @classmethod
-    def update_judgment(cls, exp_id, judgment):
-        """Update judgments on this topic
-
-        :judgment: @todo
-        :returns: @todo
-
-        """
-        t = ndb.Key(urlsafe=exp_id).get()
-        t['judgments'].append(judgment)
-        t['judgment_number'] += 1
-        t.put()
+                related_to=json.loads(row['detail']),
+                ).put()
 
 
 class Expert(ndb.Model):
@@ -105,122 +161,103 @@ class Expert(ndb.Model):
     # pylint: disable-msg=E1101
     screen_name = ndb.StringProperty(indexed=True)
 
-    expertise = ndb.JsonProperty(compressed=True)
-    checkins = ndb.JsonProperty(compressed=True)
-
-    judgments = ndb.JsonProperty(compressed=True)
-    judgment_number = ndb.IntegerProperty(indexed=True)
+    topics = ndb.JsonProperty()
+    checkin_store = ndb.BlobProperty()
+    checkins = ndb.ComputedProperty(
+        lambda self: json.loads(decompress(self.checkin_store)))
+    judged_by = ndb.StringProperty(repeated=True)
+    judged_no = ndb.ComputedProperty(lambda self: len(self.judged_by))
 
     assigned = ndb.DateTimeProperty(indexed=True)
     # pylint: enable-msg=E1101
 
     @classmethod
-    def get_by_priority(cls, limit=10):
-        """Get a list of experts sorted by their priority for judging
-        :returns: @todo
+    def getExpertsByPriority(cls, limit=10):
+        """ Get a list of experts sorted by their priority for judging
+
+        :returns: A list of experts
 
         """
         assert limit > 0
         return cls.query(Expert.assigned < (dt.now() - MIN30))\
-            .order(Expert.assigned, Expert.judgment_number)\
+            .order(Expert.assigned, Expert.judged_no)\
             .fetch(limit)
 
     @classmethod
-    def get_by_screen_name(cls, screen_name):
-        """Return a user profile by the screen_name
+    def getExpertInfoByScreenName(cls, screen_name):
+        """ Return a dict object holding basic information about the expert
 
-        :screen_name: @todo
-        :returns: @todo
+        :screen_name: The screen_name of the expert
+        :returns: A dict {'screen_name': str, 'topics': [topic_id: str]}
 
         """
-        d = cls.query(Expert.screen_name == screen_name)\
-            .fetch(1)[0]
-        ############# FIXME: Work around for restoring compressed data
-        if not isinstance(d._values.get("checkins").b_val,
-                          ndb.model._CompressedValue):
-            for p in ['checkins', 'expertise', 'judgments']:
-                d._values.get(p).b_val = ndb.model._CompressedValue(
-                    d._values.get(p).b_val)
-        ############################################################
-        e = {'exp_id': d.key.urlsafe(), '_key': d.key}
-        e.update(d.to_dict())
-        return e
+        e = cls.query(Expert.screen_name == screen_name).fetch(1)[0]
+        return {'screen_name': e.screen_name,
+                'topics': e.topics}
 
     @classmethod
-    def update_judgment(cls, exp_id, judgment):
-        """Update the judgment about expert given exp_id
+    def getExpertByScreenName(cls, screen_name):
+        """ Return a ndb object of the given expert
 
-        :exp_id: @todo
-        :judgment: @todo
-        :returns: @todo
+        :screen_name: The screen_name
+        :returns: A ndb object of the expert
 
         """
-        e = ndb.Key(urlsafe=exp_id).get()
-        ############# FIXME: Work around for restoring compressed data
-        if not isinstance(e._values.get("checkins").b_val,
-                          ndb.model._CompressedValue):
-            for p in ['checkins', 'expertise', 'judgments']:
-                e._values.get(p).b_val = ndb.model._CompressedValue(
-                    e._values.get(p).b_val)
-        ############################################################
-        e.judgments.append(judgment)
-        e.judgment_number += 1
-        e.put()
+        return cls.query(Expert.screen_name == screen_name).fetch(1)[0]
 
     @classmethod
-    def get_screen_names(cls, limit=10):
-        """Return all screen_names with whether they have been judged or not
-        :returns: @todo
+    def getScreenNames(cls, limit=10):
+        """ Return a list of screen_names ordered by their priority for judging
+
+        :returns: [screen_name: str]
 
         """
-        return [e.screen_name for e in cls.get_by_priority(limit=limit)]
+        return [e.screen_name for e in cls.getExpertsByPriority(limit=limit)]
 
     @classmethod
-    def get_one_assigned(cls):
-        """Return all screen_names with whether they have been judged or not
-        :returns: @todo
+    def getTask(cls):
+        """ Get only one from the ordered screen_names by priority for judging
+
+        :returns: screen_name
 
         """
-        e = cls.get_by_priority(1)[0]
-        ############# FIXME: Work around for restoring compressed data
-        if not isinstance(e._values.get("checkins").b_val,
-                          ndb.model._CompressedValue):
-            for p in ['checkins', 'expertise', 'judgments']:
-                e._values.get(p).b_val = ndb.model._CompressedValue(
-                    e._values.get(p).b_val)
-        ############################################################
+        e = cls.getExpertsByPriority(1)[0]
         e.assigned = dt.now()
         e.put()
         return e.screen_name
 
     @classmethod
-    def get_judged_expert(cls):
-        """Return judged Experts
-        :returns: @todo
+    def getJudgedExperts(cls):
+        """ Return all judged experts
+        :returns: [expert: Expert]
 
         """
-        es = list(cls.query(Expert.judgment_number > 0).fetch())
-        for e in es:
-            ############# FIXME: Work around for restoring compressed data
-            if not isinstance(e._values.get("checkins").b_val,
-                              ndb.model._CompressedValue):
-                e._values.get('judgments').b_val = ndb.model._CompressedValue(
-                    e._values.get('judgments').b_val)
-            ############################################################
+        es = cls.query(Expert.judged_no > 0).fetch()
         return es
 
     @classmethod
     def upload(cls, fstream):
-        """Upload data to dbs by reading from csv_string
-        :returns: @todo
-
+        """Upload data to dbs by reading from csv file stream
         """
         for row in csv.DictReader(fstream):
             cls(parent=parent_key('expert'),
                 screen_name=row['screen_name'],
-                expertise=json.loads(row['expertise']),
-                checkins=json.loads(row['checkins']),
-                judgment_number=0,
-                judgments=[],
+                topics=json.loads(row['topics']),
+                checkin_datastore=compress(row['checkins']),
+                judged_no=0,
                 assigned=dt(2013, 1, 1),
                 ).put()
+
+    @classmethod
+    def statistics(cls):
+        """ Return a set of statistics
+
+        :returns: {'judged_experts': int, 'expert_no': int,
+                   'judgement_no': int}
+
+        """
+        es = [e.judged_no for e in
+              Expert.query(projection=Expert.judged_no).fetch()]
+        return {'judged_experts': len([e for e in es if e > 0]),
+                'expert_no': len(es),
+                'judgement_no': sum(es)}

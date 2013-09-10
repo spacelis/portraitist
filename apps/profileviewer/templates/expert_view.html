@@ -21,11 +21,7 @@
   </script>
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function () {
-      profileviewer_ns.initCharts("{{ screen_name | safe }}");
-      if(! $.cookie('judge_id')){
-        $.cookie('judge_id', $.uuid(), {expires: 90, path: "/"});
-      }
-      <!--$("#judgment-panel").stick_in_parent();-->
+      profileviewer_ns.initCharts("{{ expert.screen_name | safe }}");
     });
   </script>
   <style type="text/css" media="screen">
@@ -56,10 +52,7 @@
 <div id="judgment-panel" class="panel panel-default" style="z-index: 100">
   <div class="panel-heading">
     <b>
-      How likely is
-      <a href="https://twitter.com/{{screen_name | safe}}" target="_blank">
-        @{{screen_name | safe}}
-      </a> an expert knowing about
+      How likely is this user an expert knowing about
     </b>
   </div>
   <div class="panel-body">
@@ -67,7 +60,7 @@
       <input type="hidden" name="exp_id" value="{{ exp_id }}">
       {% csrf_token %}
       <div class="list-group">
-        {% for t in expertise %}
+        {% for t in topics %}
         <div class="list-group-item">
           <div class="row">
             <div class="col-sm-8">
@@ -118,9 +111,9 @@
         <b>Statistics</b>
         <div class="btn-toolbar btn-float-right">
           <div class="btn-group">
-            {% for k, t in focus.items %}
-            <button type="button" class="btn btn-default btn-xs" onClick="profileviewer_ns.focusTopic('{{ k.value }}', '{{ k.chart }}')" title="{{ t }}">
-              <span class="glyphicon glyphicon-search"></span> {{ k.name }}
+            {% for f in filters %}
+            <button type="button" class="btn btn-default btn-xs" onClick="profileviewer_ns.focusTopic('{{ f.filter_name }}', '{{ f.filter_type }}')" title="{{ f.explanation }}">
+              <span class="glyphicon glyphicon-search"></span> {{ f.name }}
             </button>
             {% endfor %}
           </div>

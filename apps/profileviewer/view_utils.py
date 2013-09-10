@@ -9,10 +9,13 @@ Description:
 
 """
 
-from collections import defaultdict
+import gzip
 from collections import namedtuple
+from datetime import datetime as dt
+from itertools import chain
+from itertools import groupby
 
-from apps.profileviewer.models import Topic
+from django.core.exceptions import PermissionDenied
 
 Focus = namedtuple('Focus', ['name', 'value', 'chart'], verbose=True)
 
@@ -33,46 +36,80 @@ def get_client(request):
     return ip, user_agent
 
 
-def prepare_focus(data):
-    """ Prepare the data we focus
+def get_filters(topics, key=lambda x: x['filter_name']):
+    """Return filters from related_to fields in each topic
 
-    :data: @todo
+    :topics: @todo
     :returns: @todo
 
     """
-    focus = defaultdict(str)
-    for e in data['expertise']:
-        detail = Topic.getTopicById(e['topic_id'])['detail']
+    filters = list()
+    entities = chain.from_iterable([t['related_to'] for t in topics])
+    for _, vs in groupby(sorted(entities, key=key), key=key):
+        filters.append({
+            'name': vs[0]['name'],
+            'filter_name': vs[0]['filter_name'],
+            'filter_type': vs[0]['filter_type'],
+            'explanation': '\n'.join([x['explanation'] for x in vs])
+        })
+    return filters
 
-        if 'poi' in e['topic_id']:  # For poi topics
-            focus[Focus(detail['name'], detail['id'], 'p')] += '\n'
-            helpmsg = '\nThe lower-level category belonging to %s.'\
-                % (detail['name'], )
-            focus[Focus(detail['category']['name'],
-                        detail['category']['name'],
-                        'c')] += helpmsg
-            helpmsg = '\nThe category that %s belongs to.' \
-                % (detail['name'],)
-            focus[Focus(detail['category']['zero_category_name'],
-                        detail['category']['zero_category_name'],
-                        'z')] += helpmsg
-            e['topic_type'] = 'A place belonging to the category [%s, %s].' \
-                % (detail['category']['name'],
-                   detail['category']['zero_category_name'])
 
-        elif 'zcate' not in e['topic_id']:  # For cate topics
-            focus[Focus(detail['name'], detail['name'], 'c')] += '\n'
-            focus[Focus(detail['zero_category_name'],
-                        detail['zero_category_name'],
-                        'z')] += ('\nThe top-level category'
-                                  ' that %s belongs to.') \
-                % (detail['name'],)
-            e['topic_type'] = ('A lower-level category belonging'
-                               ' to the category [%s].') \
-                % (detail['zero_category_name'], )
+def flexopen(filename):
+    """@todo: Docstring for flexopen.
 
-        else:  # For zcate topics
-            focus[Focus(detail['name'], detail['name'], 'z')] += '\n'
-            e['topic_type'] = 'A top-level category.'
-    data['focus'] = {k: v.strip() for k, v in focus.iteritems()}
-    return data
+    :filename: @todo
+    :returns: @todo
+
+    """
+    if filename.endswith('.gz'):
+        return gzip.open(filename)
+    else:
+        return open(filename)
+
+
+def construct_judgement(req):
+    """Constructing judgement object out of request
+
+    :req: @todo
+    :returns: @todo
+
+    """
+    judgement = dict()
+    judgement['created_at'] = dt.now().isoformat()
+
+    ip, user_agent = get_client(req)
+    judgement['ip'] = ip
+    judgement['user_agent'] = user_agent
+
+    judgement['judgements'] = dict()
+    for v in req.REQUEST:
+        if v.startswith('judgements-'):
+            topic_id = v[10:]
+            judgement['judgements'][topic_id] = req.REQUEST[v]
+    return judgement
+
+
+def request_property(req, prop):
+    """ Get a property from a request
+
+    :req: @todo
+    :returns: @todo
+
+    """
+    return req.COOKIES.get(prop, None) or req.REQUEST.get(prop, None)
+
+
+MAGIC_PW = 'dmir2013'
+
+
+def assert_magic_signed(req, magic_pw=MAGIC_PW):
+    """ Protected by MAGIC_PW
+
+    :vf: @todo
+    :returns: @todo
+
+    """
+    magic = request_property(req, magic_pw)
+    if not magic:
+        raise PermissionDenied()

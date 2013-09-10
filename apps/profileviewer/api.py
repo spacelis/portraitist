@@ -22,12 +22,12 @@ def expert_checkins(screen_name=None, names=None):
 
     """
     if screen_name:
-        e = Expert.get_by_screen_name(screen_name)
-        return e['checkins']
+        checkins = Expert.getExpertByScreenName(screen_name).checkins
+        return checkins
     elif names:
         r = dict()
         for n in names.split(','):
-            r[n] = Expert.get_by_screen_name(n)
+            r[n] = Expert.getExpertInfoByScreenName(n)
         return r
     else:
         return {'error': 'Please specify either a screen_name '
