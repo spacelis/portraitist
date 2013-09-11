@@ -13,6 +13,46 @@ from apps.profileviewer.models import Expert
 from django.http import HttpResponse
 
 
+class EndPoint(object):
+
+    """A decorator registry"""
+
+    EndPoints = list()
+
+    def __init__(self, endpoint):
+        """Register an endpoint served in API
+
+        :endpoint: @todo
+
+        """
+        self._endpoint = endpoint
+        EndPoint.EndPoints.append(endpoint)
+
+    def __call__(self, *args, **kargs):
+        """Calling the wrapped endpoint
+
+        :*args: @todo
+        :**kargs: @todo
+        :returns: @todo
+
+        """
+        self._endpoint(*args, **kargs)
+
+    @classmethod
+    def call_endpoints(self, request, endpoint_name):
+        """Call endpoint by name
+
+        :request: @todo
+        :endpoint_name: @todo
+        :returns: @todo
+
+        """
+        endpoint = EndPoint.EndPoints[endpoint_name]
+        return HttpResponse(endpoint(**request.REQUEST),
+                            mimetype="application/json")
+
+
+@EndPoint
 def expert_checkins(hash_id=None):
     """Return all checkins for the expert
 
@@ -26,21 +66,3 @@ def expert_checkins(hash_id=None):
         )
         return checkins
     return 'Please specify either a screen_name or comma separated names.'
-
-
-APIENDPOINTS = {
-    'expert_checkins': expert_checkins,
-}
-
-
-def endpoints(request, api_name):
-    """An API return json data
-
-    :request: @todo
-    :api_name: @todo
-    :returns: @todo
-
-    """
-    api = APIENDPOINTS[api_name]
-    return HttpResponse(api(**request.REQUEST),
-                        mimetype="application/json")
