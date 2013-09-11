@@ -10,9 +10,11 @@ Description:
 """
 
 import json
-from apps.profileviewer.models import Expert
-from django.http import HttpResponse
 
+from django.http import HttpResponse
+from google.appengine.ext import ndb
+
+from apps.profileviewer.models import Expert
 
 def expert_checkins(screen_name=None, names=None):
     """Return all checkins for the expert
@@ -34,8 +36,26 @@ def expert_checkins(screen_name=None, names=None):
                 'or comma separated names.'}
 
 
+def export_judgments():
+    """ return all judgments
+    :returns: @todo
+
+    """
+    judgments = list()
+    for e in Expert.query(Expert.judgment_number > 0).fetch():
+        if not isinstance(e._values.get("judgments").b_val,
+                            ndb.model._CompressedValue):
+            e._values.get('judgments').b_val = ndb.model._CompressedValue(
+                e._values.get('judgments').b_val)
+        for jd in e.judgments:
+            jd['screen_name'] = e.screen_name
+            judgments.append(jd)
+    return judgments
+
+
 APIENDPOINTS = {
     'expert_checkins': expert_checkins,
+    'export_judgments': export_judgments,
 }
 
 
