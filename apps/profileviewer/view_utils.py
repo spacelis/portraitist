@@ -17,6 +17,8 @@ from itertools import groupby
 
 from django.core.exceptions import PermissionDenied
 
+from apps.profileviewer.models import Expert
+
 Focus = namedtuple('Focus', ['name', 'value', 'chart'], verbose=True)
 
 
@@ -46,6 +48,7 @@ def get_filters(topics, key=lambda x: x['filter_name']):
     filters = list()
     entities = chain.from_iterable([t['related_to'] for t in topics])
     for _, vs in groupby(sorted(entities, key=key), key=key):
+        vs = list(vs)
         filters.append({
             'name': vs[0]['name'],
             'filter_name': vs[0]['filter_name'],
@@ -77,6 +80,8 @@ def construct_judgement(req):
     """
     judgement = dict()
     judgement['created_at'] = dt.now().isoformat()
+    judgement['candidate'] = Expert.getExpertByHashId(
+        req.REQUEST['judgement-candidate']).screen_name
 
     ip, user_agent = get_client(req)
     judgement['ip'] = ip

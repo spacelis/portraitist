@@ -21,7 +21,7 @@
   </script>
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function () {
-      profileviewer_ns.initCharts("{{ expert.screen_name | safe }}");
+      profileviewer_ns.initCharts("{{ expert.hash_id | safe }}");
     });
   </script>
   <style type="text/css" media="screen">
@@ -57,7 +57,7 @@
   </div>
   <div class="panel-body">
     <form action="/judge_expert" method="post" accept-charset="utf-8" role="form">
-      <input type="hidden" name="exp_id" value="{{ exp_id }}">
+      <input type="hidden" name="judgement-candidate" value="{{ expert.hash_id }}" id="judgement-candidate">
       {% csrf_token %}
       <div class="list-group">
         {% for t in topics %}

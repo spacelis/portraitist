@@ -16,6 +16,7 @@ from datetime import timedelta
 from datetime import datetime as dt
 from zlib import compress
 from zlib import decompress
+from hashlib import sha1
 
 from google.appengine.ext import ndb
 
@@ -40,6 +41,7 @@ class Judge(ndb.Model):
     """ A class representing users as judges."""
 
     # pylint: disable-msg=E1101
+    nickname = ndb.StringProperty(indexed=True)
     email = ndb.StringProperty(indexed=True)
     judge_id = ndb.StringProperty(indexed=True)
     judgement_no = ndb.IntegerProperty(indexed=True)
@@ -68,7 +70,12 @@ class Judge(ndb.Model):
         :returns: return the judge ndb object
 
         """
-        return Judge.query(Judge.judge_id == judge_id).fetch(1)[0]
+        judges = Judge.query(Judge.judge_id == judge_id).fetch(1)
+        if not judges:
+            return Judge(judge_id=judge_id,
+                         judgement_no=0,
+                         judgements=list())
+        return judges[0]
 
     @classmethod
     def addJudgement(cls, judge_id, judgement):
@@ -80,10 +87,10 @@ class Judge(ndb.Model):
 
         """
         j = Judge.getJudgeById(judge_id)
-        Expert.getExpertByScreenName(judgement['screen_name'])\
+        Expert.getExpertByScreenName(judgement['candidate'])\
             .judged_by.append(judge_id)
         j.judgements.append(judgement)
-        j.submission_no += 1
+        j.judgement_no += 1
         j.put()
         return j
 
@@ -133,7 +140,7 @@ class Topic(ndb.Model):
         t = cls.query(cls.topic_id == topic_id).fetch(1)[0]
         return {'topic_id': t.topic_id,
                 'topic': t.topic,
-                'retion': t.region,
+                'region': t.region,
                 'topic_type': t.topic_type,
                 'related_to': t.related_to}
 
@@ -150,7 +157,7 @@ class Topic(ndb.Model):
                 topic=row['topic'],
                 region=row['region'],
                 experts=json.loads(row['experts']),
-                related_to=json.loads(row['detail']),
+                related_to=json.loads(row['related_to']),
                 ).put()
 
 
@@ -160,11 +167,11 @@ class Expert(ndb.Model):
 
     # pylint: disable-msg=E1101
     screen_name = ndb.StringProperty(indexed=True)
+    hash_id = ndb.ComputedProperty(
+        lambda self: sha1(self.screen_name).hexdigest())
 
     topics = ndb.JsonProperty()
-    checkin_store = ndb.BlobProperty()
-    checkins = ndb.ComputedProperty(
-        lambda self: json.loads(decompress(self.checkin_store)))
+    checkins_store = ndb.BlobProperty()
     judged_by = ndb.StringProperty(repeated=True)
     judged_no = ndb.ComputedProperty(lambda self: len(self.judged_by))
 
@@ -182,6 +189,28 @@ class Expert(ndb.Model):
         return cls.query(Expert.assigned < (dt.now() - MIN30))\
             .order(Expert.assigned, Expert.judged_no)\
             .fetch(limit)
+
+    @classmethod
+    def getExpertInfoByHashId(cls, hash_id):
+        """ Return a dict object holding basic information about the expert
+
+        :screen_name: The screen_name of the expert
+        :returns: A dict {'screen_name': str, 'topics': [topic_id: str]}
+
+        """
+        topics = cls.getExpertByHashId(hash_id).topics
+        return {'hash_id': hash_id,
+                'topics': topics}
+
+    @classmethod
+    def getExpertByHashId(cls, hash_id):
+        """ Return a ndb object of the given expert
+
+        :screen_name: The screen_name
+        :returns: A ndb object of the expert
+
+        """
+        return cls.query(Expert.hash_id == hash_id).fetch(1)[0]
 
     @classmethod
     def getExpertInfoByScreenName(cls, screen_name):
@@ -214,6 +243,15 @@ class Expert(ndb.Model):
         """
         return [e.screen_name for e in cls.getExpertsByPriority(limit=limit)]
 
+    @staticmethod
+    def getCheckinsInJson(expert):
+        """ Get the checkin profile for given user and return a json string
+
+        :returns: checkins: json
+
+        """
+        return decompress(expert.checkins_store)
+
     @classmethod
     def getTask(cls):
         """ Get only one from the ordered screen_names by priority for judging
@@ -224,7 +262,7 @@ class Expert(ndb.Model):
         e = cls.getExpertsByPriority(1)[0]
         e.assigned = dt.now()
         e.put()
-        return e.screen_name
+        return e.hash_id
 
     @classmethod
     def getJudgedExperts(cls):
@@ -243,8 +281,7 @@ class Expert(ndb.Model):
             cls(parent=parent_key('expert'),
                 screen_name=row['screen_name'],
                 topics=json.loads(row['topics']),
-                checkin_datastore=compress(row['checkins']),
-                judged_no=0,
+                checkins_store=compress(row['checkins']),
                 assigned=dt(2013, 1, 1),
                 ).put()
 

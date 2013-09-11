@@ -9,29 +9,23 @@ Description:
     The api endpoints
 """
 
-import json
 from apps.profileviewer.models import Expert
 from django.http import HttpResponse
 
 
-def expert_checkins(screen_name=None, names=None):
+def expert_checkins(hash_id=None):
     """Return all checkins for the expert
 
-    :screen_name: @todo
-    :returns: @todo
+    :hash_id: The hashlib.sha1 of twitter screen_name
+    :returns: All checkins from the database made by the twitter user
 
     """
-    if screen_name:
-        checkins = Expert.getExpertByScreenName(screen_name).checkins
+    if hash_id:
+        checkins = Expert.getCheckinsInJson(
+            Expert.getExpertByHashId(hash_id)
+        )
         return checkins
-    elif names:
-        r = dict()
-        for n in names.split(','):
-            r[n] = Expert.getExpertInfoByScreenName(n)
-        return r
-    else:
-        return {'error': 'Please specify either a screen_name '
-                'or comma separated names.'}
+    return 'Please specify either a screen_name or comma separated names.'
 
 
 APIENDPOINTS = {
@@ -48,5 +42,5 @@ def endpoints(request, api_name):
 
     """
     api = APIENDPOINTS[api_name]
-    return HttpResponse(json.dumps(api(**request.REQUEST)),
+    return HttpResponse(api(**request.REQUEST),
                         mimetype="application/json")

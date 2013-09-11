@@ -67,7 +67,7 @@ var profileviewer_ns = (function(){
       return c.place.category;
     });
     var by_zcate = fact.dimension(function(c){
-      return c.place.zcate;
+      return c.place.zcategory;
     });
     var by_poi = fact.dimension(function(c){
       //return c.place.id + "\t" + c.place.name;
@@ -215,12 +215,12 @@ var profileviewer_ns = (function(){
     renderMap(checkins_by_poi);
   }
 
-  function initCharts (screen_name) {
+  function initCharts (hash_id) {
     d3.json(
-      '/api/expert_checkins?screen_name=' + screen_name,
+      '/api/expert_checkins?hash_id=' + hash_id,
       function(err, json){
         if (err){
-          alert("Fail to get data for " + screen_name);
+          alert("Fail to get data for " + hash_id);
         }
         else{
           data = json;

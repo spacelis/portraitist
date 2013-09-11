@@ -39,11 +39,11 @@ def home(request):
     no_inst = request.COOKIES.get('no_inst', 0) or \
         request.REQUEST.get('no_inst', 0)
 
-    expert = Expert.getTask()
+    expert_hash_id = Expert.getTask()
     if no_inst:
-        return redirect('/expert_view/' + expert)
+        return redirect('/expert_view/' + expert_hash_id)
     else:
-        r = render_to_response('instructions.html', {'expert': expert},
+        r = render_to_response('instructions.html', {'expert': expert_hash_id},
                                context_instance=RequestContext(request))
         r.set_cookie(MAGIC_PW, 1, 90 * 24 * 3600)
         return r
@@ -80,7 +80,7 @@ def import_expert(request, filename):
     return redirect('/')
 
 
-def expert_view(request, screen_name):
+def expert_view(request, hash_id):
     """Return a specific profile give a user's screen_name
 
     :request: @todo
@@ -89,7 +89,7 @@ def expert_view(request, screen_name):
 
     """
     assert_magic_signed(request)
-    expert = Expert.getExpertInfoByScreenName(screen_name)
+    expert = Expert.getExpertInfoByHashId(hash_id)
     topics = [Topic.getTopicById(tid) for tid in expert['topics']]
     filters = get_filters(topics)
     return render_to_response(
