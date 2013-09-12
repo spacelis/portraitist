@@ -78,20 +78,20 @@ def construct_judgement(req):
     :returns: @todo
 
     """
-    judgement = dict()
-    judgement['created_at'] = dt.now().isoformat()
-    judgement['candidate'] = Expert.getExpertByHashId(
-        req.REQUEST['judgement-candidate']).screen_name
-
     ip, user_agent = get_client(req)
-    judgement['ip'] = ip
-    judgement['user_agent'] = user_agent
-
-    judgement['judgements'] = dict()
+    scores = dict()
     for v in req.REQUEST:
-        if v.startswith('judgements-'):
-            topic_id = v[10:]
-            judgement['judgements'][topic_id] = req.REQUEST[v]
+        if v.startswith('pv-judgements-'):
+            topic_id = v[13:]
+            scores[topic_id] = req.REQUEST[v]
+    judgement = {
+        'created_at': dt.now().isoformat(),
+        'candidate': Expert.getExpertByHashId(
+            req.REQUEST['pv-candidate-hash-id']).screen_name,
+        'ip': ip,
+        'user_agent': user_agent,
+        'scores': scores
+    }
     return judgement
 
 

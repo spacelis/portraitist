@@ -87,7 +87,7 @@ class Judge(ndb.Model):
 
         """
         j = Judge.getJudgeById(judge_id)
-        Expert.getExpertByScreenName(judgement['candidate'])\
+        Expert.getExpertByHashId(judgement['candidate'])\
             .judged_by.append(judge_id)
         j.judgements.append(judgement)
         j.judgement_no += 1
