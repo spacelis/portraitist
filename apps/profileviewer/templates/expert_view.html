@@ -6,6 +6,7 @@
   <script src="/static/js/profileviewer/dc.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/js/profileviewer/gmaps.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/js/profileviewer/jquery-uuid.js" type="text/javascript" charset="utf-8"></script>
+
   <script src="/static/js/profileviewer/expert_view.js" type="text/javascript" charset="utf-8"></script>
 
   <link rel="stylesheet" href="/static/css/profileviewer/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
@@ -22,6 +23,27 @@
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function () {
       profileviewer_ns.initCharts("{{ expert.hash_id | safe }}");
+      var in_nodes = [
+        {% for t in topics %}
+        'pv-judgements-{{ t.topic_id  }}',
+        {% endfor %}
+      ];
+
+      $('#pv-judgement-form').submit(function(){
+        var is_all_marked = true;
+        var selector;
+        for(var i in in_nodes){
+          selector = "input[name='" + in_nodes[i] + "']";
+          if($(selector + ":checked").length === 0){
+            $(selector).closest('.btn-group').addClass('error');
+            is_all_marked = false;
+          }
+        }
+        return is_all_marked;
+      });
+      $('.btn-judgement').click(function(){
+        $(this).removeClass('error')
+      });
     });
   </script>
   <style type="text/css" media="screen">
@@ -46,6 +68,14 @@
     .has-no-explanation {
       border-bottom: 1px solid white;
     }
+    .error {
+      -moz-box-shadow:    0px 0px 5px 2px #c00;
+      -webkit-box-shadow: 0px 0px 5px 2px #c00;
+      box-shadow:         0px 0px 5px 2px #c00;
+      -moz-border-radius: 3px;
+      -webkit-border-radius: 3px;
+      border-radius: 3px;
+    }
   </style>
 {% endblock %}
 {% block content %}
@@ -56,7 +86,7 @@
     </b>
   </div>
   <div class="panel-body">
-    <form action="/judge_expert" method="post" accept-charset="utf-8" role="form">
+    <form id="pv-judgement-form" action="" method="post" accept-charset="utf-8" role="form">
       <input type="hidden" name="pv-candidate-hash-id" value="{{ expert.hash_id }}" id="judgement-candidate">
       {% csrf_token %}
       <div class="list-group">
@@ -67,7 +97,7 @@
               <abbr title="{{ t.topic_type }}"><b>{{ t.topic }} </b></abbr> in <b>{{ t.region }}</b>?
             </div>
             <div class="col-sm-4" align="right">
-              <div class="btn-group btn-group-xs" data-toggle="buttons">
+              <div class="btn-group btn-group-xs btn-judgement" data-toggle="buttons">
                 <label class="btn btn-default btn-radio" for="" title="He/she probably knows nothing">
                   <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="1"> <div class="has-explanation">&nbsp;1&nbsp;</div>
                 </label>
