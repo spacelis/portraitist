@@ -49,7 +49,7 @@
   </style>
 {% endblock %}
 {% block content %}
-<div id="judgment-panel" class="panel panel-default" style="z-index: 100">
+<div id="judgement-panel" class="panel panel-default" style="z-index: 100">
   <div class="panel-heading">
     <b>
       How likely is this user an expert knowing about
@@ -69,23 +69,23 @@
             <div class="col-sm-4" align="right">
               <div class="btn-group btn-group-xs" data-toggle="buttons">
                 <label class="btn btn-default btn-radio" for="" title="He/she probably knows nothing">
-                  <input type="radio" name="pv-judgments-{{ t.topic_id  }}" value="1"> <div class="has-explanation">&nbsp;1&nbsp;</div>
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="1"> <div class="has-explanation">&nbsp;1&nbsp;</div>
                 </label>
                 <label class="btn btn-default btn-radio" for="">
-                  <input type="radio" name="pv-judgments-{{ t.topic_id  }}" value="2"> <div class="has-no-explanation">&nbsp;2&nbsp;</div>
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="2"> <div class="has-no-explanation">&nbsp;2&nbsp;</div>
                 </label>
                 <label class="btn btn-default btn-radio" for="">
-                  <input type="radio" name="pv-judgments-{{ t.topic_id  }}" value="3"> <div class="has-no-explanation">&nbsp;3&nbsp;</div>
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="3"> <div class="has-no-explanation">&nbsp;3&nbsp;</div>
                 </label>
                 <label class="btn btn-default btn-radio" for="">
-                  <input type="radio" name="pv-judgments-{{ t.topic_id  }}" value="4"> <div class="has-no-explanation">&nbsp;4&nbsp;</div>
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="4"> <div class="has-no-explanation">&nbsp;4&nbsp;</div>
                 </label>
                 <label class="btn btn-default btn-radio" for="" title="He/she definately knows a lot.">
-                  <input type="radio" name="pv-judgments-{{ t.topic_id  }}" value="5"> <div class="has-explanation">&nbsp;5&nbsp;</div>
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="5"> <div class="has-explanation">&nbsp;5&nbsp;</div>
                   <!--&nbsp;<abbr title="He/she definately knows a lot.">(Likely)</abbr>&nbsp;-->
                 </label>
                 <label class="btn btn-default btn-radio" for="" title="Not sure what the topic is really about.">
-                  <input type="radio" name="pv-judgments-{{ t.topic_id  }}" value="-1"> <div class="has-explanation">Not Sure</div>
+                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="-1"> <div class="has-explanation">Not Sure</div>
                 </label>
               </div>
             </div>

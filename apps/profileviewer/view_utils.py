@@ -82,7 +82,7 @@ def construct_judgement(req):
     scores = dict()
     for v in req.REQUEST:
         if v.startswith('pv-judgements-'):
-            topic_id = v[13:]
+            topic_id = v[14:]
             scores[topic_id] = req.REQUEST[v]
     judgement = {
         'created_at': dt.now().isoformat(),

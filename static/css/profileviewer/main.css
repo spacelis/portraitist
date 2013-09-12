@@ -24,10 +24,10 @@ div#map-canvas{
 	height: 512px;
 	width: 512px;
 }
-div.judgment-list-item {
+div.judgement-list-item {
 	text-align: left;
 }
-div.judgment-list-item-judged {
+div.judgement-list-item-judged {
 	width: 16px;
 	height: 16px;
 	float: left;

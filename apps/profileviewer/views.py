@@ -103,8 +103,8 @@ def expert_view(request, hash_id):
 
 
 @csrf_protect
-def submit_expert_judgment(request):
-    """Submit judgment into the database
+def submit_expert_judgement(request):
+    """Submit judgement into the database
 
     :request: @todo
     :returns: @todo
@@ -154,8 +154,8 @@ def topic_view(request, topic_id):
 
 
 @csrf_protect
-def submit_topic_judgment(request):
-    """Submit a judgment on a topic
+def submit_topic_judgement(request):
+    """Submit a judgement on a topic
 
     :request: @todo
     :topic_id: @todo
@@ -168,8 +168,23 @@ def submit_topic_judgment(request):
 
 # ------------------------ OVERVIEW ---------------------
 
-def judgment_overview(request):
-    """@todo: Docstring for judgment_overview.
+def import_judge(request):
+    """Import judgements
+
+    :request: @todo
+    :returns: @todo
+
+    """
+    assert_magic_signed(request)
+    from apps import APP_PATH
+    import os.path
+    datapath = os.path.join(APP_PATH, 'data', filename)
+    with flexopen(datapath) as fin:
+        Judge.upload(fin)
+    return redirect('/')
+
+def judgement_overview(request):
+    """@todo: Docstring for judgement_overview.
 
     :request: @todo
     :returns: @todo
@@ -181,7 +196,7 @@ def judgment_overview(request):
     jstat = Judge.statistics()
     data.update(estat)
     data.update(jstat)
-    return render_to_response('judgment_overview.html',
+    return render_to_response('judgement_overview.html',
                               data,
                               context_instance=RequestContext(request))
 

@@ -4,8 +4,8 @@
   {% for t in topics %}
     <li class="list-group-item">
       <a href="/topic_view/{{t.topic_id}}">{{t.topic}} in {{t.region}}</a>
-      {% if t.judgment_number > 0 %}
-        <span class="badge">{{ t.judgment_number }}</span>
+      {% if t.judgement_number > 0 %}
+        <span class="badge">{{ t.judgement_number }}</span>
       {% endif %}
     </li>
   {% endfor %}

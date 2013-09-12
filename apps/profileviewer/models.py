@@ -49,6 +49,22 @@ class Judge(ndb.Model):
     # pylint: enable-msg=E1101
 
     @classmethod
+    def upload(cls, fstream):
+        """ Upload data to dbs by reading from a stream
+        :fstream: A stream like object
+        :returns: None
+
+        """
+        for row in csv.DictReader(fstream):
+            cls(parent=parent_key('topic'),
+                nickname='',
+                email='',
+                judge_id=row['judge_id'],
+                judgement_no=int(row['judgement_no']),
+                judgements=row['judgements'],
+                ).put()
+
+    @classmethod
     def newJudge(cls, email):
         """ Create a new judge user
 
