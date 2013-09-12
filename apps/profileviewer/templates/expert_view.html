@@ -86,7 +86,7 @@
     </b>
   </div>
   <div class="panel-body">
-    <form id="pv-judgement-form" action="" method="post" accept-charset="utf-8" role="form">
+    <form id="pv-judgement-form" action="/judge_expert" method="post" accept-charset="utf-8" role="form">
       <input type="hidden" name="pv-candidate-hash-id" value="{{ expert.hash_id }}" id="judgement-candidate">
       {% csrf_token %}
       <div class="list-group">
