@@ -17,7 +17,7 @@ class EndPoint(object):
 
     """A decorator registry"""
 
-    EndPoints = list()
+    EndPoints = dict()
 
     def __init__(self, endpoint):
         """Register an endpoint served in API
@@ -26,7 +26,7 @@ class EndPoint(object):
 
         """
         self._endpoint = endpoint
-        EndPoint.EndPoints.append(endpoint)
+        EndPoint.EndPoints[endpoint.__name__] = endpoint
 
     def __call__(self, *args, **kargs):
         """Calling the wrapped endpoint
@@ -37,19 +37,6 @@ class EndPoint(object):
 
         """
         self._endpoint(*args, **kargs)
-
-    @classmethod
-    def call_endpoints(self, request, endpoint_name):
-        """Call endpoint by name
-
-        :request: @todo
-        :endpoint_name: @todo
-        :returns: @todo
-
-        """
-        endpoint = EndPoint.EndPoints[endpoint_name]
-        return HttpResponse(endpoint(**request.REQUEST),
-                            mimetype="application/json")
 
 
 @EndPoint
@@ -66,3 +53,16 @@ def expert_checkins(hash_id=None):
         )
         return checkins
     return 'Please specify either a screen_name or comma separated names.'
+
+
+def call_endpoint(request, endpoint_name):
+    """Call endpoint by name
+
+    :request: @todo
+    :endpoint_name: @todo
+    :returns: @todo
+
+    """
+    endpoint = EndPoint.EndPoints[endpoint_name]
+    return HttpResponse(endpoint(**request.REQUEST),
+                        mimetype="application/json")
