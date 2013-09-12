@@ -168,7 +168,7 @@ def submit_topic_judgement(request):
 
 # ------------------------ OVERVIEW ---------------------
 
-def import_judge(request):
+def import_judge(request, filename):
     """Import judgements
 
     :request: @todo
@@ -182,6 +182,7 @@ def import_judge(request):
     with flexopen(datapath) as fin:
         Judge.upload(fin)
     return redirect('/')
+
 
 def judgement_overview(request):
     """@todo: Docstring for judgement_overview.
