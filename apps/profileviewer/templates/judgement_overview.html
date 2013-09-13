@@ -1,0 +1,10 @@
+{% extends "frame.html" %}
+{% block extra_header %}
+{% endblock %}
+{% block content %}
+<ul class="list-group">
+  <li class="list-group-item">Submitted Judgements<span class="badge">{{ e_judgement_no }} | {{ j_judgement_no }}</span></li>
+  <li class="list-group-item">Participated Judges<span class="badge">{{ judge_no }}</span></li>
+  <li class="list-group-item">Expert Judged<span class="badge">{{ judged_experts }} / {{ expert_no }}</span></li>
+</ul>
+{% endblock %}

@@ -120,7 +120,7 @@ class Judge(ndb.Model):
         js = [j.judgement_no for j in
               Judge.query(projection=[Judge.judgement_no])]
         return {'judge_no': len(js),
-                'judgement_no': sum(js)}
+                'j_judgement_no': sum(js)}
 
 
 class Topic(ndb.Model):
@@ -310,7 +310,7 @@ class Expert(ndb.Model):
 
         """
         es = [e.judged_no for e in
-              Expert.query(projection=Expert.judged_no).fetch()]
+              Expert.query(projection=[Expert.judged_no]).fetch()]
         return {'judged_experts': len([e for e in es if e > 0]),
                 'expert_no': len(es),
-                'judgement_no': sum(es)}
+                'e_judgement_no': sum(es)}
