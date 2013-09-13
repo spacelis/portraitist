@@ -103,8 +103,10 @@ class Judge(ndb.Model):
 
         """
         j = Judge.getJudgeById(judge_id)
-        Expert.getExpertByScreenName(judgement['candidate'])\
-            .judged_by.append(judge_id)
+        e = Expert.getExpertByScreenName(judgement['candidate'])
+        e.judged_by.append(judge_id)
+        e.judged_no += 1
+        e.put()
         j.judgements.append(judgement)
         j.judgement_no += 1
         j.put()
@@ -188,8 +190,8 @@ class Expert(ndb.Model):
 
     topics = ndb.JsonProperty()
     checkins_store = ndb.BlobProperty()
-    judged_by = ndb.StringProperty(repeated=True)
-    judged_no = ndb.ComputedProperty(lambda self: len(self.judged_by))
+    judged_by = ndb.StringProperty(repeated=True, indexed=True)
+    judged_no = ndb.IntegerProperty(indexed=True)
 
     assigned = ndb.DateTimeProperty(indexed=True)
     # pylint: enable-msg=E1101

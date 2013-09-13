@@ -10,7 +10,10 @@ Description:
 """
 
 from apps.profileviewer.models import Expert
+from apps.profileviewer.models import Judge
 from django.http import HttpResponse
+import json
+from json import dumps as _j
 
 
 class EndPoint(object):
@@ -39,6 +42,19 @@ class EndPoint(object):
         self._endpoint(*args, **kargs)
 
 
+def call_endpoint(request, endpoint_name):
+    """Call endpoint by name
+
+    :request: @todo
+    :endpoint_name: @todo
+    :returns: @todo
+
+    """
+    endpoint = EndPoint.EndPoints[endpoint_name]
+    return HttpResponse(endpoint(**request.REQUEST),
+                        mimetype="application/json")
+
+
 @EndPoint
 def expert_checkins(hash_id=None):
     """Return all checkins for the expert
@@ -52,17 +68,40 @@ def expert_checkins(hash_id=None):
             Expert.getExpertByHashId(hash_id)
         )
         return checkins
-    return 'Please specify either a screen_name or comma separated names.'
+    return _j({'error': 'Please specify either a '
+              'screen_name or comma separated names.'})
 
 
-def call_endpoint(request, endpoint_name):
-    """Call endpoint by name
-
-    :request: @todo
-    :endpoint_name: @todo
+@EndPoint
+def sync_judgement():
+    """Update Expert judged_by and judgement_no from Judge entities
     :returns: @todo
 
     """
-    endpoint = EndPoint.EndPoints[endpoint_name]
-    return HttpResponse(endpoint(**request.REQUEST),
-                        mimetype="application/json")
+    for e in Expert.query().fetch():
+        e.judge_by = list()
+        e.judged_no = 0
+    for j in Judge.query().fetch():
+        if isinstance(j.judgements, unicode):
+            j.judgements = json.loads(j.judgements)
+            j.put()
+        j.judgement_no = len(j.judgements)
+        j.put()
+        assert isinstance(j.judgements, list), \
+            'j.judgements is of type %s' % (type(j.judgements), )
+        for ju in j.judgements:
+            e = Expert.query(Expert.screen_name == ju['candidate']).fetch(1)[0]
+            e.judged_by.append(j.judge_id)  # pylint: disable-msg=E1101
+            e.judged_no += 1
+            e.put()
+
+
+@EndPoint
+def view_judgements(judge_id):
+    """ Return all judgements made by the judge
+
+    :judge_id: The judge_id of a Judge
+    :returns: All Judgement from the Judge in JSON
+
+    """
+    return Judge.query(Judge.judge_id == judge_id).fetch(1)[0].judgements
