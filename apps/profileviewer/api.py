@@ -9,11 +9,14 @@ Description:
     The api endpoints
 """
 
-from apps.profileviewer.models import Expert
-from apps.profileviewer.models import Judge
-from django.http import HttpResponse
+import inspect
 import json
 from json import dumps as _j
+
+from django.http import HttpResponse
+
+from apps.profileviewer.models import Expert
+from apps.profileviewer.models import Judge
 
 
 class EndPoint(object):
@@ -51,7 +54,9 @@ def call_endpoint(request, endpoint_name):
 
     """
     endpoint = EndPoint.EndPoints[endpoint_name]
-    return HttpResponse(endpoint(**request.REQUEST),
+    argspec = inspect.getargspec(endpoint)
+    args = {k: request.REQUEST.get(k, None) for k in argspec}
+    return HttpResponse(endpoint(**args),  # pylint: disable-msg=W0142
                         mimetype="application/json")
 
 

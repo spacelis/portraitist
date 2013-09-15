@@ -11,3 +11,11 @@ Description:
 import django.core.handlers.wsgi
 
 application = django.core.handlers.wsgi.WSGIHandler()
+
+
+#import django.views.debug
+#from werkzeug.debug import DebuggedApplication
+#def null_technical_500_response(request, exc_type, exc_value, tb):
+    #raise exc_type, exc_value, tb
+#django.views.debug.technical_500_response = null_technical_500_response
+#application = DebuggedApplication(application, evalex=True)

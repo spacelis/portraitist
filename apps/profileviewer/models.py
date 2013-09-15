@@ -56,7 +56,7 @@ class Judge(ndb.Model):
 
         """
         for row in csv.DictReader(fstream):
-            cls(parent=parent_key('topic'),
+            cls(parent=parent_key('judge'),
                 nickname='',
                 email='',
                 judge_id=row['judge_id'],
@@ -72,8 +72,8 @@ class Judge(ndb.Model):
         :returns: A newly created ndb judge object
 
         """
-        return cls(parent_key=parent_key('judge'),
-                   judge_id=uuid4(),
+        return cls(parent=parent_key('judge'),
+                   judge_id=str(uuid4()),
                    judgement_no=0,
                    email=email,
                    judgements=list())
