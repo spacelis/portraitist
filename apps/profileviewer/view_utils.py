@@ -143,6 +143,8 @@ def assure_judge(req):
 
     """
     judge_id = req.COOKIES.get('judge_id', '')
+    judge_nick = req.COOKIES.get('judge_nick', '')
+    judge_email = req.COOKIES.get('judge_email', '')
     ip, _ = get_client(req)
     j = None
     if judge_id:
@@ -150,13 +152,18 @@ def assure_judge(req):
         if len(j) > 0:
             return j
         else:
-            j = Judge.query(Judge.judge_id == OLD_JUDGE[ip]).fetch(1)[0]
-            j.email = req.COOKIES.get('judge_email', '')
-            j.nickname = req.COOKIES.get('judge_nickname', '')
-            return j
+            js = Judge.query(Judge.judge_id == OLD_JUDGE[ip]).fetch(1)
+            if len(js) > 0:
+                j.email = judge_email
+                j.nickname = judge_nick
+                j.put()
+                return j
+            else:
+                j = Judge.newJudge(judge_email, judge_nick)
+                j.put()
+                return j
     else:
-        judge_email = req.COOKIES.get('judge_email', '')
-        judge_nick = req.COOKIES.get('judge_nickname', '')
         j = Judge.newJudge(judge_email, judge_nick)
+        j.put()
         return j
     return None

@@ -73,11 +73,15 @@ class Judge(ndb.Model):
         :returns: A newly created ndb judge object
 
         """
-        return cls(parent=parent_key('judge'),
-                   judge_id=str(uuid4()),
-                   judgement_no=0,
-                   email=email,
-                   judgements=list())
+        js = Judge.query(Judge.email==email).fetch()
+        if len(js) == 0:
+            return cls(parent=parent_key('judge'),
+                       judge_id=str(uuid4()),
+                       judgement_no=0,
+                       email=email,
+                       judgements=list())
+        else:
+            return js[0]
 
     @classmethod
     def getJudgeById(cls, judge_id):
