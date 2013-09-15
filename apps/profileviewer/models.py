@@ -73,15 +73,17 @@ class Judge(ndb.Model):
         :returns: A newly created ndb judge object
 
         """
-        js = Judge.query(Judge.email==email).fetch()
-        if len(js) == 0:
+        print email, nickname
+        js = Judge.query(Judge.email == email).fetch()
+        if len(js) > 0:
+            return js[0]
+        else:
             return cls(parent=parent_key('judge'),
                        judge_id=str(uuid4()),
                        judgement_no=0,
                        email=email,
+                       nickname=nickname,
                        judgements=list())
-        else:
-            return js[0]
 
     @classmethod
     def getJudgeById(cls, judge_id):
@@ -93,29 +95,29 @@ class Judge(ndb.Model):
         """
         judges = Judge.query(Judge.judge_id == judge_id).fetch(1)
         if not judges:
-            return Judge(judge_id=judge_id,
+            return Judge(parent=parent_key('judge'),
+                         judge_id=judge_id,
                          judgement_no=0,
                          judgements=list())
         return judges[0]
 
     @classmethod
-    def addJudgement(cls, judge_id, judgement):
+    def addJudgement(cls, judge, judgement):
         """@todo: Docstring for addJudgement.
 
-        :judge_id: The id of the judge
+        :judge: The id of the judge
         :judgement: A dict object holding the judgement made by the judge
         :returns: The ndb object of the judge
 
         """
-        j = Judge.getJudgeById(judge_id)
         e = Expert.getExpertByScreenName(judgement['candidate'])
-        e.judged_by.append(judge_id)
+        e.judged_by.append(judge.judge_id)
         e.judged_no += 1
         e.put()
-        j.judgements.append(judgement)
-        j.judgement_no += 1
-        j.put()
-        return j
+        judge.judgements.append(judgement)
+        judge.judgement_no += 1
+        judge.put()
+        return judge
 
     @classmethod
     def statistics(cls):

@@ -113,7 +113,7 @@ def submit_expert_judgement(request):
     """
     judge = assure_judge(request)
     judgement = construct_judgement(request)
-    j = Judge.addJudgement(judge.judge_id, judgement)
+    j = Judge.addJudgement(judge, judgement)
     r = redirect('/home?no_inst=1')
     r.set_cookie('submitted_tasks', j.judgement_no, 90 * 24 * 3600)
     r.set_cookie('judge_id', j.judge_id, 90 * 24 * 3600)
