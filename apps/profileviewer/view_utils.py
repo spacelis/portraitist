@@ -18,6 +18,7 @@ from itertools import groupby
 from django.core.exceptions import PermissionDenied
 
 from apps.profileviewer.models import Expert
+from apps.profileviewer.models import Judge
 
 Focus = namedtuple('Focus', ['name', 'value', 'chart'], verbose=True)
 
@@ -118,3 +119,44 @@ def assert_magic_signed(req, magic_pw=MAGIC_PW):
     magic = request_property(req, magic_pw)
     if not magic:
         raise PermissionDenied()
+
+
+OLD_JUDGE = {'128.59.65.204': '608e6304-975e-44f9-8274-428706e6ad2a',
+             '129.252.131.185': '09d0510e-a8a5-4776-a63a-fb20a5f38826',
+             '130.161.91.175': '07e284c5-d549-4147-af63-dccd10c89e6a',
+             '131.107.192.26': '92ce77e9-59ad-4530-875b-95cfa51c33a4',
+             '131.180.203.8': '6f96fed9-dd0e-4a2e-872b-e9f73ac0e808',
+             '131.180.220.139': '62eaa7eb-cec3-493f-a1ca-2d12aede3ba4',
+             '131.180.220.212': '981b4e7e-745b-4d50-90d2-d5d6ac18de70',
+             '131.180.42.115': '08699293-81d0-455f-8868-d66978d14a3a',
+             '138.38.108.253': 'd4f5ec11-ac74-4a1a-887e-b701f56e1b12',
+             '145.94.215.79': 'b41667f2-3d46-430d-8ca8-d42a7dd9a112',
+             '192.16.196.142': 'a337ecb9-abcd-4c73-b3e6-8619eefccb21',
+             '77.162.62.125': '42eea441-9096-4e72-8035-cc50b482392c'}
+
+
+def assure_judge(req):
+    """ make sure the user matches the judge in datastore
+
+    :req: @todo
+    :returns: @todo
+
+    """
+    judge_id = req.COOKIES.get('judge_id', '')
+    ip, _ = get_client(req)
+    j = None
+    if judge_id:
+        j = Judge.query(Judge.judge_id == judge_id).fetch(1)
+        if len(j) > 0:
+            return j
+        else:
+            j = Judge.query(Judge.judge_id == OLD_JUDGE[ip]).fetch(1)[0]
+            j.email = req.COOKIES.get('judge_email', '')
+            j.nickname = req.COOKIES.get('judge_nickname', '')
+            return j
+    else:
+        judge_email = req.COOKIES.get('judge_email', '')
+        judge_nick = req.COOKIES.get('judge_nickname', '')
+        j = Judge.newJudge(judge_email, judge_nick)
+        return j
+    return None

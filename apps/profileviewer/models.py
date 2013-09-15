@@ -65,10 +65,11 @@ class Judge(ndb.Model):
                 ).put()
 
     @classmethod
-    def newJudge(cls, email):
+    def newJudge(cls, email, nickname):
         """ Create a new judge user
 
         :email: An email address associate with this judge
+        :nickname: An nickname used for greeting
         :returns: A newly created ndb judge object
 
         """
