@@ -148,9 +148,9 @@ def assure_judge(req):
     ip, _ = get_client(req)
     j = None
     if judge_id:
-        j = Judge.query(Judge.judge_id == judge_id).fetch(1)
-        if len(j) > 0:
-            return j
+        js = Judge.query(Judge.judge_id == judge_id).fetch(1)
+        if len(js) > 0:
+            return js[0]
         else:
             js = Judge.query(Judge.judge_id == OLD_JUDGE[ip]).fetch(1)
             if len(js) > 0:
