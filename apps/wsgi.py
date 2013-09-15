@@ -27,6 +27,14 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "apps.settings")
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
+
+import django.views.debug
+from werkzeug.debug import DebuggedApplication
+def null_technical_500_response(request, exc_type, exc_value, tb):
+    raise exc_type, exc_value, tb
+django.views.debug.technical_500_response = null_technical_500_response
+application = DebuggedApplication(application, evalex=True)
+
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
 # application = HelloWorldApplication(application)
