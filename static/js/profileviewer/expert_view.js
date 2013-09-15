@@ -29,9 +29,9 @@ var profileviewer_ns = (function(){
       map.addMarker({
         lat: poi.lat,
         lng: poi.lng,
-        title: poi.name + ' (' + pois[i].value + ' check-ins)\n' + poi.category + ', ' + poi.zcate,
+        title: poi.name + ' (' + pois[i].value + ' check-ins)\n' + poi.category + ', ' + poi.zcategory,
         infoWindow: {
-          content: poi.name + ' (' + pois[i].value + ' check-ins)<br>' + poi.category + ', ' + poi.zcate,
+          content: poi.name + ' (' + pois[i].value + ' check-ins)<br>' + poi.category + ', ' + poi.zcategory,
         },
         icon: '/static/images/profileviewer/map_icons/' + poi.cate_id + '_black.png',
       });
