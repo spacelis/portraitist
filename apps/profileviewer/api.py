@@ -55,7 +55,7 @@ def call_endpoint(request, endpoint_name):
     """
     endpoint = EndPoint.EndPoints[endpoint_name]
     argspec = inspect.getargspec(endpoint)
-    args = {k: request.REQUEST.get(k, None) for k in argspec}
+    args = {k: request.REQUEST.get(k, None) for k in argspec.args}
     return HttpResponse(endpoint(**args),  # pylint: disable-msg=W0142
                         mimetype="application/json")
 
@@ -102,6 +102,19 @@ def sync_judgement():
 
 
 @EndPoint
+def ensure_datatype():
+    """ When upload datastore finished, this function should be called to make
+        sure the data types are correct.
+    :returns: @todo
+
+    """
+    for j in Judge.query().fetch():
+        if isinstance(j.judgements, str) or isinstance(j.judgements, unicode):
+            j.judgements = json.loads(j.judgements)
+            j.put()
+
+
+@EndPoint
 def view_judgements(judge_id):
     """ Return all judgements made by the judge
 
@@ -110,3 +123,10 @@ def view_judgements(judge_id):
 
     """
     return Judge.query(Judge.judge_id == judge_id).fetch(1)[0].judgements
+
+
+@EndPoint
+def assert_error():
+    """ Bring a debug page for console
+    """
+    assert False
