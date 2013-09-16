@@ -151,17 +151,17 @@ def assure_judge(req):
         js = Judge.query(Judge.judge_id == judge_id).fetch(1)
         if len(js) > 0:
             return js[0]
-        else:
+        elif ip in OLD_JUDGE:
             js = Judge.query(Judge.judge_id == OLD_JUDGE[ip]).fetch(1)
             if len(js) > 0:
                 j.email = judge_email
                 j.nickname = judge_nick
                 j.put()
                 return j
-            else:
-                j = Judge.newJudge(judge_email, judge_nick)
-                j.put()
-                return j
+        else:
+            j = Judge.newJudge(judge_email, judge_nick)
+            j.put()
+            return j
     else:
         j = Judge.newJudge(judge_email, judge_nick)
         j.put()
