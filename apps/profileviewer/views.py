@@ -65,6 +65,17 @@ def list_data_dir(request):
                         mimetype="application/json")
 
 
+def survey(request):
+    """ Showing a survey to judges
+
+    :request: @todo
+    :returns: @todo
+
+    """
+    j = assure_judge(request)
+    return render_to_response('survey.html', {'judge_email': j.email})
+
+
 def import_expert(request, filename):
     """Upload the expert to dbstore
 
