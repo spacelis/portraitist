@@ -1,11 +1,240 @@
 {% extends "frame.html" %}
 {% block extra_header %}
 <script type="text/javascript" charset="utf-8">
-  $("#embedded-google-form").ready(function(){
-    $("#embedded-google-form").height(document.body.scrollHeight - 120 + 'px');
-    });
+//  $("#embedded-google-form").ready(function(){
+//    $("#embedded-google-form").height(document.body.scrollHeight - 120 + 'px');
+//    });
 </script>
+<!--<link rel="stylesheet" href="https://docs.google.com/static/forms/client/css/722395648-mobile_formview_ltr.css" type="text/css" media="screen" title="no title" charset="utf-8">-->
+<link rel="stylesheet" href="https://docs.google.com/static/forms/client/css/3904611051-formview_ltr.css" type="text/css" media="screen" title="no title" charset="utf-8">
+<style type="text/css">
+form label {
+  font-weight: Normal;
+}
+body.ss-base-body {
+  background-color: #ababab;
+  font-family: sans-serif,sans-serif;
+}
+div.ss-form-container {
+  padding: 15px;
+  background-color: #f7f7f7;
+  border-color: #4a4a4a;
+  border-style: solid;
+  border-width: 1px;
+}
+h1.ss-form-title {
+  background-color: #5e5e5e;
+  padding: 15px;
+  margin: -15px -15px 15px;
+  color: #ebebeb;
+  text-align: left;
+}
+div.errorbox-bad {
+  background-color: #e8dfdf;
+}
+h2.ss-section-title {
+  background-color: transparent;
+}
+div.ss-submit div.ss-form-entry {
+  background: none;
+  border: none;
+}
+
+</style>
+<script type="text/javascript">
+        /**
+ * @license
+ *! H5F
+ * https://github.com/ryanseddon/H5F/
+ * Copyright (c) Ryan Seddon | Licensed MIT
+ */
+
+(function(e,t){"function"==typeof define&&define.amd?define(t):e.H5F=t()})(this,function(){var e,t,a,i,n,r,s,l,u,o,c,d,v,f,p,m,h,g,b,y,w,C,N,A,E,$,k=document,x=k.createElement("input"),q=/^[a-zA-Z0-9.!#$%&'*+-\/=?\^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,M=/[a-z][\-\.+a-z]*:\/\//i,L=/^(input|select|textarea)$/i;return r=function(e,t){var a=!e.nodeType||!1,i={validClass:"valid",invalidClass:"error",requiredClass:"required",placeholderClass:"placeholder"};if("object"==typeof t)for(var r in i)t[r]===void 0&&(t[r]=i[r]);if(n=t||i,a)for(var l=0,u=e.length;u>l;l++)s(e[l]);else s(e)},s=function(a){var i,n=a.elements,r=n.length,s=!!a.attributes.novalidate;if(b(a,"invalid",u,!0),b(a,"blur",u,!0),b(a,"input",u,!0),b(a,"keyup",u,!0),b(a,"focus",u,!0),b(a,"change",u,!0),b(a,"click",o,!0),b(a,"submit",function(i){e=!0,t||s||a.checkValidity()||w(i)},!1),!v())for(a.checkValidity=function(){return c(a)};r--;)i=!!n[r].attributes.required,"fieldset"!==n[r].nodeName.toLowerCase()&&l(n[r])},l=function(e){var t=e,a=g(t),n={type:t.getAttribute("type"),pattern:t.getAttribute("pattern"),placeholder:t.getAttribute("placeholder")},r=/^(email|url)$/i,s=/^(input|keyup)$/i,l=r.test(n.type)?n.type:n.pattern?n.pattern:!1,u=f(t,l),o=m(t,"step"),v=m(t,"min"),h=m(t,"max"),b=!(""===t.validationMessage||void 0===t.validationMessage);t.checkValidity=function(){return c.call(this,t)},t.setCustomValidity=function(e){d.call(t,e)},t.validity={valueMissing:a,patternMismatch:u,rangeUnderflow:v,rangeOverflow:h,stepMismatch:o,customError:b,valid:!(a||u||o||v||h||b)},n.placeholder&&!s.test(i)&&p(t)},u=function(e){var t=C(e)||e,a=/^(input|keyup|focusin|focus|change)$/i,r=/^(submit|image|button|reset)$/i,s=/^(checkbox|radio)$/i,o=!0;!L.test(t.nodeName)||r.test(t.type)||r.test(t.nodeName)||(i=e.type,v()||l(t),t.validity.valid&&(""!==t.value||s.test(t.type))||t.value!==t.getAttribute("placeholder")&&t.validity.valid?(A(t,[n.invalidClass,n.requiredClass]),N(t,n.validClass)):a.test(i)?t.validity.valueMissing&&A(t,[n.requiredClass,n.invalidClass,n.validClass]):t.validity.valueMissing?(A(t,[n.invalidClass,n.validClass]),N(t,n.requiredClass)):t.validity.valid||(A(t,[n.validClass,n.requiredClass]),N(t,n.invalidClass)),"input"===i&&o&&(y(t.form,"keyup",u,!0),o=!1))},c=function(t){var a,i,n,r,s=!1;if("form"===t.nodeName.toLowerCase()){a=t.elements;for(var l=0,o=a.length;o>l;l++)i=a[l],n=!!i.attributes.required,r=!!i.attributes.pattern,"fieldset"!==i.nodeName.toLowerCase()&&(n||r&&n)&&(u(i),i.validity.valid||s||(e&&i.focus(),s=!0));return!s}return u(t),t.validity.valid},d=function(e){var t=this;t.validationMessage=e},o=function(e){var a=C(e);a.attributes.formnovalidate&&"submit"===a.type&&(t=!0)},v=function(){return E(x,"validity")&&E(x,"checkValidity")},f=function(e,t){if("email"===t)return!q.test(e.value);if("url"===t)return!M.test(e.value);if(t){var i=e.getAttribute("placeholder"),n=e.value;return a=RegExp("^(?:"+t+")$"),n===i?!1:""===n?!1:!a.test(e.value)}return!1},p=function(e){var t={placeholder:e.getAttribute("placeholder")},a=/^(focus|focusin|submit)$/i,r=/^(input|textarea)$/i,s=/^password$/i,l=!!("placeholder"in x);l||!r.test(e.nodeName)||s.test(e.type)||(""!==e.value||a.test(i)?e.value===t.placeholder&&a.test(i)&&(e.value="",A(e,n.placeholderClass)):(e.value=t.placeholder,b(e.form,"submit",function(){i="submit",p(e)},!0),N(e,n.placeholderClass)))},m=function(e,t){var a=parseInt(e.getAttribute("min"),10)||0,i=parseInt(e.getAttribute("max"),10)||!1,n=parseInt(e.getAttribute("step"),10)||1,r=parseInt(e.value,10),s=(r-a)%n;return g(e)||isNaN(r)?"number"===e.getAttribute("type")?!0:!1:"step"===t?e.getAttribute("step")?0!==s:!1:"min"===t?e.getAttribute("min")?a>r:!1:"max"===t?e.getAttribute("max")?r>i:!1:void 0},h=function(e){var t=!!e.attributes.required;return t?g(e):!1},g=function(e){var t=e.getAttribute("placeholder"),a=/^(checkbox|radio)$/i,i=!!e.attributes.required;return!(!i||""!==e.value&&e.value!==t&&(!a.test(e.type)||$(e)))},b=function(e,t,a,i){E(window,"addEventListener")?e.addEventListener(t,a,i):E(window,"attachEvent")&&window.event!==void 0&&("blur"===t?t="focusout":"focus"===t&&(t="focusin"),e.attachEvent("on"+t,a))},y=function(e,t,a,i){E(window,"removeEventListener")?e.removeEventListener(t,a,i):E(window,"detachEvent")&&window.event!==void 0&&e.detachEvent("on"+t,a)},w=function(e){e=e||window.event,e.stopPropagation&&e.preventDefault?(e.stopPropagation(),e.preventDefault()):(e.cancelBubble=!0,e.returnValue=!1)},C=function(e){return e=e||window.event,e.target||e.srcElement},N=function(e,t){var a;e.className?(a=RegExp("(^|\\s)"+t+"(\\s|$)"),a.test(e.className)||(e.className+=" "+t)):e.className=t},A=function(e,t){var a,i,n="object"==typeof t?t.length:1,r=n;if(e.className)if(e.className===t)e.className="";else for(;n--;)a=RegExp("(^|\\s)"+(r>1?t[n]:t)+"(\\s|$)"),i=e.className.match(a),i&&3===i.length&&(e.className=e.className.replace(a,i[1]&&i[2]?" ":""))},E=function(e,t){var a=typeof e[t],i=RegExp("^function|object$","i");return!!(i.test(a)&&e[t]||"unknown"===a)},$=function(e){for(var t=document.getElementsByName(e.name),a=0;t.length>a;a++)if(t[a].checked)return!0;return!1},{setup:r}});
+
+      </script>
 {% endblock %}
 {% block content %}
-<iframe id="embedded-google-form" src="http://docs.google.com/forms/d/1JRylVL8AouJclb_TU1GiBzhVAGp-_G7A0GplfJ7Rl6s/viewform?entry.1102912225={{ judge_email }}&embedded=true" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+<!--<iframe id="embedded-google-form" src="http://docs.google.com/forms/d/1JRylVL8AouJclb_TU1GiBzhVAGp-_G7A0GplfJ7Rl6s/viewform?entry.1102912225={{ judge_email }}&embedded=true" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>-->
+<div class="ss-form-container"><div class="ss-top-of-page">
+
+
+<div class="ss-form-heading"><h1 class="ss-form-title" dir="ltr">GeoExpert Judging Criteria</h1>
+<div class="ss-form-desc ss-no-ignore-whitespace">Along with the GeoExpert Judging System, we made this survey because we also want to know more about the decision making process when you judge one as an expert or not. To be more specific, we would like to know your criteria and they are important for us to consider for our future systems. <p>In this survey, we also provide some hints on judging an expert. However, ONLY when you REALLY think they are sound, should you take them into account in your future judgement. You can safely ignore them and insist on your way of judging experts.</p><p>Again, thank you very much for your contribution.</p><p></p></div>
+
+<hr class="ss-email-break" style="display:none;">
+<div class="ss-required-asterisk">* Required</div></div></div>
+<div class="ss-form"><form action="https://docs.google.com/forms/d/1JRylVL8AouJclb_TU1GiBzhVAGp-_G7A0GplfJ7Rl6s/formResponse" method="POST" id="ss-form" target="_self" onsubmit=""><ol style="padding-left: 0">
+<div class="ss-form-question errorbox-good">
+<div dir="ltr" class="ss-item ss-item-required ss-text"><div class="ss-form-entry"><label class="ss-q-item-label" for="entry_1102912225"><div class="ss-q-title">Your Email
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+<input type="text" name="entry.1102912225" value="" class="ss-q-short required" id="entry_1102912225" dir="auto" aria-required="true" required="" pattern="^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$" title="Please enter a valid email address" aria-invalid="true">
+<div class="error-message">Please enter a valid email address</div>
+<div class="required-message">This is a required question</div>
+
+</div></div></div> <div class="ss-form-question errorbox-good">
+<div dir="ltr" class="ss-item ss-item-required ss-radio"><div class="ss-form-entry"><label class="ss-q-item-label" for="entry_1666383304"><div class="ss-q-title">How often do you ask your friends, family, colleagues for advice of a place to go?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">Is that often the case you want to know whether a place is good or bad</div></label>
+
+<ul class="ss-choices"><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.23754099" value="Yes, very often." id="group_23754099_1" class="ss-q-radio" aria-label="Yes, very often." required=""></span>
+<span class="ss-choice-label">Yes, very often.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.23754099" value="Yes, sometimes." id="group_23754099_2" class="ss-q-radio" aria-label="Yes, sometimes." required=""></span>
+<span class="ss-choice-label">Yes, sometimes.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.23754099" value="No, not often." id="group_23754099_3" class="ss-q-radio" aria-label="No, not often." required=""></span>
+<span class="ss-choice-label">No, not often.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.23754099" value="No, I usually can figure it out myself." id="group_23754099_4" class="ss-q-radio" aria-label="No, I usually can figure it out myself." required=""></span>
+<span class="ss-choice-label">No, I usually can figure it out myself.</span>
+</label></li></ul>
+<div class="error-message"></div>
+<div class="required-message">This is a required question</div>
+</div></div></div> <div class="ss-form-question errorbox-good">
+<div dir="ltr" class="ss-item ss-item-required ss-checkbox"><div class="ss-form-entry"><label class="ss-q-item-label" for="entry_1479677513"><div class="ss-q-title">Do you often use any online social networks?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+
+<ul class="ss-choices ss-choices-required"><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="Twitter" id="group_897752890_1" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">Twitter</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="Facebook" id="group_897752890_2" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">Facebook</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="Foursquare" id="group_897752890_3" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">Foursquare</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="LinkedIn" id="group_897752890_4" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">LinkedIn</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="Google Plus" id="group_897752890_5" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">Google Plus</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="__other_option__" id="group_897752890_6" class="ss-q-checkbox ss-q-other-toggle"></span>
+Other:</label>
+<span class="ss-q-other-container goog-inline-block"><input type="text" name="entry.897752890.other_option_response" value="" class="ss-q-other" id="entry_897752890_other_option_response" dir="auto" aria-label="Other"></span>
+</li></ul>
+<div class="error-message"></div>
+<div class="required-message">This is a required question</div>
+</div></div></div> <div class="ss-form-question errorbox-good">
+<div dir="ltr" class="ss-item ss-item-required ss-radio"><div class="ss-form-entry"><label class="ss-q-item-label" for="entry_10657627"><div class="ss-q-title">When you want to ask for help from a friend, which of the following way do you prefer?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+
+<ul class="ss-choices"><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1804684484" value="Online social networks (sending tweets or messages)" id="group_1804684484_1" class="ss-q-radio" aria-label="Online social networks (sending tweets or messages)" required=""></span>
+<span class="ss-choice-label">Online social networks (sending tweets or messages)</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1804684484" value="Emails, Telephone, SMS" id="group_1804684484_2" class="ss-q-radio" aria-label="Emails, Telephone, SMS" required=""></span>
+<span class="ss-choice-label">Emails, Telephone, SMS</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1804684484" value="Asking in person" id="group_1804684484_3" class="ss-q-radio" aria-label="Asking in person" required=""></span>
+<span class="ss-choice-label">Asking in person</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1804684484" value="__other_option__" id="group_1804684484_4" class="ss-q-radio ss-q-other-toggle"></span>
+Other:</label>
+<span class="ss-q-other-container goog-inline-block"><input type="text" name="entry.1804684484.other_option_response" value="" class="ss-q-other" id="entry_1804684484_other_option_response" dir="auto" aria-label="Other"></span>
+</li></ul>
+<div class="error-message"></div>
+<div class="required-message">This is a required question</div>
+</div></div></div> <div class="ss-form-question errorbox-good">
+<div dir="ltr" class="ss-item ss-item-required ss-checkbox"><div class="ss-form-entry"><label class="ss-q-item-label" for="entry_609036192"><div class="ss-q-title">If you want helps from others but you don't know exactly who what do you prefer to do?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+
+<ul class="ss-choices ss-choices-required"><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.132625108" value="Telling friends/family/colleagues that I need help and see whether they know someone can help." id="group_132625108_1" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">Telling friends/family/colleagues that I need help and see whether they know someone can help.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.132625108" value="Asking my followers on Twitter or any other similar platforms" id="group_132625108_2" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">Asking my followers on Twitter or any other similar platforms</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.132625108" value="Asking on a question and answer forum." id="group_132625108_3" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">Asking on a question and answer forum.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.132625108" value="Writing a blog post about it and see whether some one would comment on it." id="group_132625108_4" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">Writing a blog post about it and see whether some one would comment on it.</span>
+</label></li></ul>
+<div class="error-message"></div>
+<div class="required-message">This is a required question</div>
+</div></div></div> <div class="ss-form-question errorbox-good">
+<div dir="ltr" class="ss-item ss-item-required ss-checkbox"><div class="ss-form-entry"><label class="ss-q-item-label" for="entry_649194106"><div class="ss-q-title">Which of the following group do you trust the most when they suggest you some place to go?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">Do you often take advice from your family members or your friends?</div></label>
+
+<ul class="ss-choices ss-choices-required"><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.385465219" value="Family members" id="group_385465219_1" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">Family members</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.385465219" value="Friends offline" id="group_385465219_2" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">Friends offline</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.385465219" value="Friends online (Facebook, Twitter, Foursquare)" id="group_385465219_3" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">Friends online (Facebook, Twitter, Foursquare)</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.385465219" value="Colleagues" id="group_385465219_4" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">Colleagues</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.385465219" value="Other resource,e.g., professional review site" id="group_385465219_5" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">Other resource,e.g., professional review site</span>
+</label></li></ul>
+<div class="error-message">Must select at least 1 options.</div>
+<div class="required-message">This is a required question</div>
+</div></div></div> <div class="ss-form-question errorbox-good">
+<div dir="ltr" class="ss-item ss-item-required ss-checkbox"><div class="ss-form-entry"><label class="ss-q-item-label" for="entry_461171513"><div class="ss-q-title">Do you use any of the following criteria during your judging
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">We observe the following criteria being used among judges. Do you used them in the judgement you already done?</div></label>
+
+<ul class="ss-choices ss-choices-required"><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.717151528" value="The total number of a user's check-ins at the place (or category) mentioned in the given topic should be above certain amount." id="group_717151528_1" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">The total number of a user's check-ins at the place (or category) mentioned in the given topic should be above certain amount.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.717151528" value="The total number of check-ins should be above certain amount." id="group_717151528_2" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">The total number of check-ins should be above certain amount.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.717151528" value="The recency of the check-ins at a location." id="group_717151528_3" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">The recency of the check-ins at a location.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.717151528" value="If the given topic is about a category of locations, then the user should been to many locations of the category to be an expert." id="group_717151528_4" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">If the given topic is about a category of locations, then the user should been to many locations of the category to be an expert.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.717151528" value="The user should visit the given category of locations in different cities." id="group_717151528_5" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">The user should visit the given category of locations in different cities.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.717151528" value="__other_option__" id="group_717151528_6" class="ss-q-checkbox ss-q-other-toggle"></span>
+Other:</label>
+<span class="ss-q-other-container goog-inline-block"><input type="text" name="entry.717151528.other_option_response" value="" class="ss-q-other" id="entry_717151528_other_option_response" dir="auto" aria-label="Other"></span>
+</li></ul>
+<div class="error-message"></div>
+<div class="required-message">This is a required question</div>
+</div></div></div> <div class="ss-form-question errorbox-good">
+<div dir="ltr" class="ss-item ss-item-required ss-checkbox"><div class="ss-form-entry"><label class="ss-q-item-label" for="entry_1661887918"><div class="ss-q-title">Which of the criteria do you think the most important in your judgement?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">In the following criteria, which one do you use most often and which one do you think the most important one?</div></label>
+
+<ul class="ss-choices ss-choices-required"><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.450880543" value="The total number of a user's check-ins at the place (or category) mentioned in the given topic should be above certain amount." id="group_450880543_1" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">The total number of a user's check-ins at the place (or category) mentioned in the given topic should be above certain amount.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.450880543" value="The total number of check-ins should be above certain amount." id="group_450880543_2" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">The total number of check-ins should be above certain amount.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.450880543" value="The recency of the check-ins at a location." id="group_450880543_3" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">The recency of the check-ins at a location.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.450880543" value="If the given topic is about a category of locations, then the user should been to many locations of the category to be an expert." id="group_450880543_4" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">If the given topic is about a category of locations, then the user should been to many locations of the category to be an expert.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.450880543" value="The user should visit the given category of locations in different cities." id="group_450880543_5" class="ss-q-checkbox"></span>
+<span class="ss-choice-label">The user should visit the given category of locations in different cities.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.450880543" value="__other_option__" id="group_450880543_6" class="ss-q-checkbox ss-q-other-toggle"></span>
+Other:</label>
+<span class="ss-q-other-container goog-inline-block"><input type="text" name="entry.450880543.other_option_response" value="" class="ss-q-other" id="entry_450880543_other_option_response" dir="auto" aria-label="Other"></span>
+</li></ul>
+<div class="error-message">Please select the top two important criteria you used.</div>
+<div class="required-message">This is a required question</div>
+</div></div></div>
+<input type="hidden" name="draftResponse" value="[]
+">
+<input type="hidden" name="pageHistory" value="0">
+
+
+<div class="ss-item ss-navigate"><table id="navigation-table"><tbody><tr><td class="ss-form-entry goog-inline-block" id="navigation-buttons" dir="ltr">
+<input type="submit" name="submit" value="Submit" id="ss-submit">
+<div class="ss-secondary-text">Never submit passwords through Google Forms.</div></td>
+</tr></tbody></table></div></ol></form></div>
+<div class="ss-footer"><div class="ss-attribution"></div>
+<div class="ss-legal"><div class="disclaimer-separator"></div>
+<div class="disclaimer" dir="ltr"><div class="powered-by-logo"><span class="powered-by-text">Powered by</span>
+<a class="ss-logo-link" href="http://docs.google.com"><img class="ss-logo" src="https://ssl.gstatic.com/docs/forms/drive_logo_small.png" alt="Google Drive"></a></div>
+<div class="ss-terms"><span class="disclaimer-msg">This content is neither created nor endorsed by Google.</span>
+<br>
+<a href="https://docs.google.com/forms/d/1JRylVL8AouJclb_TU1GiBzhVAGp-_G7A0GplfJ7Rl6s/reportabuse?source=https://docs.google.com/forms/d/1JRylVL8AouJclb_TU1GiBzhVAGp-_G7A0GplfJ7Rl6s/viewform">Report Abuse</a>
+-
+<a href="http://www.google.com/accounts/TOS">Terms of Service</a>
+-
+<a href="http://www.google.com/google-d-s/terms.html">Additional Terms</a></div></div></div></div>
+
+<div id="docs-aria-speakable" class="docs-a11y-ariascreenreader-speakable docs-offscreen" aria-live="assertive" role="region" aria-atomic="">Screen reader support enabled.</div></div>
+<script type='text/javascript' src='https://docs.google.com/static/forms/client/js/2310864441-formviewer_prd.js'></script>
+<script type="text/javascript">H5F.setup(document.getElementById('ss-form'));_initFormViewer(
+          "[100,\x22#5e5e5e\x22,[[[1102912225,[[4,301,[\x22^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,4}$\x22]\n,\x22Please enter a valid email address\x22]\n]\n]\n,[385465219,[[7,200,[\x221\x22]\n,\x22\x22]\n]\n]\n,[450880543,[[7,201,[\x222\x22]\n,\x22Please select the top two important criteria you used.\x22]\n]\n]\n]\n]\n]\n");
+</script>
 {% endblock %}
