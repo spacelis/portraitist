@@ -27,6 +27,10 @@ from apps.profileviewer.view_utils import construct_judgement
 from apps.profileviewer.view_utils import assert_magic_signed
 from apps.profileviewer.view_utils import MAGIC_PW
 from apps.profileviewer.view_utils import assure_judge
+from apps.profileviewer.view_utils import request_property
+
+
+COOKIE_LIFE = 90 * 24 * 3600
 
 
 def home(request):
@@ -37,16 +41,20 @@ def home(request):
 
     """
     assert_magic_signed(request)
-    no_inst = request.COOKIES.get('no_inst', 0) or \
-        request.REQUEST.get('no_inst', 0)
-
+    no_inst = request_property(request, 'no_inst')
+    submitted_tasks = request_property(request, 'submitted_tasks')
+    done_survey = request_property(request, 'done_survey')
+    if submitted_tasks > 5 and not done_survey:
+        r = redirect('/survey')
+        r.set_cookie('done_survey', 1, COOKIE_LIFE)
+        return r
     expert_hash_id = Expert.getTask()
     if no_inst:
         return redirect('/expert_view/' + expert_hash_id)
     else:
         r = render_to_response('instructions.html', {'expert': expert_hash_id},
                                context_instance=RequestContext(request))
-        r.set_cookie(MAGIC_PW, 1, 90 * 24 * 3600)
+        r.set_cookie(MAGIC_PW, 1, COOKIE_LIFE)
         return r
 
 
