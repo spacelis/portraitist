@@ -1,0 +1,22 @@
+{% extends "frame.html" %}
+{% block extra_header %}
+<script type="text/javascript" charset="utf-8">
+  $("#embedded-google-form").ready(function(){
+    $("#embedded-google-form").height(document.body.scrollHeight - 120 + 'px');
+    });
+</script>
+{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-4-sm text-muted" align="right" style="margin-bottom: 5px">
+    Please submit the questionnaire by clicking the button
+    "Submit" at the end of the questionnaire before 
+    <button class="btn btn-primary" onClick="javascript:window.open('/home?no_inst=1', '_self')">Continue</button>.
+  </div>
+</div>
+<div class="row">
+  <div class="col-12-sm">
+    <iframe id="embedded-google-form" src="https://docs.google.com/forms/d/1JRylVL8AouJclb_TU1GiBzhVAGp-_G7A0GplfJ7Rl6s/viewform?entry.1102912225={{ judge_email }}&embedded=true" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+  </div>
+</div>
+{% endblock %}

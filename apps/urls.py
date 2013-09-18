@@ -23,6 +23,8 @@ urlpatterns = patterns('',
     url(r'^api/(.*)$', 'apps.profileviewer.api.call_endpoint'),
     url(r'^test_view$', 'apps.profileviewer.views.test_view'),
     url(r'^list_data_dir$', 'apps.profileviewer.views.list_data_dir'),
+    url(r'^survey$', 'apps.profileviewer.views.survey'),
+
     # url(r'^profileviewer/', include('profileviewer.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
