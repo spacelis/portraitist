@@ -223,6 +223,15 @@ def judgement_overview(request):
                               context_instance=RequestContext(request))
 
 
+def route_form(request):
+    """
+
+    :request: @todo
+    :returns: @todo
+
+    """
+    pass
+
 # -------------------------- test view ------------------
 
 def test_view(request):
