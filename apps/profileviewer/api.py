@@ -14,9 +14,23 @@ import json
 from json import dumps as _j
 
 from django.http import HttpResponse
+from django.core.exceptions import PermissionDenied
+from django.http import Http404
 
 from apps.profileviewer.models import Expert
 from apps.profileviewer.models import Judge
+
+
+def assert_admin(req):
+    """Make sure the call comes from admin
+
+    :req: @todo
+    :returns: @todo
+
+    """
+    if (req.REQUEST.get('_admin_key', None) or
+        req.COOKIES.get('_admin_key', None)) != 'tu2013delft' :
+        raise PermissionDenied
 
 
 class EndPoint(object):
@@ -53,7 +67,10 @@ def call_endpoint(request, endpoint_name):
     :returns: @todo
 
     """
+    assert_admin(request)
     endpoint = EndPoint.EndPoints[endpoint_name]
+    if not endpoint:
+        raise Http404
     argspec = inspect.getargspec(endpoint)
     args = {k: request.REQUEST.get(k, None) for k in argspec.args}
     return HttpResponse(endpoint(**args),  # pylint: disable-msg=W0142
