@@ -86,6 +86,7 @@ def sync_judgement():
     for e in Expert.query().fetch():
         e.judge_by = list()
         e.judged_no = 0
+        e.put()
     for j in Judge.query().fetch():
         if isinstance(j.judgements, unicode):
             j.judgements = json.loads(j.judgements)
@@ -99,6 +100,7 @@ def sync_judgement():
             e.judged_by.append(j.judge_id)  # pylint: disable-msg=E1101
             e.judged_no += 1
             e.put()
+    return _j({'msg': 'Sucesses!'})
 
 
 @EndPoint
@@ -112,6 +114,7 @@ def ensure_datatype():
         if isinstance(j.judgements, str) or isinstance(j.judgements, unicode):
             j.judgements = json.loads(j.judgements)
             j.put()
+    return _j({'msg': 'Sucesses!'})
 
 
 @EndPoint
@@ -122,7 +125,24 @@ def view_judgements(judge_id):
     :returns: All Judgement from the Judge in JSON
 
     """
-    return Judge.query(Judge.judge_id == judge_id).fetch(1)[0].judgements
+    return _j(Judge.query(Judge.judge_id == judge_id).fetch(1)[0].judgements)
+
+
+@EndPoint
+def export_judgements():
+    """
+    :returns: @todo
+
+    """
+    def iter_judgement():
+        """ An iterator over all judgements """
+        for j in Judge.query().fetch():
+            for ju in j.judgements:
+                ju['judge_id'] = j.judge_id
+                ju['judge_email'] = j.email
+                ju['judge_nick'] = j.nickname
+                yield _j(ju) + '\n'
+    return iter_judgement()
 
 
 @EndPoint

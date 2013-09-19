@@ -61,7 +61,7 @@ class Judge(ndb.Model):
                 email='',
                 judge_id=row['judge_id'],
                 judgement_no=int(row['judgement_no']),
-                judgements=row['judgements'],
+                judgements=json.loads(row['judgements']),
                 ).put()
 
     @classmethod
