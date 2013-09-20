@@ -29,7 +29,7 @@ def assert_admin(req):
 
     """
     if (req.REQUEST.get('_admin_key', None) or
-        req.COOKIES.get('_admin_key', None)) != 'tu2013delft' :
+            req.COOKIES.get('_admin_key', None)) != 'tu2013delft':
         raise PermissionDenied
 
 
@@ -39,24 +39,22 @@ class EndPoint(object):
 
     EndPoints = dict()
 
-    def __init__(self, endpoint):
+    def __init__(self, secured=False):
         """Register an endpoint served in API
 
         :endpoint: @todo
 
         """
-        self._endpoint = endpoint
-        EndPoint.EndPoints[endpoint.__name__] = endpoint
+        self.secured = secured
 
-    def __call__(self, *args, **kargs):
+    def __call__(self, endpoint):
         """Calling the wrapped endpoint
 
-        :*args: @todo
-        :**kargs: @todo
+        :endpoint: real endpoint handler
         :returns: @todo
 
         """
-        self._endpoint(*args, **kargs)
+        EndPoint.EndPoints[endpoint.__name__] = (endpoint, self.secured)
 
 
 def call_endpoint(request, endpoint_name):
@@ -67,17 +65,18 @@ def call_endpoint(request, endpoint_name):
     :returns: @todo
 
     """
-    assert_admin(request)
-    endpoint = EndPoint.EndPoints[endpoint_name]
-    if not endpoint:
+    if endpoint_name not in EndPoint.EndPoints:
         raise Http404
+    endpoint, secured = EndPoint.EndPoints[endpoint_name]
+
+    (not secured) or assert_admin(request)  # pylint: disable-msg=W0106
     argspec = inspect.getargspec(endpoint)
     args = {k: request.REQUEST.get(k, None) for k in argspec.args}
     return HttpResponse(endpoint(**args),  # pylint: disable-msg=W0142
                         mimetype="application/json")
 
 
-@EndPoint
+@EndPoint(secured=False)
 def expert_checkins(hash_id=None):
     """Return all checkins for the expert
 
@@ -94,7 +93,7 @@ def expert_checkins(hash_id=None):
               'screen_name or comma separated names.'})
 
 
-@EndPoint
+@EndPoint(secured=True)
 def sync_judgement():
     """Update Expert judged_by and judgement_no from Judge entities
     :returns: @todo
@@ -120,7 +119,7 @@ def sync_judgement():
     return _j({'msg': 'Sucesses!'})
 
 
-@EndPoint
+@EndPoint(secured=True)
 def ensure_datatype():
     """ When upload datastore finished, this function should be called to make
         sure the data types are correct.
@@ -134,7 +133,7 @@ def ensure_datatype():
     return _j({'msg': 'Sucesses!'})
 
 
-@EndPoint
+@EndPoint(secured=True)
 def view_judgements(judge_id):
     """ Return all judgements made by the judge
 
@@ -145,7 +144,7 @@ def view_judgements(judge_id):
     return _j(Judge.query(Judge.judge_id == judge_id).fetch(1)[0].judgements)
 
 
-@EndPoint
+@EndPoint(secured=True)
 def export_judgements():
     """
     :returns: @todo
@@ -162,7 +161,7 @@ def export_judgements():
     return iter_judgement()
 
 
-@EndPoint
+@EndPoint(secured=True)
 def assert_error():
     """ Bring a debug page for console
     """
