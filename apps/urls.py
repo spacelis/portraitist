@@ -1,16 +1,18 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import patterns, url
 from django.views.generic import RedirectView
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('',
-    # Examples:
+urlpatterns = patterns(
+    '',
     url(r'^$', RedirectView.as_view(url='/home', query_string=True)),
     url(r'^home$', 'apps.profileviewer.views.home'),
-    url(r'^favicon\.ico$', RedirectView.as_view(url='/static/images/profileviewer/socialmining.ico')),
-    url(r'^judgement_overview$', 'apps.profileviewer.views.judgement_overview'),
+    url(r'^favicon\.ico$', RedirectView.as_view(
+        url='/static/images/profileviewer/socialmining.ico')),
+    url(r'^judgement_overview$',
+        'apps.profileviewer.views.judgement_overview'),
     url(r'^import_judge/(.*)$', 'apps.profileviewer.views.import_judge'),
 
     url(r'^import_expert/(.*)$', 'apps.profileviewer.views.import_expert'),
@@ -24,12 +26,5 @@ urlpatterns = patterns('',
     url(r'^test_view$', 'apps.profileviewer.views.test_view'),
     url(r'^list_data_dir$', 'apps.profileviewer.views.list_data_dir'),
     url(r'^survey$', 'apps.profileviewer.views.survey'),
-
-    # url(r'^profileviewer/', include('profileviewer.foo.urls')),
-
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+    url(r'^lgc_submit$', 'apps.profileviewer.views.lgc_submit'),
 )
