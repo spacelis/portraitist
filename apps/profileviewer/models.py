@@ -186,6 +186,26 @@ class Topic(ndb.Model):
                 ).put()
 
 
+class Participant(ndb.Model):
+
+    """Persistency of Participant from Twitter Ads Campaign"""
+
+    name = ndb.StringProperty(indexed=True)
+    token = ndb.StringProperty()
+    card = ndb.StringProperty(indexed=True)
+    email = ndb.StringProperty(indexed=True)
+    screen_name = ndb.StringProperty(indexed=True)
+
+
+    @classmethod
+    def newParticipant(cls, name, token, card, email, screen_name):
+        cls(name=name,
+            token=token,
+            card=card,
+            email=email,
+            screen_name=screen_name)
+
+
 class Expert(ndb.Model):
 
     """Candidate Expert for judging"""
