@@ -1,4 +1,4 @@
-{% extends "frame.html" %}
+{% extends "frame_lgc.html" %}
 {% block extra_header %}
 {% endblock %}
 {% block content %}
@@ -6,6 +6,19 @@
   {% csrf_token %}
   <div class="jumbotron">
     <div class="container">
+      <div class="row">
+        <div class="col-4-sm">
+          <h1> Thank you for participating </h1>
+          <p> <small>This is a non-profit project conducted by a PhD
+          student at Delft University of Technology in Netherlands. It
+          aims at helping people quickly and accurately find those from
+          their friends who is knowledgeable on topics regarding places
+          of interest (POI).</small></p>
+
+          <p> For more information, please see <a href="/terms">Terms</a>
+          and <a href="/about">About</a>.
+        </div>
+      </div>
       <div class="row">
         <div class="col-4-sm">
           <div class="form-group">

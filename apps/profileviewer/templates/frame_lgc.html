@@ -1,0 +1,63 @@
+<html>
+<head>
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@socialmining">
+<meta name="twitter:title" content="GeoExpert Project">
+<meta name="twitter:description" content="This is a non-profit project conducted by a PhD student from Delft University of Technology, Netherlands.">
+<meta name="twitter:creator" content="@socialmining">
+<meta name="twitter:image:src" content="http://geo-expertise.appspot.com/static/images/profileviewer/snapshot.png">
+<meta name="twitter:domain" content="geo-expertise.appspot.com">
+<meta name="twitter:app:name:iphone" content="">
+<meta name="twitter:app:name:ipad" content="">
+<meta name="twitter:app:name:googleplay" content="">
+<meta name="twitter:app:url:iphone" content="">
+<meta name="twitter:app:url:ipad" content="">
+<meta name="twitter:app:url:googleplay" content="">
+<meta name="twitter:app:id:iphone" content="">
+<meta name="twitter:app:id:ipad" content="">
+<meta name="twitter:app:id:googleplay" content="">
+
+  <title>GeoExpertise</title>
+  <script src="/static/js/profileviewer/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+
+  <link rel="stylesheet" href="/static/css/profileviewer/bootstrap.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <link rel="stylesheet" href="/static/css/profileviewer/sticky-footer.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <script>
+  </script>
+  {% block extra_header %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a href="/" class="navbar-brand">GeoExpertise Project</a>
+      </div>
+      <div id="judge_info" class="collapse navbar-collapse navbar-ex1-collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/terms">Terms</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/general_survey">Participants</a></li>
+        </ul>
+      </div>
+    </nav>
+    <div id="pv-content" class="container">
+      {% block content %}{% endblock %}
+    </div>
+    <footer>
+      <div class="foot-fixed-bottom">
+        <div class="container" align="right">
+          <hr />
+          <img src="/static/images/profileviewer/dmirlogo.svg" title="Thanks for Raynor Vliegendhart's work on the vectorized logo." height="24px">
+          © DMIR • TU Delft • 2013</div>
+        </div>
+      </div>
+    </footer>
+</body>
+</html>
