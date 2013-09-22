@@ -1725,4 +1725,5 @@ FORMMAP = {
     'danielle_bell': '1_0We6b5mIE7qK4gM5qEp8OBhLL-n_HJJUXqIT8S3OTg',
     'sportykrys': '1Wm82lpYaleMWqsBPDCWz9fvjrUX4WAeVfOL2g2iCwf8',
     'Bobby_n_SF': '1Y4AKcBSpnMnnqvw3uvbAu78Z_8JhPqiougbz8VHz8to',
+    'socialmining': '1luGLLHQOPQ-R53d7uDr0Se2QA8uZ_eQFYpZADqqo2qg'
 }

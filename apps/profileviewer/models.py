@@ -199,11 +199,11 @@ class Participant(ndb.Model):
 
     @classmethod
     def newParticipant(cls, name, token, card, email, screen_name):
-        cls(name=name,
-            token=token,
-            card=card,
-            email=email,
-            screen_name=screen_name)
+        return cls(name=name,
+                   token=token,
+                   card=card,
+                   email=email,
+                   screen_name=screen_name)
 
 
 class Expert(ndb.Model):

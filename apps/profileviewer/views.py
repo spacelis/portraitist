@@ -16,6 +16,7 @@ from django.shortcuts import render_to_response
 from django.shortcuts import redirect
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 
 from apps.profileviewer.models import Expert
@@ -228,6 +229,7 @@ def judgement_overview(request):
 
 # -------------- Twitter Lead Generation Cards ----------
 
+@csrf_exempt
 def lgc_submit(request):
     """Submitting a Lead Generation Card
 
@@ -247,9 +249,17 @@ def lgc_submit(request):
                                card=card,
                                email=email,
                                screen_name=screen_name).put()
-    gform_id = FORMMAP.get(screen_name,
-                           '1LwV2mJUWb9Kx-Pl_nQz_vpUZOY3KdVkb6W4B7ez6Obc')
-    resp = render_to_response('self_servey.html', {'gform_id': gform_id})
+    gform_id = FORMMAP.get(screen_name, None)
+    if gform_id:
+        gform_url = "https://docs.google.com/forms" + \
+            "/d/%s/viewform?embedded=true" % (gform_id, )
+    else:
+        gform_url = "https://docs.google.com/forms" + \
+            "/d/1LwV2mJUWb9Kx-Pl_nQz_vpUZOY3KdVkb6W4B7ez6Obc" + \
+            "/viewform?embedded=true&entry.2124722808=@" + screen_name + \
+            "&entry.314211455"
+
+    resp = render_to_response('self_survey.html', {'gform_url': gform_url})
     resp.set_cookie('judge_email', email, COOKIE_LIFE)
     resp.set_cookie('judge_nick', name, COOKIE_LIFE)
     return resp
