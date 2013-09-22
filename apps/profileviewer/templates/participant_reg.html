@@ -1,0 +1,25 @@
+{% extends "frame.html" %}
+{% block extra_header %}
+{% endblock %}
+{% block content %}
+<form role="form" method="POST" action="/general_survey">
+  {% csrf_token %}
+  <div class="jumbotron">
+    <div class="container">
+      <div class="row">
+        <div class="col-4-sm">
+          <div class="form-group">
+            <label for="inputEmail">Email address</label>
+            <input name="email" type="email" class="form-control" id="inputEmail" placeholder="one@example.com ">
+          </div>
+          <div class="form-group">
+            <label for="inputScreenName">Twitter ID</label>
+            <input name="screen_name" type="text" class="form-control" id="inputTwitterID" placeholder="@one_example">
+          </div>
+          <button type="submit" class="btn btn-primary">Continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

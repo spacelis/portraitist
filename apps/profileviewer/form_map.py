@@ -1727,3 +1727,21 @@ FORMMAP = {
     'Bobby_n_SF': '1Y4AKcBSpnMnnqvw3uvbAu78Z_8JhPqiougbz8VHz8to',
     'socialmining': '1luGLLHQOPQ-R53d7uDr0Se2QA8uZ_eQFYpZADqqo2qg'
 }
+
+def get_gform_url(screen_name):
+    """Return the form url for the given screen_name
+
+    :screen_name: @todo
+    :returns: @todo
+
+    """
+    gform_id = FORMMAP.get(screen_name, None)
+    if gform_id:
+        gform_url = "https://docs.google.com/forms" + \
+            "/d/%s/viewform?embedded=true" % (gform_id, )
+    else:
+        gform_url = "https://docs.google.com/forms" + \
+            "/d/1LwV2mJUWb9Kx-Pl_nQz_vpUZOY3KdVkb6W4B7ez6Obc" + \
+            "/viewform?embedded=true&entry.2124722808=@" + screen_name + \
+            "&entry.314211455"
+    return gform_url

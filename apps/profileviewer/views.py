@@ -11,6 +11,7 @@ Description:
 
 #import twitter
 import json
+from uuid import uuid4
 
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
@@ -24,7 +25,7 @@ from apps.profileviewer.models import Expert
 from apps.profileviewer.models import Topic
 from apps.profileviewer.models import Judge
 from apps.profileviewer.models import Participant
-from apps.profileviewer.form_map import FORMMAP
+from apps.profileviewer.form_map import get_gform_url
 
 from apps.profileviewer.view_utils import get_filters
 from apps.profileviewer.view_utils import flexopen
@@ -245,16 +246,8 @@ def lgc_submit(request):
     card = R['card']
     email = R['email']
     screen_name = R['screen_name']
+    gform_url = get_gform_url(screen_name)
 
-    gform_id = FORMMAP.get(screen_name, None)
-    if gform_id:
-        gform_url = "https://docs.google.com/forms" + \
-            "/d/%s/viewform?embedded=true" % (gform_id, )
-    else:
-        gform_url = "https://docs.google.com/forms" + \
-            "/d/1LwV2mJUWb9Kx-Pl_nQz_vpUZOY3KdVkb6W4B7ez6Obc" + \
-            "/viewform?embedded=true&entry.2124722808=@" + screen_name + \
-            "&entry.314211455"
     Participant.newParticipant(name=name,
                                token=token,
                                card=card,
@@ -267,7 +260,7 @@ def lgc_submit(request):
     return HttpResponse('Sucess!')
 
 
-@csrf_exempt
+@csrf_protect
 def general_survey(request):
     """ Showing the gernal survey for participants
 
@@ -275,14 +268,34 @@ def general_survey(request):
     :returns: @todo
 
     """
-    try:
-        gform_url = Participant.query(
-            Participant.token == request.REQUEST['token']
-        ).fetch(1)[0].gform_url
-        resp = render_to_response('self_survey.html', {'gform_url': gform_url})
-        return resp
-    except:
-        raise Http404
+    R = request.REQUEST
+    if 'token' in R:
+        try:
+            gform_url = Participant.query(
+                Participant.token == request.REQUEST['token']
+            ).fetch(1)[0].gform_url
+            resp = render_to_response('self_survey.html',
+                                      {'gform_url': gform_url})
+            return resp
+        except:
+            raise Http404
+    elif 'screen_name' in R and 'email' in R:
+        token = str(uuid4())
+        screen_name = R['screen_name'][1:]
+        gform_url = get_gform_url(screen_name)
+        Participant.newParticipant(
+            name=None,
+            card=None,
+            token=token,
+            email=R['email'],
+            screen_name=screen_name,
+            gform_url=gform_url).put()
+        return render_to_response('self_survey.html',
+                                  {'gform_url': gform_url})
+    else:
+        return render_to_response(
+            'participant_reg.html',
+            context_instance=RequestContext(request))
 
 
 # -------------------------- test view ------------------
