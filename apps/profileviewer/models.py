@@ -190,20 +190,29 @@ class Participant(ndb.Model):
 
     """Persistency of Participant from Twitter Ads Campaign"""
 
+    # pylint: disable-msg=E1101
     name = ndb.StringProperty(indexed=True)
-    token = ndb.StringProperty()
+    token = ndb.StringProperty(indexed=True)
     card = ndb.StringProperty(indexed=True)
     email = ndb.StringProperty(indexed=True)
     screen_name = ndb.StringProperty(indexed=True)
-
+    gform_url = ndb.StringProperty()
+    # pylint: enable-msg=E1101
 
     @classmethod
-    def newParticipant(cls, name, token, card, email, screen_name):
+    def newParticipant(cls, name, token, card,
+                       email, screen_name, gform_url):
+        """ Create and return a new Participant
+
+        :returns: A new Participant
+
+        """
         return cls(name=name,
                    token=token,
                    card=card,
                    email=email,
-                   screen_name=screen_name)
+                   screen_name=screen_name,
+                   gform_url=gform_url)
 
 
 class Expert(ndb.Model):

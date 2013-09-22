@@ -18,6 +18,7 @@ from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
+from django.http import Http404
 
 from apps.profileviewer.models import Expert
 from apps.profileviewer.models import Topic
@@ -32,6 +33,7 @@ from apps.profileviewer.view_utils import assert_magic_signed
 from apps.profileviewer.view_utils import MAGIC_PW
 from apps.profileviewer.view_utils import assure_judge
 from apps.profileviewer.view_utils import request_property
+from apps.profileviewer.view_utils import send_self_survey_email
 
 
 COOKIE_LIFE = 90 * 24 * 3600
@@ -244,11 +246,6 @@ def lgc_submit(request):
     email = R['email']
     screen_name = R['screen_name']
 
-    Participant.newParticipant(name=name,
-                               token=token,
-                               card=card,
-                               email=email,
-                               screen_name=screen_name).put()
     gform_id = FORMMAP.get(screen_name, None)
     if gform_id:
         gform_url = "https://docs.google.com/forms" + \
@@ -258,11 +255,34 @@ def lgc_submit(request):
             "/d/1LwV2mJUWb9Kx-Pl_nQz_vpUZOY3KdVkb6W4B7ez6Obc" + \
             "/viewform?embedded=true&entry.2124722808=@" + screen_name + \
             "&entry.314211455"
+    Participant.newParticipant(name=name,
+                               token=token,
+                               card=card,
+                               email=email,
+                               screen_name=screen_name,
+                               gform_url=gform_url).put()
+    send_self_survey_email(
+        'https://geo-expertise.appspot.com/general_survey?token='
+        + token, name, email)
+    return HttpResponse('Sucess!')
 
-    resp = render_to_response('self_survey.html', {'gform_url': gform_url})
-    resp.set_cookie('judge_email', email, COOKIE_LIFE)
-    resp.set_cookie('judge_nick', name, COOKIE_LIFE)
-    return resp
+
+@csrf_exempt
+def general_survey(request):
+    """ Showing the gernal survey for participants
+
+    :request: @todo
+    :returns: @todo
+
+    """
+    try:
+        gform_url = Participant.query(
+            Participant.token == request.REQUEST['token']
+        ).fetch(1)[0].gform_url
+        resp = render_to_response('self_survey.html', {'gform_url': gform_url})
+        return resp
+    except:
+        raise Http404
 
 
 # -------------------------- test view ------------------

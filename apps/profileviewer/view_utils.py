@@ -14,11 +14,13 @@ from collections import namedtuple
 from datetime import datetime as dt
 from itertools import chain
 from itertools import groupby
+from textwrap import dedent
 
 from django.core.exceptions import PermissionDenied
 
 from apps.profileviewer.models import Expert
 from apps.profileviewer.models import Judge
+from google.appengine.api import mail
 
 Focus = namedtuple('Focus', ['name', 'value', 'chart'], verbose=True)
 
@@ -167,3 +169,29 @@ def assure_judge(req):
         j.put()
         return j
     return None
+
+
+def send_self_survey_email(survey_url, name, email):
+    """Send an email to the ones who clicked the participating email
+
+    :survey_url: @todo
+    :returns: @todo
+
+    """
+    mail.send_mail(sender="Wen Li <spacelis@gmail.com>",
+                   to="%s <%s>" % (name, email),
+                   subject="Your participation to GeoExpertise project has been approved",
+                   body="""
+Dear %s,
+
+Thank you for participating our project! Please follow the link below to the survey:
+
+%s
+
+You may find more information about the project and our privacy terms at
+Terms - http://geo-expertise.appspot.com/terms
+About - http://geo-expertise.appspot.com/about
+
+Best,
+Wen Li
+""" % (name, survey_url))
