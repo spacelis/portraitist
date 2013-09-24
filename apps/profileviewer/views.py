@@ -47,7 +47,6 @@ def home(request):
     :returns: @todo
 
     """
-    assert_magic_signed(request)
     no_inst = request_property(request, 'no_inst')
     submitted_tasks = request_property(request, 'submitted_tasks')
     done_survey = request_property(request, 'done_survey')
@@ -115,7 +114,6 @@ def expert_view(request, hash_id):
     :returns: @todo
 
     """
-    assert_magic_signed(request)
     expert = Expert.getExpertInfoByHashId(hash_id)
     topics = [Topic.getTopicById(tid) for tid in expert['topics']]
     filters = get_filters(topics)
