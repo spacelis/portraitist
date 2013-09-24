@@ -100,7 +100,7 @@ def sync_judgement():
 
     """
     for e in Expert.query().fetch():
-        e.judge_by = list()
+        e.judged_by = list()
         e.judged_no = 0
         e.put()
     for j in Judge.query().fetch():
