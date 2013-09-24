@@ -134,14 +134,22 @@ def ensure_datatype():
 
 
 @EndPoint(secured=True)
-def view_judgements(judge_id):
+def view_judge(judge_id):
     """ Return all judgements made by the judge
 
     :judge_id: The judge_id of a Judge
     :returns: All Judgement from the Judge in JSON
 
     """
-    return _j(Judge.query(Judge.judge_id == judge_id).fetch(1)[0].judgements)
+    j = Judge.query(Judge.judge_id == judge_id)\
+        .fetch(1)[0]
+    return _j({
+        'judge_id': j.judge_id,
+        'email': j.email,
+        'nick': j.nickname,
+        'judgements': j.judgements,
+        'judgement_no': j.judgement_no
+    })
 
 
 @EndPoint(secured=True)

@@ -14,7 +14,6 @@ from collections import namedtuple
 from datetime import datetime as dt
 from itertools import chain
 from itertools import groupby
-from textwrap import dedent
 
 from django.core.exceptions import PermissionDenied
 
@@ -98,14 +97,21 @@ def construct_judgement(req):
     return judgement
 
 
-def request_property(req, prop):
-    """ Get a property from a request
+def request_property(req, prop, default=None):
+    """ Get a property from a request or cookie
 
-    :req: @todo
+    :req: The request object
+    :prop: the name of the property
+    :default: the default value when the prop doesn't exist
     :returns: @todo
 
     """
-    return req.COOKIES.get(prop, None) or req.REQUEST.get(prop, None)
+    if prop in req.REQUEST:
+        return req.REQUEST[prop]
+    elif prop in req.COOKIES:
+        return req.COOKIES[prop]
+    else:
+        return default
 
 
 MAGIC_PW = 'dmir2013'
@@ -180,11 +186,13 @@ def send_self_survey_email(survey_url, name, email):
     """
     mail.send_mail(sender="Wen Li <spacelis@gmail.com>",
                    to="%s <%s>" % (name, email),
-                   subject="Your participation to GeoExpertise project has been approved",
+                   subject=("Your participation to "
+                            "GeoExpertise project has been approved"),
                    body="""
 Dear %s,
 
-Thank you for participating our project! Please follow the link below to the survey:
+Thank you for participating our project!
+Please follow the link below to the survey:
 
 %s
 

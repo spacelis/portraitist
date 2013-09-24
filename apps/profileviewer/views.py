@@ -48,9 +48,9 @@ def home(request):
 
     """
     no_inst = request_property(request, 'no_inst')
-    submitted_tasks = request_property(request, 'submitted_tasks')
+    submitted_tasks = int(request_property(request, 'submitted_tasks', 0))
     done_survey = request_property(request, 'done_survey')
-    if submitted_tasks > 5 and not done_survey:
+    if (submitted_tasks >= 5) and (done_survey is None):
         r = redirect('/survey')
         r.set_cookie('done_survey', 1, COOKIE_LIFE)
         return r
@@ -269,12 +269,14 @@ def general_survey(request):
     R = request.REQUEST
     if 'token' in R:
         try:
-            gform_url = Participant.query(
+            p = Participant.query(
                 Participant.token == request.REQUEST['token']
-            ).fetch(1)[0].gform_url
-            resp = render_to_response('self_survey.html',
-                                      {'gform_url': gform_url})
-            return resp
+            ).fetch(1)[0]
+            r = render_to_response('self_survey.html',
+                                   {'gform_url': p.gform_url})
+            r.set_cookie('judge_email', p.email)
+            r.set_cookie('judge_nick', p.name)
+            return r
         except:
             raise Http404
     elif 'screen_name' in R and 'email' in R:
@@ -288,8 +290,11 @@ def general_survey(request):
             email=R['email'],
             screen_name=screen_name,
             gform_url=gform_url).put()
-        return render_to_response('self_survey.html',
-                                  {'gform_url': gform_url})
+        r = render_to_response('self_survey.html',
+                               {'gform_url': gform_url})
+        r.set_cookie('judge_email', R['email'])
+        r.set_cookie('judge_nick', screen_name)
+        return r
     else:
         return render_to_response(
             'participant_reg.html',
