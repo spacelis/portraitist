@@ -28,7 +28,7 @@
         $("#judge_info").prepend("<ul class=\"nav navbar-nav navbar-right\"> <li><a>by <span id=\"judge_nick\"></span></a></li> </ul>");
         $("#judge_nick").text($("#inputJudgeNick").val())
       });
-      if(! $.cookie("judge_email")){
+      if((! $.cookie("judge_email")) && (! $.cookie("do_not_track"))){
         $("#judge_profile_detail").modal('show');
       }
       var nick = $.cookie("judge_nick");
@@ -36,6 +36,10 @@
         $("#judge_info").prepend("<ul class=\"nav navbar-nav navbar-right\"> <li><a>by <span id=\"judge_nick\"></span></a></li> </ul>");
         $("#judge_nick").text(nick)
       }
+      $("#save_do_not_track").click(function(){
+        $.cookie("do_not_track", 1, {"expires": 90, "path": "/"});
+        $("#judge_profile_detail").modal('hide');
+      });
     })
   </script>
   <script>
@@ -100,7 +104,8 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button id="save_judge_profile" type="button" class="btn btn-primary">Save changes</button>
+            <button id="save_judge_profile" type="button" class="btn btn-primary">Save</button>
+            <button id="save_do_not_track" type="button" class="btn btn-default">DO NOT TRACK</button>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
