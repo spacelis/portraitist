@@ -422,6 +422,7 @@ class TaskPackage(ndb.Model):
                                  tasks_done=list(),
                                  confirm_code=getUID().split('-')[-1])
                 tp.tasks.append(e.hash_id)
+                t_cnt += 1
         if len(tp.tasks) > 0:
             tp.put()
             tp_list.append({'id': tp.task_pack_id,
