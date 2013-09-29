@@ -47,25 +47,35 @@ def taskrouter(request):
     :returns: @todo
 
     """
+    # View elements for banner
     no_inst = request_property(request, 'no_inst')
     submitted_tasks = int(request_property(request, 'submitted_tasks', 0))
+
+    # Route item: Judge Survey
     done_survey = request_property(request, 'done_survey')
     if (submitted_tasks >= 5) and (done_survey is None):
         r = redirect('/survey')
         r.set_cookie('done_survey', 1, COOKIE_LIFE)
         return r
+
+    # Route item: Confirmation Code
+    confirm_code = request_property(request, 'confirm_code')
+    if confirm_code:
+        r = render_to_response('taskpack_confirmation.html',
+                               {'confirm_code': confirm_code})
+        return r
+
+    # Route item: Packaged Tasks
     task_pack_id = request_property(request, 'task_pack_id')
     if task_pack_id:
         try:
-            expert_hash_id = TaskPackage.getTask(task_pack_id)
+            expert_hash_id = request_property(request, 'next_task') or \
+                TaskPackage.getTask(task_pack_id)
         except TaskPackage.NoMoreTask:
             confirm_code = TaskPackage.getConfirmationCode(task_pack_id)
             r = render_to_response('taskpack_confirmation.html',
                                    {'confirm_code': confirm_code})
-            r.delete_cookie('task_pack_id')
             return r
-        except TaskPackage.TaskPackageNotExists:
-            raise Http404
     else:
         expert_hash_id = Expert.getTask()
     if no_inst:
@@ -149,15 +159,22 @@ def submit_expert_judgement(request):
     :returns: @todo
 
     """
+    r = None
     judge = assure_judge(request)
     judgement = construct_judgement(request)
     j = Judge.addJudgement(judge, judgement)
     task_pack_id = request_property(request, 'task_pack_id')
     if task_pack_id:
-        TaskPackage.submitTask(
+        tnext = TaskPackage.submitTask(
             task_pack_id,
             request.REQUEST['pv-candidate-hash-id'])
-    r = redirect('/home?no_inst=1')
+        if tnext:
+            r = redirect('/home?no_inst=1&next_task=' + tnext)
+        else:
+            confirm_code = TaskPackage.getConfirmationCode(task_pack_id)
+            r = redirect('/home?no_inst=1&confirm_code=' + confirm_code)
+    if not r:
+        r = redirect('/home?no_inst=1')
 
     # pylint: disable-msg=E1101
     r.set_cookie('submitted_tasks', j.judgement_no, 90 * 24 * 3600)

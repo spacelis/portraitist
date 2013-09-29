@@ -18,6 +18,7 @@ from zlib import compress
 from zlib import decompress
 from hashlib import sha1
 
+from django.http import Http404
 from google.appengine.ext import ndb
 
 DEFAULT_APP_NAME = 'geo-expertise-2'
@@ -194,7 +195,7 @@ class Topic(ndb.Model):
                 ).put()
 
 
-class Participant(ndb.Model):
+class Participant(ndb.Model):  # pylint: disable-msg=R0903
 
     """Persistency of Participant from Twitter Ads Campaign"""
 
@@ -208,7 +209,7 @@ class Participant(ndb.Model):
     # pylint: enable-msg=E1101
 
     @classmethod
-    def newParticipant(cls, name, token, card,
+    def newParticipant(cls, name, token, card,  # pylint: disable-msg=R0913
                        email, screen_name, gform_url):
         """ Create and return a new Participant
 
@@ -239,6 +240,10 @@ class Expert(ndb.Model):
 
     assigned = ndb.DateTimeProperty(indexed=True)
     # pylint: enable-msg=E1101
+
+    class ExpertNotExists(Http404):
+        """ Exception when the expert queried does not exist"""
+        pass
 
     @classmethod
     def getExpertsByPriority(cls, limit=10):
@@ -272,7 +277,10 @@ class Expert(ndb.Model):
         :returns: A ndb object of the expert
 
         """
-        return cls.query(Expert.hash_id == hash_id).fetch(1)[0]
+        try:
+            return cls.query(Expert.hash_id == hash_id).fetch(1)[0]
+        except IndexError:
+            raise Expert.ExpertNotExists(hash_id)
 
     @classmethod
     def getExpertInfoByScreenName(cls, screen_name):
@@ -282,7 +290,7 @@ class Expert(ndb.Model):
         :returns: A dict {'screen_name': str, 'topics': [topic_id: str]}
 
         """
-        e = cls.query(Expert.screen_name == screen_name).fetch(1)[0]
+        e = cls.getExpertByScreenName(screen_name)
         return {'screen_name': e.screen_name,
                 'topics': e.topics}
 
@@ -294,7 +302,10 @@ class Expert(ndb.Model):
         :returns: A ndb object of the expert
 
         """
-        return cls.query(Expert.screen_name == screen_name).fetch(1)[0]
+        try:
+            return cls.query(Expert.screen_name == screen_name).fetch(1)[0]
+        except IndexError:
+            raise Expert.ExpertNotExists(screen_name)
 
     @classmethod
     def getScreenNames(cls, limit=10):
@@ -375,7 +386,7 @@ class TaskPackage(ndb.Model):
 
     # pylint: enable-msg=E1101
 
-    class TaskPackageNotExists(Exception):
+    class TaskPackageNotExists(Http404):
         """ If the task_pack_id doesn't exists"""
         pass
 
@@ -467,7 +478,14 @@ class TaskPackage(ndb.Model):
 
         """
         tp = cls.getTaskPackage(task_pack_id)
-        pos = tp.tasks.index(expert_hash_id)
-        del tp.tasks[pos]
+        tlist = list(tp.tasks)
+        pos = tlist.index(expert_hash_id)
+        del tlist[pos]
+        if len(tlist) > 0:
+            tnext = tlist[0]
+        else:
+            tnext = None
+        tp.tasks = tlist
         tp.tasks_done.append(expert_hash_id)
         tp.put()
+        return tnext

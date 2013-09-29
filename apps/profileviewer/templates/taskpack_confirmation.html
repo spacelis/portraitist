@@ -1,0 +1,20 @@
+{% extends "frame.html" %}
+{% block extra_header %}
+{% endblock %}
+{% block content %}
+<form role="form" method="POST" action="/general_survey">
+  {% csrf_token %}
+  <div class="jumbotron">
+    <div class="container">
+      <div class="row">
+        <div class="col-4-sm">
+          <p> Thank you for participating! <br>
+          <small class='text-muted'> Plase use the following code to
+          redeem your task on CrowdFlower. </small></p>
+          <center style="font-size: 72px">{{ confirm_code }}</center>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}
