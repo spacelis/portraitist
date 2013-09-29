@@ -56,19 +56,26 @@ def taskrouter(request):
         return r
     task_pack_id = request_property(request, 'task_pack_id')
     if task_pack_id:
-        expert_hash_id = TaskPackage.getTask(task_pack_id)
-        if not expert_hash_id:
+        try:
+            expert_hash_id = TaskPackage.getTask(task_pack_id)
+        except TaskPackage.NoMoreTask:
             confirm_code = TaskPackage.getConfirmationCode(task_pack_id)
-            return render_to_response('taskpack_confirmation.html',
-                                      {'confirm_code': confirm_code})
+            r = render_to_response('taskpack_confirmation.html',
+                                   {'confirm_code': confirm_code})
+            r.delete_cookie('task_pack_id')
+            return r
+        except TaskPackage.TaskPackageNotExists:
+            raise Http404
     else:
         expert_hash_id = Expert.getTask()
     if no_inst:
-        return redirect('/expert_view/' + expert_hash_id)
+        r = redirect('/expert_view/' + expert_hash_id)
     else:
         r = render_to_response('instructions.html', {'expert': expert_hash_id},
                                context_instance=RequestContext(request))
-        return r
+    if task_pack_id:
+        r.set_cookie('task_pack_id', task_pack_id, COOKIE_LIFE)
+    return r
 
 
 def list_data_dir(request):
@@ -147,17 +154,10 @@ def submit_expert_judgement(request):
     j = Judge.addJudgement(judge, judgement)
     task_pack_id = request_property(request, 'task_pack_id')
     if task_pack_id:
-        confirm_code = TaskPackage.submitTask(
+        TaskPackage.submitTask(
             task_pack_id,
             request.REQUEST['pv-candidate-hash-id'])
-        if not confirm_code:
-            r = redirect('/home?no_inst=1&task_pack_id='
-                         + task_pack_id)
-        else:
-            r = render_to_response('taskpack_confirmation.html',
-                                   {'confirm_code': confirm_code})
-    else:
-        r = redirect('/home?no_inst=1')
+    r = redirect('/home?no_inst=1')
 
     # pylint: disable-msg=E1101
     r.set_cookie('submitted_tasks', j.judgement_no, 90 * 24 * 3600)

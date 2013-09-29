@@ -375,13 +375,22 @@ class TaskPackage(ndb.Model):
 
     # pylint: enable-msg=E1101
 
+    class TaskPackageNotExists(Exception):
+        """ If the task_pack_id doesn't exists"""
+        pass
+
+    class NoMoreTask(Exception):
+        """ If there is no more tasks to assign"""
+        pass
+
     @classmethod
     def constructFromeUndone(cls, psize=10):
         """ Construct task packages from those undone tasks
         :returns: @todo
 
         """
-        tp = TaskPackage(task_pack_id=getUID(),
+        tp = TaskPackage(parent=parent_key('taskpackage'),
+                         task_pack_id=getUID(),
                          tasks=list(),
                          tasks_done=list(),
                          confirm_code=getUID().split('-')[-1])
@@ -390,7 +399,7 @@ class TaskPackage(ndb.Model):
         tp_list = list()
         for e in Expert.query(Expert.judged_no == 0).fetch():
             if len(tp.tasks) < psize:
-                tp.tasks.append(e.expert_hash_id)
+                tp.tasks.append(e.hash_id)
                 t_cnt += 1
             else:
                 tp.put()
@@ -401,7 +410,7 @@ class TaskPackage(ndb.Model):
                                  tasks=list(),
                                  tasks_done=list(),
                                  confirm_code=getUID().split('-')[-1])
-                tp.tasks.append(e.expert_hash_id)
+                tp.tasks.append(e.hash_id)
         if len(tp.tasks) > 0:
             tp.put()
             tp_list.append({'id': tp.task_pack_id,
@@ -411,9 +420,8 @@ class TaskPackage(ndb.Model):
                 'created_packages': tp_cnt,
                 'task_packages': tp_list}
 
-
     @classmethod
-    def getTaskPackage(self, task_pack_id):
+    def getTaskPackage(cls, task_pack_id):
         """ Get a reference to the task package by task_pack_id
 
         :task_pack_id: @todo
@@ -424,8 +432,7 @@ class TaskPackage(ndb.Model):
             return TaskPackage.query(TaskPackage.task_pack_id == task_pack_id)\
                 .fetch(1)[0]
         except IndexError:
-            raise ValueError('No task package associated with ID: '
-                             + task_pack_id)
+            raise TaskPackage.TaskPackageNotExists(task_pack_id)
 
     @classmethod
     def getTask(cls, task_pack_id):
@@ -435,10 +442,13 @@ class TaskPackage(ndb.Model):
         :returns: @todo
 
         """
-        return cls.getTaskPackage(task_pack_id).tasks[0]
+        try:
+            return cls.getTaskPackage(task_pack_id).tasks[0]
+        except IndexError:
+            raise TaskPackage.NoMoreTask()
 
     @classmethod
-    def getConfirmationCode(self, task_pack_id):
+    def getConfirmationCode(cls, task_pack_id):
         """ Get the confirmation code by tp_id
 
         :task_pack_id: @todo
@@ -457,14 +467,7 @@ class TaskPackage(ndb.Model):
 
         """
         tp = cls.getTaskPackage(task_pack_id)
-        pos = tp.tasks.find(expert_hash_id) >= 0
-        if pos >= 0:
-            del tp.tasks[pos]
-            tp.tasks_done.append(expert_hash_id)
-            tp.put()
-        else:
-            raise ValueError
-        if len(tp.tasks) > 0:
-            return None
-        else:
-            return tp.confirm_code
+        pos = tp.tasks.index(expert_hash_id)
+        del tp.tasks[pos]
+        tp.tasks_done.append(expert_hash_id)
+        tp.put()
