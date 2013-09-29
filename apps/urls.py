@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 
 urlpatterns = patterns(
     '',
-    url(r'^home$', 'apps.profileviewer.views.home'),
+    url(r'^home$', 'apps.profileviewer.views.taskrouter'),
     url(r'^favicon\.ico$', RedirectView.as_view(
         url='/static/images/profileviewer/socialmining.ico')),
 

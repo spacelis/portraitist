@@ -25,13 +25,13 @@ from apps.profileviewer.models import Expert
 from apps.profileviewer.models import Topic
 from apps.profileviewer.models import Judge
 from apps.profileviewer.models import Participant
+from apps.profileviewer.models import TaskPackage
 from apps.profileviewer.form_map import get_gform_url
 
 from apps.profileviewer.view_utils import get_filters
 from apps.profileviewer.view_utils import flexopen
 from apps.profileviewer.view_utils import construct_judgement
 from apps.profileviewer.view_utils import assert_magic_signed
-from apps.profileviewer.view_utils import MAGIC_PW
 from apps.profileviewer.view_utils import assure_judge
 from apps.profileviewer.view_utils import request_property
 from apps.profileviewer.view_utils import send_self_survey_email
@@ -40,8 +40,8 @@ from apps.profileviewer.view_utils import send_self_survey_email
 COOKIE_LIFE = 90 * 24 * 3600
 
 
-def home(request):
-    """Return a homepage
+def taskrouter(request):
+    """ Routing tasks by tasks
 
     :request: @todo
     :returns: @todo
@@ -54,13 +54,20 @@ def home(request):
         r = redirect('/survey')
         r.set_cookie('done_survey', 1, COOKIE_LIFE)
         return r
-    expert_hash_id = Expert.getTask()
+    task_pack_id = request_property(request, 'task_pack_id')
+    if task_pack_id:
+        expert_hash_id = TaskPackage.getTask(task_pack_id)
+        if not expert_hash_id:
+            confirm_code = TaskPackage.getConfirmationCode(task_pack_id)
+            return render_to_response('taskpack_confirmation.html',
+                                      {'confirm_code': confirm_code})
+    else:
+        expert_hash_id = Expert.getTask()
     if no_inst:
         return redirect('/expert_view/' + expert_hash_id)
     else:
         r = render_to_response('instructions.html', {'expert': expert_hash_id},
                                context_instance=RequestContext(request))
-        r.set_cookie(MAGIC_PW, 1, COOKIE_LIFE)
         return r
 
 
@@ -138,9 +145,24 @@ def submit_expert_judgement(request):
     judge = assure_judge(request)
     judgement = construct_judgement(request)
     j = Judge.addJudgement(judge, judgement)
-    r = redirect('/home?no_inst=1')
+    task_pack_id = request_property(request, 'task_pack_id')
+    if task_pack_id:
+        confirm_code = TaskPackage.submitTask(
+            task_pack_id,
+            request.REQUEST['pv-candidate-hash-id'])
+        if not confirm_code:
+            r = redirect('/home?no_inst=1&task_pack_id='
+                         + task_pack_id)
+        else:
+            r = render_to_response('taskpack_confirmation.html',
+                                   {'confirm_code': confirm_code})
+    else:
+        r = redirect('/home?no_inst=1')
+
+    # pylint: disable-msg=E1101
     r.set_cookie('submitted_tasks', j.judgement_no, 90 * 24 * 3600)
     r.set_cookie('judge_id', j.judge_id, 90 * 24 * 3600)
+    # pylint: enable-msg=E1101
     return r
 
 

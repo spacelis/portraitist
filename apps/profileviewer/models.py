@@ -25,6 +25,14 @@ MIN30 = timedelta(minutes=30)
 csv.field_size_limit(500000)
 
 
+def getUID():
+    """ Return a UUID in str()
+    :returns: @todo
+
+    """
+    return str(uuid4())
+
+
 def parent_key(name, appname=DEFAULT_APP_NAME):
     """@todo: Docstring for parent_key.
 
@@ -79,7 +87,7 @@ class Judge(ndb.Model):
             return js[0]
         else:
             return cls(parent=parent_key('judge'),
-                       judge_id=str(uuid4()),
+                       judge_id=getUID(),
                        judgement_no=0,
                        email=email,
                        nickname=nickname,
@@ -352,3 +360,111 @@ class Expert(ndb.Model):
         return {'judged_experts': len([e for e in es if e > 0]),
                 'expert_no': len(es),
                 'e_judgement_no': sum(es)}
+
+
+class TaskPackage(ndb.Model):
+
+    """ A package of tasks"""
+
+    # pylint: disable-msg=E1101
+
+    task_pack_id = ndb.StringProperty(indexed=True)
+    tasks = ndb.StringProperty(repeated=True)
+    tasks_done = ndb.StringProperty(repeated=True)
+    confirm_code = ndb.StringProperty()
+
+    # pylint: enable-msg=E1101
+
+    @classmethod
+    def constructFromeUndone(cls, psize=10):
+        """ Construct task packages from those undone tasks
+        :returns: @todo
+
+        """
+        tp = TaskPackage(task_pack_id=getUID(),
+                         tasks=list(),
+                         tasks_done=list(),
+                         confirm_code=getUID().split('-')[-1])
+        tp_cnt = 0
+        t_cnt = 0
+        tp_list = list()
+        for e in Expert.query(Expert.judged_no == 0).fetch():
+            if len(tp.tasks) < psize:
+                tp.tasks.append(e.expert_hash_id)
+                t_cnt += 1
+            else:
+                tp.put()
+                tp_list.append({'id': tp.task_pack_id,
+                                'cf_code': tp.confirm_code})
+                tp_cnt += 1
+                tp = TaskPackage(task_pack_id=getUID(),
+                                 tasks=list(),
+                                 tasks_done=list(),
+                                 confirm_code=getUID().split('-')[-1])
+                tp.tasks.append(e.expert_hash_id)
+        if len(tp.tasks) > 0:
+            tp.put()
+            tp_list.append({'id': tp.task_pack_id,
+                            'cf_code': tp.confirm_code})
+            tp_cnt += 1
+        return {'assigned_tasks': t_cnt,
+                'created_packages': tp_cnt,
+                'task_packages': tp_list}
+
+
+    @classmethod
+    def getTaskPackage(self, task_pack_id):
+        """ Get a reference to the task package by task_pack_id
+
+        :task_pack_id: @todo
+        :returns: @todo
+
+        """
+        try:
+            return TaskPackage.query(TaskPackage.task_pack_id == task_pack_id)\
+                .fetch(1)[0]
+        except IndexError:
+            raise ValueError('No task package associated with ID: '
+                             + task_pack_id)
+
+    @classmethod
+    def getTask(cls, task_pack_id):
+        """ Get a new task from a task package
+
+        :task_pack_id: @todo
+        :returns: @todo
+
+        """
+        return cls.getTaskPackage(task_pack_id).tasks[0]
+
+    @classmethod
+    def getConfirmationCode(self, task_pack_id):
+        """ Get the confirmation code by tp_id
+
+        :task_pack_id: @todo
+        :returns: @todo
+
+        """
+        return cls.getTaskPackage(task_pack_id).confirm_code
+
+    @classmethod
+    def submitTask(cls, task_pack_id, expert_hash_id):
+        """ Mark a task been done by the assessor
+
+        :task_pack_id: @todo
+        :expert_hash_id: @todo
+        :returns: @todo
+
+        """
+        tp = cls.getTaskPackage(task_pack_id)
+        pos = tp.tasks.find(expert_hash_id) >= 0
+        if pos >= 0:
+            del tp.tasks[pos]
+            tp.tasks_done.append(expert_hash_id)
+            tp.put()
+        else:
+            raise ValueError
+        if len(tp.tasks) > 0:
+            return None
+        else:
+            return tp.confirm_code

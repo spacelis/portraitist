@@ -19,6 +19,7 @@ from django.http import Http404
 
 from apps.profileviewer.models import Expert
 from apps.profileviewer.models import Judge
+from apps.profileviewer.models import TaskPackage
 
 
 def assert_admin(req):
@@ -167,6 +168,15 @@ def export_judgements():
                 ju['judge_nick'] = j.nickname
                 yield _j(ju) + '\n'
     return iter_judgement()
+
+
+@EndPoint(secured=True)
+def create_tps():
+    """ Create a list of task packages from undone tasks
+    :returns: @todo
+
+    """
+    return _j(TaskPackage.constructFromeUndone())
 
 
 @EndPoint(secured=True)
