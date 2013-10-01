@@ -176,7 +176,7 @@ def create_tps():
     :returns: @todo
 
     """
-    return _j(TaskPackage.constructFromeUndone())
+    return _j(TaskPackage.construct())
 
 
 @EndPoint(secured=True)

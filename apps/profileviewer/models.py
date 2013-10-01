@@ -395,7 +395,7 @@ class TaskPackage(ndb.Model):
         pass
 
     @classmethod
-    def constructFromeUndone(cls, psize=10):
+    def construct(cls, psize=10):
         """ Construct task packages from those undone tasks
         :returns: @todo
 
@@ -408,7 +408,7 @@ class TaskPackage(ndb.Model):
         tp_cnt = 0
         t_cnt = 0
         tp_list = list()
-        for e in Expert.query(Expert.judged_no == 0).fetch():
+        for e in Expert.query().fetch():
             if len(tp.tasks) < psize:
                 tp.tasks.append(e.hash_id)
                 t_cnt += 1
