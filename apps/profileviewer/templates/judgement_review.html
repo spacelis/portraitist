@@ -12,8 +12,14 @@
   function adjustHeight(){
     setTimeout(function(){
       $("#embedded-view").height($("#embedded-view").contents().height());
-    }, 1000)
+    }, 100)
   }
+  $(document).ready(function(){
+    {% with judgements|first as j %}
+    openView("{{ j.candidate }}",
+              "{{ j.scores|jsonencode|urlencode }}")
+    {% endwith %}
+  });
 </script>
 {% endblock %}
 {% block content %}
