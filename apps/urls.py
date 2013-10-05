@@ -15,6 +15,8 @@ urlpatterns = patterns(
     # Management
     url(r'^judgement_overview$',
         'apps.profileviewer.views.judgement_overview'),
+    url(r'^judgement_review/(.*)$',
+        'apps.profileviewer.views.judgement_review'),
     #url(r'^import_judge/(.*)$', 'apps.profileviewer.views.import_judge'),
     #url(r'^import_expert/(.*)$', 'apps.profileviewer.views.import_expert'),
     #url(r'^import_topic/(.*)$', 'apps.profileviewer.views.import_topic'),

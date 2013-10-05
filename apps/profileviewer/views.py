@@ -138,6 +138,7 @@ def expert_view(request, hash_id):
     :returns: @todo
 
     """
+    topic_judgement = request_property(request, 'topic_judgement', None)
     expert = Expert.getExpertInfoByHashId(hash_id)
     topics = [Topic.getTopicById(tid) for tid in expert['topics']]
     filters = get_filters(topics)
@@ -146,9 +147,28 @@ def expert_view(request, hash_id):
         {
             'expert': expert,
             'topics': topics,
-            'filters': filters
+            'filters': filters,
+            'topic_judgement': topic_judgement
         },
         context_instance=RequestContext(request))
+
+
+def judgement_review(_, judge_id):
+    """ Showing all judgement from a judge and see the quality
+
+    :request: @todo
+    :returns: @todo
+
+    """
+    judge = Judge.getJudgeById(judge_id)
+    return render_to_response(
+        'judgement_review.html',
+        {'judgements': judge.judgements,
+         'email': judge.email,
+         'name': judge.nickname,
+         'judge_id': judge_id
+         }
+    )
 
 
 @csrf_protect

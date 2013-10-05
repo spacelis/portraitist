@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GeoExpert Judgment System</title>
+  <script src="/static/js/profileviewer/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/js/profileviewer/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+
+  <link rel="stylesheet" href="/static/css/profileviewer/bootstrap.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <link rel="stylesheet" href="/static/css/profileviewer/sticky-footer.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  {% block extra_header %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+          <span class="icon-bar"></span>
+        </button>
+        <a href="/home" class="navbar-brand">GeoExpert Judgment System</a>
+      </div>
+      <div id="judge_info" class="collapse navbar-collapse navbar-ex1-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="#">Management</a></li>
+        </ul>
+      </div>
+    </nav>
+    <div id="pv-content" width="100%">
+      {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

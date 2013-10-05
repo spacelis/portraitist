@@ -1,0 +1,32 @@
+{% extends "frame_mgr.html" %}
+{% load extra_tags %}
+{% block extra_header %}
+<script src="/static/js/profileviewer/jquery.crypt.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+  function openView(candidate, topic_judgement){
+    $("#embedded-view").attr("src", "/expert_view/"
+                                  + $().crypt({method: "sha1", source: candidate})
+                                  + "?topic_judgement="
+                                  + topic_judgement);
+  }
+  function adjustHeight(){
+    $("#embedded-view").height($("#embedded-view").contents().height());
+  }
+</script>
+{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-sm-1">
+    <div class="btn-group-vertical">
+      {% for j in judgements %}
+      <button type="button" class="btn btn-default" onClick="openView('{{ j.candidate }}', '{{ j.scores|jsonencode|urlencode }}');">
+        {{ j.candidate }}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-sm-11">
+    <iframe id="embedded-view" src="" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0" onLoad="adjustHeight()">Loading...</iframe>
+  </div>
+</div>
+{% endblock %}

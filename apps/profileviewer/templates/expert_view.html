@@ -34,6 +34,14 @@
       $(".btn-judgement").click(function(){
         $(this).removeClass("error");
       });
+      var topic_judgement = JSON.parse("{{ topic_judgement|escapejs }}");
+      if(topic_judgement){
+        for(var k in topic_judgement){
+          $("input[name=py-judgements-" + k + "]").prop("checked", true);
+          $("input[name=pv-judgements-" + k + "][value=" + topic_judgement[k] + "]")
+            .closest("label").addClass("active")
+        }
+      }
     });
   </script>
   <style type="text/css" media="screen">
