@@ -10,23 +10,52 @@
                                   + topic_judgement);
   }
   function adjustHeight(){
-    $("#embedded-view").height($("#embedded-view").contents().height());
+    setTimeout(function(){
+      $("#embedded-view").height($("#embedded-view").contents().height());
+    }, 1000)
   }
 </script>
 {% endblock %}
 {% block content %}
-<div class="row">
-  <div class="col-sm-1">
-    <div class="btn-group-vertical">
-      {% for j in judgements %}
-      <button type="button" class="btn btn-default" onClick="openView('{{ j.candidate }}', '{{ j.scores|jsonencode|urlencode }}');">
-        {{ j.candidate }}
-      </button>
-      {% endfor %}
+<div class="container" style="margin-left:15px;margin-right:15px;width:1500px;max-width:1500px">
+  <div class="row">
+    <div class="col-sm-12">
+      <ul class="pagination">
+        {% for j in judges %}
+        {% if j.this %}
+        <li class="active">
+          <a href="/judgement_review/{{ j.jid }}">
+            {% if email %}
+              {{ name }}
+            {% elif email %}
+              {{ name }}
+            {% else %}
+              {{ j.page }}
+            {% endif %}
+          </a>
+        </li>
+        {% else %}
+        <li>
+          <a href="/judgement_review/{{ j.jid }}">{{ j.page }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+      </ul>
     </div>
   </div>
-  <div class="col-sm-11">
-    <iframe id="embedded-view" src="" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0" onLoad="adjustHeight()">Loading...</iframe>
+  <div class="row">
+    <div class="col-sm-2">
+      <div class="btn-group-vertical">
+        {% for j in judgements %}
+        <button type="button" class="btn btn-default" onClick="openView('{{ j.candidate }}', '{{ j.scores|jsonencode|urlencode }}');">
+          {{ j.candidate }}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-sm-10">
+      <iframe id="embedded-view" src="" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0" onLoad="adjustHeight()">Loading...</iframe>
+    </div>
   </div>
 </div>
 {% endblock %}

@@ -161,12 +161,18 @@ def judgement_review(_, judge_id):
 
     """
     judge = Judge.getJudgeById(judge_id)
+    judges = [{
+        'this': j.judge_id == judge_id,
+        'jid': j.judge_id,
+        'page': idx
+    } for idx, j in enumerate(Judge.query().order(Judge.judge_id).fetch())]
     return render_to_response(
         'judgement_review.html',
         {'judgements': judge.judgements,
          'email': judge.email,
          'name': judge.nickname,
-         'judge_id': judge_id
+         'judge_id': judge_id,
+         'judges': judges
          }
     )
 
