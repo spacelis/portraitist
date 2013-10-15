@@ -51,11 +51,11 @@
   </div>
   <div class="row">
     <div class="col-sm-2">
-      <div class="btn-group-vertical">
+      <div class="btn-group-vertical" data-toggle="buttons">
         {% for j in judgements %}
-        <button type="radio" class="btn btn-default" onClick="openView('{{ j.candidate }}', '{{ j.scores|jsonencode|urlencode }}');">
-          {{ j.candidate }}
-        </button>
+        <label type="radio" class="btn btn-default" onClick="openView('{{ j.candidate }}', '{{ j.scores|jsonencode|urlencode }}');">
+          <input type="radio" name="candidate" value="{{ forloop.counter1 }}">{{ j.candidate }}
+        </label>
         {% endfor %}
       </div>
     </div>
