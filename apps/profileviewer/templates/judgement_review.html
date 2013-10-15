@@ -23,7 +23,7 @@
 </script>
 {% endblock %}
 {% block content %}
-<div class="container" style="margin-left:15px;margin-right:15px;width:1500px;max-width:1500px">
+<div class="container" style="margin-left:15px;margin-right:15px;width:1100px;max-width:1500px">
   <div class="row">
     <div class="col-sm-12">
       <ul class="pagination">
@@ -53,7 +53,7 @@
     <div class="col-sm-2">
       <div class="btn-group-vertical">
         {% for j in judgements %}
-        <button type="button" class="btn btn-default" onClick="openView('{{ j.candidate }}', '{{ j.scores|jsonencode|urlencode }}');">
+        <button type="radio" class="btn btn-default" onClick="openView('{{ j.candidate }}', '{{ j.scores|jsonencode|urlencode }}');">
           {{ j.candidate }}
         </button>
         {% endfor %}

@@ -195,11 +195,12 @@ var profileviewer_ns = (function(){
       .transitionDuration(500) // (optional) define chart transition duration, :default = 500
       .dimension(by_week) // set dimension
       .group(checkins_by_week) // set group
-      .elasticY(false)
       .elasticX(false)
       .x(d3.time.scale().domain([new Date(2009, 0, 1), new Date(2013, 7, 0)]))
       .round(d3.time.week.round)
       .xUnits(d3.time.weeks)
+      .elasticY(false)
+      .y(d3.scale.linear().domain([0, 20]))
       .centerBar(true)
       .gap(1)
       .renderHorizontalGridLines(true)
