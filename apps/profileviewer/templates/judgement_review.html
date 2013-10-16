@@ -12,6 +12,7 @@
   function adjustHeight(){
     setTimeout(function(){
       $("#embedded-view").height($("#embedded-view").contents().height());
+      $("#candidate-list").height($("#embedded-view").contents().height());
     }, 100)
   }
   $(document).ready(function(){
@@ -50,7 +51,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-sm-2">
+    <div id="candidate-list" class="col-sm-2" style="overflow-x: hidden; overflow-y: scroll">
       <div class="btn-group-vertical" data-toggle="buttons">
         {% for j in judgements %}
         <label type="radio" class="btn btn-default" onClick="openView('{{ j.candidate }}', '{{ j.scores|jsonencode|urlencode }}');">
