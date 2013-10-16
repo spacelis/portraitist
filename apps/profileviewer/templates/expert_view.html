@@ -84,7 +84,15 @@
         <div class="list-group-item">
           <div class="row">
             <div class="col-sm-8">
-              <abbr title="{{ t.topic_type }}"><b>{{ t.topic }} </b></abbr> in <b>{{ t.region }}</b>?
+              <abbr title="{{ t.topic_type }}">
+                {% if t.topic_id.0 == 'p' %}
+                <a href="http://www.google.com/search?q={{ t.topic }}+{{ t.region }}" target="_blank">
+                  <b>{{ t.topic }}</b>
+                </a>
+                {% else %}
+                  <b>{{ t.topic }}</b>
+                {% endif %}
+              </abbr> in <b>{{ t.region }}</b>?
             </div>
             <div class="col-sm-4" align="right">
               <div class="btn-group btn-group-xs btn-judgement" data-toggle="buttons">
