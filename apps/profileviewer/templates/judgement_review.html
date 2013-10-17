@@ -54,8 +54,9 @@
     <div id="candidate-list" class="col-sm-2" style="overflow-x: hidden; overflow-y: scroll">
       <div class="btn-group-vertical" data-toggle="buttons">
         {% for j in judgements %}
-        <label type="radio" class="btn btn-default" onClick="openView('{{ j.candidate }}', '{{ j.scores|jsonencode|urlencode }}');" title="{{ j.created_at | parsedatetime | date:"r" }}
-{{ j.ip }}"><!-- Explicit newline for line breaking in title -->
+        <label type="radio" class="btn btn-default" onClick="openView('{{ j.candidate }}', '{{ j.scores|jsonencode|urlencode }}');" title="{{ j.created_at | date:"r" }}
+{{ j.ip }}
+{{ j.effort }} min"><!-- Explicit newline for line breaking in title -->
           <input type="radio" name="candidate" value="{{ forloop.counter1 }}">{{ j.candidate }}
         </label>
         {% endfor %}

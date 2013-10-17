@@ -16,6 +16,7 @@ from itertools import chain
 from itertools import groupby
 
 from django.core.exceptions import PermissionDenied
+from django.utils.dateparse import parse_datetime
 
 from apps.profileviewer.models import Expert
 from apps.profileviewer.models import Judge
@@ -175,6 +176,23 @@ def assure_judge(req):
         j.put()
         return j
     return None
+
+
+def judgement_for_review(judgements):
+    """ transform judgements for review
+
+    :judgements: @todo
+    :returns: @todo
+
+    """
+    for j, pj in zip(judgements, [None] + judgements):
+        j['created_at'] = parse_datetime(j['created_at'])
+        if pj:
+            j['effort'] = '%.3f' % ((j['created_at'] - pj['created_at'])
+                                    .total_seconds() / 60.0, )
+        else:
+            j['effort'] = 'Unknown'
+    return judgements
 
 
 def send_self_survey_email(survey_url, name, email):

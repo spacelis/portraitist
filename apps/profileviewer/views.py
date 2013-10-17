@@ -35,6 +35,7 @@ from apps.profileviewer.view_utils import assert_magic_signed
 from apps.profileviewer.view_utils import assure_judge
 from apps.profileviewer.view_utils import request_property
 from apps.profileviewer.view_utils import send_self_survey_email
+from apps.profileviewer.view_utils import judgement_for_review
 
 
 COOKIE_LIFE = 90 * 24 * 3600
@@ -168,7 +169,7 @@ def judgement_review(_, judge_id):
     } for idx, j in enumerate(Judge.query().order(Judge.judge_id).fetch())]
     return render_to_response(
         'judgement_review.html',
-        {'judgements': judge.judgements,
+        {'judgements': judgement_for_review(judge.judgements),
          'email': judge.email,
          'name': judge.nickname,
          'judge_id': judge_id,
