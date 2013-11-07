@@ -166,7 +166,8 @@ def judgement_review(_, judge_id):
         'this': j.judge_id == judge_id,
         'jid': j.judge_id,
         'page': idx
-    } for idx, j in enumerate(Judge.query().order(Judge.judge_id).fetch())]
+    } for idx, j in enumerate(Judge.query(Judge.email == 'new_created')
+                              .order(Judge.judge_id).fetch())]
     return render_to_response(
         'judgement_review.html',
         {'judgements': judgement_for_review(judge.judgements),

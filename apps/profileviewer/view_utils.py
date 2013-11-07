@@ -14,6 +14,8 @@ from collections import namedtuple
 from datetime import datetime as dt
 from itertools import chain
 from itertools import groupby
+import sys
+from functools import wraps
 
 from django.core.exceptions import PermissionDenied
 from django.utils.dateparse import parse_datetime
@@ -23,6 +25,31 @@ from apps.profileviewer.models import Judge
 from google.appengine.api import mail
 
 Focus = namedtuple('Focus', ['name', 'value', 'chart'], verbose=True)
+
+
+def DEBUG(func):
+    """ A decorator logging input and output of a function
+
+    :func: @todo
+    :returns: @todo
+
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        """ wrapping the func
+
+        :*args: @todo
+        :*kwargs: @todo
+        :returns: @todo
+
+        """
+        print >> sys.stderr, func.__name__ + \
+            '(' + ', '.join([str(i) for i in args]
+                            + ['%s=%s' % (k, v) for k, v in kwargs]) + ')',
+        ret = func(*args, **kwargs)
+        #print >> sys.stderr, '=', str(ret)
+        return ret
+    return wrapper
 
 
 def get_client(request):

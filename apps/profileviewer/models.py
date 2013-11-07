@@ -17,6 +17,7 @@ from datetime import datetime as dt
 from zlib import compress
 from zlib import decompress
 from hashlib import sha1
+import time
 
 from django.http import Http404
 from google.appengine.ext import ndb
@@ -104,10 +105,12 @@ class Judge(ndb.Model):
         """
         judges = Judge.query(Judge.judge_id == judge_id).fetch(1)
         if not judges:
-            return Judge(parent=parent_key('judge'),
-                         judge_id=judge_id,
-                         judgement_no=0,
-                         judgements=list())
+            j = Judge(parent=parent_key('judge'),
+                      judge_id=judge_id,
+                      judgement_no=0,
+                      judgements=list())
+            time.sleep(1)
+            return j
         return judges[0]
 
     @classmethod

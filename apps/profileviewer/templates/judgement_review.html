@@ -56,7 +56,8 @@
         {% for j in judgements %}
         <label type="radio" class="btn btn-default" onClick="openView('{{ j.candidate }}', '{{ j.scores|jsonencode|urlencode }}');" title="{{ j.created_at | date:"r" }}
 {{ j.ip }}
-{{ j.effort }} min"><!-- Explicit newline for line breaking in title -->
+{{ j.effort }} min
+{{ j.scores }}"><!-- Explicit newline for line breaking in title -->
           <input type="radio" name="candidate" value="{{ forloop.counter1 }}">{{ j.candidate }}
         </label>
         {% endfor %}
