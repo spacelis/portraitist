@@ -72,7 +72,7 @@ class TwitterAccount(ndb.Model):  # pylint: disable-msg=R0903
     """Docstring for TwitterAccount. """
 
     # pylint: disable-msg=E1101
-    checkin = ndb.JsonProperty(repeated=True, index=False, compressed=True)
+    checkin = ndb.JsonProperty(repeated=True, indexed=False, compressed=True)
     screen_name = ndb.StringProperty(indexed=True)
     access_token = ndb.StringProperty(indexed=True)
     access_token_secret = ndb.StringProperty(indexed=True)
@@ -151,7 +151,7 @@ class User(ndb.Model):
     twitter_account = ndb.KeyProperty(indexed=True)
     email_account = ndb.KeyProperty(indexed=True)
     last_seen = ndb.DateTimeProperty(indexed=False)
-    token = ndb.StringProperty(index=True)  # UUID4
+    token = ndb.StringProperty(indexed=True)  # UUID4
     # pylint: enable-msg=E1101
 
     def getName(self):
@@ -226,13 +226,13 @@ class Judgement(ndb.Model):  # pylint: disable-msg=R0903
     """ The judgement given by judges. """
 
     # pylint: disable-msg=E1101
-    judge = ndb.KeyProperty(indexed=True, kind=User)()
-    candidate = ndb.KeyProperty(index=True, kind=User)
+    judge = ndb.KeyProperty(indexed=True, kind=User)
+    candidate = ndb.KeyProperty(indexed=True, kind=User)
     topic = ndb.KeyProperty(indexed=True, kind=GeoEntity)
     score = ndb.IntegerProperty(indexed=False)
-    created_at = ndb.DateTimeProperty(index=False)
-    ipaddr = ndb.StringProperty(index=False)
-    user_agent = ndb.StringProperty(index=False)
+    created_at = ndb.DateTimeProperty(indexed=False)
+    ipaddr = ndb.StringProperty(indexed=False)
+    user_agent = ndb.StringProperty(indexed=False)
     # pylint: enable-msg=E1101
 
     @staticmethod
