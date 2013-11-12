@@ -20,7 +20,7 @@ from datetime import datetime as dt
 from django.http import Http404
 from google.appengine.ext import ndb
 
-DEFAULT_PARENT_KEY = 'geo-expertise-3'
+DEFAULT_PARENT_KEY = ndb.Key('Version', 'geo-expertise-3', app='geo-expertise')
 LONG_TIME = timedelta(minutes=30)
 csv.field_size_limit(500000)
 
@@ -72,7 +72,7 @@ class TwitterAccount(ndb.Model):  # pylint: disable-msg=R0903
     """Docstring for TwitterAccount. """
 
     # pylint: disable-msg=E1101
-    checkin = ndb.JsonProperty(repeated=True, indexed=False, compressed=True)
+    checkin = ndb.JsonProperty(indexed=False, compressed=True)
     screen_name = ndb.StringProperty(indexed=True)
     access_token = ndb.StringProperty(indexed=True)
     access_token_secret = ndb.StringProperty(indexed=True)
@@ -107,7 +107,7 @@ class EmailAccount(ndb.Model):
         :email: An email address associate with this judge.
         :passwd: An password for login.
         :name: An nickname used for greeting.
-        :returns: A newly created account entity.
+        :returns: A newly created User entity.
 
         """
         assertAbsent(EmailAccount, EmailAccount.email, email)
@@ -115,30 +115,31 @@ class EmailAccount(ndb.Model):
                     last_seen=dt.utcnow(),
                     token=newToken(),
                     email_account=None,
-                    twitter_account=None)
+                    twitter_account=None).put()
         account = EmailAccount(email=email,
                                name=name,
                                passwd=secure_hash(passwd),
-                               user=user.key)
-        user.populate(email_account=account).put()
-        account.put()
-        return user
+                               user=user).put()
+        user.get().populate(email_account=account)
+        return user.get()
 
     @staticmethod
     def signIn(email, passwd):
         """ Sign in the account.
 
-        :email: @todo
-        :passwd: @todo
-        :returns: @todo
+        :email: Registered email.
+        :passwd: Registered password.
+        :returns: A new token.
 
         """
         try:
             user = EmailAccount.query(
                 (EmailAccount.email == email),
-                (EmailAccount.passwd == secure_hash(passwd))).fetch(1)[0]
-            user.token = newToken()
-            user.last_seen = dt.utcnow()
+                (EmailAccount.passwd == secure_hash(passwd))) \
+                .fetch(1)[0].user.get()
+            token = newToken()
+            user.populate(token=token, last_seen=dt.utcnow())
+            return token
         except IndexError:
             raise ValueError('User not found.')
 
@@ -190,9 +191,22 @@ class User(ndb.Model):
         :throws: ValueError if the last seen is long time ago.
 
         """
-        if (dt.utcnow() - self.last_seen > LONG_TIME):
+        if self.isDead():
             raise ValueError('Long time no see.')
-        self.last_seen = dt.utcnow()
+        self.populate(last_seen=dt.utcnow())
+        if self.token is not None:
+            memcache.set(key='User.' + self.token,
+                         value=self,
+                         timeout=3600)
+
+    def isDead(self):
+        """ Return whether the session is ended.
+
+        :returns: @todo
+
+        """
+        assert self.last_seen <= dt.utcnow()
+        return dt.utcnow() - self.last_seen > LONG_TIME
 
     @staticmethod
     def getByToken(token):
@@ -203,7 +217,9 @@ class User(ndb.Model):
 
         """
         try:
-            return User.query(User.token == token).fetch(1)[0]
+            user = memcache.get('User.' + token) or \
+                User.query(User.token == token).fetch(1)[0]
+            user.heartBeat()
         except IndexError:
             raise ValueError('Token not found: ' + token)
 
