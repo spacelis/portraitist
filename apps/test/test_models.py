@@ -58,18 +58,22 @@ class TestBaseModel(unittest.TestCase):
         self.testbed.init_memcache_stub()
         self.testbed.init_datastore_v3_stub()
 
-    def tearDown(self):
-        self.testbed.deactivate()
-
-    def test_BaseModel(self):
-        """ test_BaseModel. """
-        class A(M.BaseModel):
+        class AClass(M.BaseModel):
             akey = ndb.model.KeyProperty(indexed=True)
             name = ndb.model.StringProperty(indexed=True)
             gender = ndb.model.StringProperty(indexed=False)
 
-            bm_protected = ['gender']
+            bm_updatable = ['name']
+            bm_viewable = ['gender']
 
+        self.aclass = AClass
+
+    def tearDown(self):
+        self.testbed.deactivate()
+
+    def test_BaseModel_encode(self):
+        """ test_BaseModel. """
+        A = self.aclass
         a = A()
         self.assertTrue(isinstance(A.akey, ndb.model.KeyProperty))
         self.assertEqual(a.bm_version, 0)
@@ -83,9 +87,32 @@ class TestBaseModel(unittest.TestCase):
                                u'gender': None,
                                u'name': None})
 
-    def test_jsdecode(self):
+    def test_BaseModel_load(self):
         """ test_jsdecode. """
-        pass
+        A = self.aclass
+        datapack = json.dumps({u'bm_version': 0,
+                               u'gender': 'male',
+                               u'name': 'Jack Shaphard'})
+        a = A.load(datapack)
+        self.assertEqual(a.name, 'Jack Shaphard')
+        self.assertIsNone(a.key)
+
+    def test_BaseModel_load2(self):
+        """ test_BaseModel_load2. """
+        A = self.aclass
+        a = A(name='Jack Shaphard',
+              gender='male').put()
+        obj = {'name': 'Swyer',
+               'gender': 'female',
+               'bm_version': 1,
+               '__KEY__': a.urlsafe()}
+        a = A.load(json.dumps(obj))
+        self.assertEqual(a.name, 'Swyer')
+        self.assertEqual(a.gender, 'male')
+        self.assertIsNotNone(a.key)
+        b = A.query().fetch()[0]
+        self.assertEqual(b.name, 'Swyer')
+        self.assertEqual(a.gender, 'male')
 
 
 class TestNDB(unittest.TestCase):

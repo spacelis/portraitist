@@ -72,75 +72,71 @@ def assertAbsent(model, field, value):
 
 class BaseModel(ndb.Model):
 
-    """ A unified model. """
+    """ A unified model with enhanced serierlizing methods.
 
-    # pylint: disable-msg=E1101
+    :bm_version: Used for tracking the versions of an object.
+    :bm_viewable: Defines the properties returned in js_encode().
+    :bm_updatable: Defines the properties accepting updates for load().
+
+    Methods:
+        js_encode() will return a snippet of javascript with base64 encoded
+        data.
+        load() will will populate a model object with a dict while keep
+        non-updatable properties untouched.
+    """
+
+    # pylint: disable=E1101
     bm_version = ndb.IntegerProperty(default=0)
-    # pylint: enable-msg=E1101
-    bm_protected = None
-    bm_keyproperties = None
+    # pylint: enable=E1101
+    bm_updatable = None
+    bm_viewable = None
     BM_KEYNAME = '__KEY__'
 
     def js_encode(self):
         """ encode for javascript. """
-        self.__class__._ensure_keyproperties()  # pylint: disable=W0212
         d = self.to_dict()
-        d = {k: d[k] for k in self._properties
-             if k not in self.bm_keyproperties}
+        d = {k: d[k] for k in set(self.bm_updatable +
+                                  self.bm_viewable + ['bm_version'])}
         if self.key:
             d[self.BM_KEYNAME] = self.key.urlsafe()
         return 'JSON.parse(atob("%s"))' % (base64.b64encode(json.dumps(d)), )
 
-    @staticmethod
-    def _decode(encoded):
-        """ decode from the encoded. """
-        return json.loads(base64.b64decode(encoded))
-
     @classmethod
-    def _ensure_keyproperties(cls):
-        """ Ensure that _keyproperties being initialized before use.
+    def load(cls, val=None, b64=False):
+        """ Sync the value and return the synced one.
 
-        :returns: None
+        :val: A string encoded json object.
+        :b64: Whether the string is base64 encoded.
 
         """
-        if cls.bm_keyproperties is None:
-            cls.bm_keyproperties = list()
-            for n, p in cls._properties.iteritems():
-                # pylint: disable=E1101
-                if isinstance(p, ndb.model.KeyProperty):
-                    cls.bm_keyproperties.append(n)
-                # pylint: enable=E1101
-
-    @classmethod
-    def js_decode(cls, val=None):
-        """ Sync the value and return the synced one. """
-        cls._ensure_keyproperties()
+        assert not b64, "Base64 decoding is not supported yet."
         if isinstance(val, str) and len(val):
-            raw_obj = cls.js_decode(val)
-            mobj = _k(raw_obj[cls.BM_KEYNAME]).get()
+            raw_obj = json.loads(val)
             ver = raw_obj['bm_version']
             d = {k: v
                  for k, v in raw_obj.iteritems()
-                 if k in cls._properties and
-                 k not in cls.bm_keyproperties and
-                 k not in cls.bm_protected}
-            if mobj.bm_version < ver:  # pylint: disable-msg=W0212
-                mobj.populate(**d)  # pylint: disable-msg=W0142
+                 if k in cls.bm_updatable}
+            try:
+                mobj = _k(raw_obj[cls.BM_KEYNAME]).get()
+                if mobj.bm_version < ver:  # pylint: disable=W0212
+                    mobj.populate(**d)  # pylint: disable=W0142
+            except KeyError:
+                mobj = cls(**d)  # pylint: disable=W0142
             return mobj
 
 
-class TwitterAccount(ndb.Model):  # pylint: disable-msg=R0903,R0921
+class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
 
     """Docstring for TwitterAccount. """
 
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
     checkins = ndb.JsonProperty(indexed=False, compressed=True)
     friends = ndb.StringProperty(indexed=False, repeated=True)
     screen_name = ndb.StringProperty(indexed=True)
     access_token = ndb.StringProperty(indexed=True)
     access_token_secret = ndb.StringProperty(indexed=True)
     user = ndb.KeyProperty(indexed=True, kind='User')
-    # pylint: enable-msg=E1101
+    # pylint: enable=E1101
 
     @staticmethod
     def singIn(access_token, access_token_secret):
@@ -154,6 +150,7 @@ class TwitterAccount(ndb.Model):  # pylint: disable-msg=R0903,R0921
     @staticmethod
     def getByScreenName(screen_name):
         """ Return the account with the given screen_name.
+
         :returns: A TwitterAccount
 
         """
@@ -175,12 +172,12 @@ class EmailAccount(ndb.Model):
 
     """ The email account registered with this site. """
 
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
     name = ndb.StringProperty(indexed=True)
     email = ndb.StringProperty(indexed=True)
     passwd = ndb.StringProperty(indexed=True)
     user = ndb.KeyProperty(indexed=True, kind='User')
-    # pylint: enable-msg=E1101
+    # pylint: enable=E1101
 
     @staticmethod
     def signUp(email, passwd, name):
@@ -226,17 +223,17 @@ class EmailAccount(ndb.Model):
             raise ValueError('User not found.')
 
 
-class User(ndb.Model):
+class User(BaseModel):
 
     """ A class representing users as judges or candidates."""
 
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
     twitter_account = ndb.KeyProperty(indexed=True)
     email_account = ndb.KeyProperty(indexed=True)
     last_seen = ndb.DateTimeProperty(indexed=False)
     token = ndb.StringProperty(indexed=True)  # UUID4
     info = ndb.JsonProperty(indexed=False)
-    # pylint: enable-msg=E1101
+    # pylint: enable=E1101
 
     def getName(self):
         """ Return a name for this user.
@@ -332,17 +329,17 @@ class User(ndb.Model):
             raise ValueError('Token not found: ' + token)
 
 
-class GeoEntity(ndb.Model):  # pylint: disable-msg=R0903
+class GeoEntity(ndb.Model):  # pylint: disable=R0903
 
     """ A model for entities like POI, Category. """
 
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
     tfid = ndb.StringProperty(indexed=True)
     name = ndb.StringProperty(indexed=False)
     group = ndb.StringProperty(indexed=False)  # e.g., category, poi
     relation = ndb.JsonProperty(indexed=False)
     url = ndb.StringProperty(indexed=False)
-    # pylint: enable-msg=E1101
+    # pylint: enable=E1101
 
     @staticmethod
     def getByTFId(tfid):
@@ -358,11 +355,11 @@ class GeoEntity(ndb.Model):  # pylint: disable-msg=R0903
             raise KeyError()
 
 
-class Judgement(ndb.Model):  # pylint: disable-msg=R0903
+class Judgement(ndb.Model):  # pylint: disable=R0903
 
     """ The judgement given by judges. """
 
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
     judge = ndb.KeyProperty(indexed=True, kind=User)
     candidate = ndb.KeyProperty(indexed=True, kind=User)
     topic = ndb.KeyProperty(indexed=True, kind=GeoEntity)
@@ -370,7 +367,7 @@ class Judgement(ndb.Model):  # pylint: disable-msg=R0903
     created_at = ndb.DateTimeProperty(indexed=False)
     ipaddr = ndb.StringProperty(indexed=False)
     user_agent = ndb.StringProperty(indexed=False)
-    # pylint: enable-msg=E1101
+    # pylint: enable=E1101
 
     @staticmethod
     def add(judge, candidate, scores, ipaddr, user_agent):
@@ -395,18 +392,18 @@ class Judgement(ndb.Model):  # pylint: disable-msg=R0903
                       user_agent=user_agent).put()
 
 
-class ExpertiseRank(ndb.Model):  # pylint: disable-msg=R0903
+class ExpertiseRank(ndb.Model):  # pylint: disable=R0903
 
     """ The ranking needed to be annotated. """
 
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
     topic_id = ndb.StringProperty(indexed=False)
     topic = ndb.KeyProperty(indexed=True, kind=GeoEntity)
     region = ndb.StringProperty(indexed=True)
     candidate = ndb.KeyProperty(indexed=True, kind=TwitterAccount)
     rank = ndb.IntegerProperty(indexed=False)
     rank_info = ndb.JsonProperty(indexed=False)  # e.g., methods, profile
-    # pylint: enable-msg=E1101
+    # pylint: enable=E1101
 
     class ExpertNotExists(Http404):
         """ Exception when the expert queried does not exist"""
@@ -427,22 +424,22 @@ class AnnotationTask(ndb.Model):  # pylint: disable=R0903
 
     """ A task usually contains all rankings from one canddiate. """
 
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
     rankings = ndb.KeyProperty(repeated=True)
-    # pylint: enable-msg=E1101
+    # pylint: enable=E1101
 
 
 class TaskPackage(ndb.Model):
 
     """ A package of tasks. """
 
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
     tasks = ndb.KeyProperty(repeated=True, kind=AnnotationTask)
     progress = ndb.KeyProperty(repeated=True, kind=AnnotationTask)
     done_by = ndb.KeyProperty(indexed=True, repeated=True, kind=User)
     confirm_code = ndb.StringProperty()
     assigned_at = ndb.DateTimeProperty(indexed=True)
-    # pylint: enable-msg=E1101
+    # pylint: enable=E1101
 
     class TaskPackageNotExists(Http404):
         """ If the task_pack_id doesn't exists"""
@@ -502,10 +499,10 @@ class Session(ndb.Model):
 
     """ This is a class for session control. """
 
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
     user = ndb.KeyProperty(indexed=True, kind=User)
     token = ndb.StringProperty(indexed=True)
-    # pylint: enable-msg=E1101
+    # pylint: enable=E1101
 
     @staticmethod
     def getOrStart(token=None):
