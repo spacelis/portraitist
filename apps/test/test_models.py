@@ -12,8 +12,10 @@ Description:
 """
 
 import unittest
+import json
 from google.appengine.ext import testbed
 from google.appengine.api import memcache
+from google.appengine.ext import ndb
 from collections import Counter
 
 import apps.profileviewer.models as M
@@ -45,6 +47,107 @@ class TestModelUtils(unittest.TestCase):
         self.assertEquals(M.secure_hash('a'), M.secure_hash('a'))
 
 
+class TestBaseModel(unittest.TestCase):
+
+    """ TestBaseModel. """
+
+    def setUp(self):
+        self.testbed = testbed.Testbed()
+        self.testbed.setup_env(app_id='geo-expertise')
+        self.testbed.activate()
+        self.testbed.init_memcache_stub()
+        self.testbed.init_datastore_v3_stub()
+
+    def tearDown(self):
+        self.testbed.deactivate()
+
+    def test_BaseModel(self):
+        """ test_BaseModel. """
+        class A(M.BaseModel):
+            akey = ndb.model.KeyProperty(indexed=True)
+            name = ndb.model.StringProperty(indexed=True)
+            gender = ndb.model.StringProperty(indexed=False)
+
+            bm_protected = ['gender']
+
+        a = A()
+        self.assertTrue(isinstance(A.akey, ndb.model.KeyProperty))
+        self.assertEqual(a.bm_version, 0)
+        import subprocess
+        out = subprocess.check_output(
+            ['node', '-e', 'atob=require("atob");\
+             process.stdout.write(JSON.stringify(%s))'
+             % (a.js_encode(), )])
+        obj = json.loads(out)
+        self.assertEqual(obj, {u'bm_version': 0,
+                               u'gender': None,
+                               u'name': None})
+
+    def test_jsdecode(self):
+        """ test_jsdecode. """
+        pass
+
+
+class TestNDB(unittest.TestCase):
+
+    """ Test NDB Feature. """
+
+    def setUp(self):
+        self.testbed = testbed.Testbed()
+        self.testbed.setup_env(app_id='geo-expertise')
+        self.testbed.activate()
+        self.testbed.init_memcache_stub()
+        self.testbed.init_datastore_v3_stub()
+
+    def tearDown(self):
+        self.testbed.deactivate()
+
+    def test_name(self):
+        pass
+
+    def test_inheritance(self):
+        """ test_inheritance. """
+        class A(ndb.Model):
+            version = ndb.IntegerProperty()
+
+        class B(A):
+            name = ndb.StringProperty()
+            gender = ndb.StringProperty()
+
+        b = B(name='Jack Shaphard', gender='mail', version=100)
+        b.put()
+        self.assertEquals(B.query().fetch()[0].version, 100)
+        self.assertIsNotNone(b.key)
+        self.assertIsNone(B().key)
+
+    def test_populate(self):
+        """ test_populate. """
+        g = M.GeoEntity(tfid='a', name='c', group='a', relation='s', url='h')
+        g.put()
+        g.populate(tfid='b')
+        self.assertEqual(M.GeoEntity.query().fetch()[0].tfid, 'b')
+
+    def test_memcache(self):
+        """ test_memcache. """
+        self.assertIsNone(memcache.get('something'))
+        memcache.set(key='something', value=1)
+        self.assertIsNotNone(memcache.get('something'))
+
+    def test_memcache2(self):
+        """ test_memcache2. """
+        f = M.GeoEntity(tfid='a', name='c', group='a', relation='s', url='h')
+        memcache.set(key='a', value=f)
+        memcache.set(key='b', value=f)
+        g = memcache.get('a')
+        g.name = 'xxx'
+        self.assertNotEqual(memcache.get('a').name, 'xxx')
+
+    def test_keykind(self):
+        """ test_keykind. """
+        g = M.GeoEntity(tfid='a', name='c', group='a', relation='s', url='h')
+        self.assertEquals(g.put().kind(), 'GeoEntity')
+
+
 class TestModels(unittest.TestCase):
 
     """models tests."""
@@ -58,19 +161,6 @@ class TestModels(unittest.TestCase):
 
     def tearDown(self):
         self.testbed.deactivate()
-
-    def test_populate(self):
-        """ test_basis. """
-        g = M.GeoEntity(tfid='a', name='c', group='a', relation='s', url='h')
-        g.put()
-        g.populate(tfid='b')
-        self.assertEqual(M.GeoEntity.query().fetch()[0].tfid, 'b')
-
-    def test_memcache(self):
-        """ test_basis. """
-        self.assertIsNone(memcache.get('something'))
-        memcache.set(key='something', value=1)
-        self.assertIsNotNone(memcache.get('something'))
 
     def test_EmailAccount(self):
         """ test EmailAccount. """
