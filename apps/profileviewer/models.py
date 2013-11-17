@@ -70,39 +70,78 @@ def assertAbsent(model, field, value):
         raise ValueError
 
 
-class BaseModel(ndb.Model):
+class Encodable(object):
 
     """ A unified model with enhanced serierlizing methods.
 
-    :bm_version: Used for tracking the versions of an object.
     :bm_viewable: Defines the properties returned in js_encode().
     :bm_updatable: Defines the properties accepting updates for load().
 
     Methods:
         js_encode() will return a snippet of javascript with base64 encoded
         data.
-        load() will will populate a model object with a dict while keep
+        js_decode() will will populate a model object with a dict while keep
         non-updatable properties untouched.
+
+    Require:
+        to_dict() to be defined.
+
     """
 
-    # pylint: disable=E1101
-    bm_version = ndb.IntegerProperty(default=0)
-    # pylint: enable=E1101
-    bm_updatable = None
-    bm_viewable = None
-    BM_KEYNAME = '__KEY__'
+    JS_CLASS = """{
+        payload: JSON.parse(atob("%s")),
+        get: function(name){
+            return this.payload[name];
+        },
+        set: function(name, val){
+            if(this.payload[name] !== val){
+                this.payload["__CHANGED__"] = true;
+                this.payload[name] = val;
+            }
+        }
+    }"""
 
     def js_encode(self):
         """ encode for javascript. """
-        d = self.to_dict()
-        d = {k: d[k] for k in set(self.bm_updatable +
-                                  self.bm_viewable + ['bm_version'])}
-        if self.key:
-            d[self.BM_KEYNAME] = self.key.urlsafe()
-        return 'JSON.parse(atob("%s"))' % (base64.b64encode(json.dumps(d)), )
+        d = self.as_dict()
+        assert '__CHANGED__' not in d, '__CHANGED__ key is reserved.'
+        d['__CHANGED__'] = False
+        return self.JS_CLASS % (base64.b64encode(json.dumps(d)), )
+
+    @staticmethod
+    def js_decode(b64str):
+        """ decode the b64str into dict object.
+
+        :b64str: the encoded json object.
+        :return: the dict, whether something changed
+
+        """
+        d = json.loads(base64.b64decode(b64str))
+        if d['__CHANGED__']:
+            c = True
+        else:
+            c = False
+        del d['__CHANGED__']
+        return d, c
+
+    def as_dict(self):
+        """ Return a dict representation of current object.
+
+        :returns: A dict object.
+
+        """
+        raise NotImplementedError
+
+
+class EncodableModel(ndb.Model, Encodable):
+
+    """ A ndb based model with encoding and syncing. """
+
+    bm_viewable = None
+    bm_updatable = None
 
     @classmethod
-    def load(cls, val=None, b64=False):
+    def synced(cls, val=None, b64=False):
         """ Sync the value and return the synced one.
 
         :val: A string encoded json object.
@@ -111,32 +150,45 @@ class BaseModel(ndb.Model):
         """
         assert not b64, "Base64 decoding is not supported yet."
         if isinstance(val, str) and len(val):
-            raw_obj = json.loads(val)
-            ver = raw_obj['bm_version']
+            raw_obj, changed = Encodable.js_decode(val)
             d = {k: v
                  for k, v in raw_obj.iteritems()
                  if k in cls.bm_updatable}
             try:
-                mobj = _k(raw_obj[cls.BM_KEYNAME]).get()
-                if mobj.bm_version < ver:  # pylint: disable=W0212
+                mobj = _k(raw_obj['__KEY__']).get()
+                if changed:  # pylint: disable=W0212
                     mobj.populate(**d)  # pylint: disable=W0142
             except KeyError:
                 mobj = cls(**d)  # pylint: disable=W0142
             return mobj
+
+    def as_dict(self):
+        """ Return a dict representation of data model.
+
+        :returns: @todo
+
+        """
+        d = self.to_dict()
+        if self.key:
+            d['__KEY__'] = self.key.urlsafe()
+        else:
+            d['__KEY__'] = None
+        return {k: v for k, v in d.iteritems()
+                if k in self.bm_viewable
+                or k in self.bm_updatable
+                or k == '__KEY__'}
 
 
 class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
 
     """Docstring for TwitterAccount. """
 
-    # pylint: disable=E1101
-    checkins = ndb.JsonProperty(indexed=False, compressed=True)
-    friends = ndb.StringProperty(indexed=False, repeated=True)
-    screen_name = ndb.StringProperty(indexed=True)
-    access_token = ndb.StringProperty(indexed=True)
-    access_token_secret = ndb.StringProperty(indexed=True)
-    user = ndb.KeyProperty(indexed=True, kind='User')
-    # pylint: enable=E1101
+    checkins = ndb.model.JsonProperty(indexed=False, compressed=True)
+    friends = ndb.model.StringProperty(indexed=False, repeated=True)
+    screen_name = ndb.model.StringProperty(indexed=True)
+    access_token = ndb.model.StringProperty(indexed=True)
+    access_token_secret = ndb.model.StringProperty(indexed=True)
+    user = ndb.model.KeyProperty(indexed=True, kind='User')
 
     @staticmethod
     def singIn(access_token, access_token_secret):
@@ -172,12 +224,9 @@ class EmailAccount(ndb.Model):
 
     """ The email account registered with this site. """
 
-    # pylint: disable=E1101
-    name = ndb.StringProperty(indexed=True)
-    email = ndb.StringProperty(indexed=True)
-    passwd = ndb.StringProperty(indexed=True)
-    user = ndb.KeyProperty(indexed=True, kind='User')
-    # pylint: enable=E1101
+    email = ndb.model.StringProperty(indexed=True)
+    passwd = ndb.model.StringProperty(indexed=True)
+    user = ndb.model.KeyProperty(indexed=True, kind='User')
 
     @staticmethod
     def signUp(email, passwd, name):
@@ -191,19 +240,17 @@ class EmailAccount(ndb.Model):
         """
         assertAbsent(EmailAccount, EmailAccount.email, email)
         user = User(parent=DEFAULT_PARENT_KEY,
-                    last_seen=dt.utcnow(),
-                    token=newToken(),
+                    name=name,
                     email_account=None,
                     twitter_account=None).put()
         account = EmailAccount(email=email,
-                               name=name,
                                passwd=secure_hash(passwd),
                                user=user).put()
         user.get().populate(email_account=account)
         return user.get()
 
     @staticmethod
-    def signIn(email, passwd):
+    def login(email, passwd):
         """ Sign in the account.
 
         :email: Registered email.
@@ -216,62 +263,25 @@ class EmailAccount(ndb.Model):
                 (EmailAccount.email == email),
                 (EmailAccount.passwd == secure_hash(passwd))) \
                 .fetch(1)[0].user.get()
-            token = newToken()
-            user.populate(token=token, last_seen=dt.utcnow())
-            return token
+            return user
         except IndexError:
             raise ValueError('User not found.')
 
 
-class User(BaseModel):
+class User(EncodableModel):
 
     """ A class representing users as judges or candidates."""
 
     # pylint: disable=E1101
-    twitter_account = ndb.KeyProperty(indexed=True)
-    email_account = ndb.KeyProperty(indexed=True)
-    last_seen = ndb.DateTimeProperty(indexed=False)
-    token = ndb.StringProperty(indexed=True)  # UUID4
-    info = ndb.JsonProperty(indexed=False)
+    name = ndb.model.StringProperty(indexed=True)
+    twitter_account = ndb.model.KeyProperty(indexed=True)
+    email_account = ndb.model.KeyProperty(indexed=True)
+    last_seen = ndb.model.DateTimeProperty()
+    seen_instructions = ndb.model.BooleanProperty(default=False)
+    done_survey = ndb.model.BooleanProperty(default=False)
+    done_tasks = ndb.model.IntegerProperty(default=0)
+    info = ndb.model.JsonProperty(indexed=False)
     # pylint: enable=E1101
-
-    def getName(self):
-        """ Return a name for this user.
-
-        :returns: @todo
-
-        """
-        if self.twitter_account:
-            return self.twitter_account.get().screen_name
-        elif self.email_account:
-            return self.email_account.get().name
-        else:
-            return "Unknown User"
-
-    @staticmethod
-    def default_info():
-        """ Return the default info object. """
-        return {
-            'show_instructions': 1,
-            'done_survey': 0,
-            'done_tasks': 0,
-            'version': 0
-        }
-
-    def getSyncedInfo(self, info=None):
-        """ Return associated information of the user.
-
-        :return: A dict() object.
-
-        """
-        if not info:
-            info = User.default_info()
-        if not self.info or self.info['version'] < info['version']:
-            self.info = info
-            self.put()
-            return info
-        else:
-            return self.info
 
     def addTwitterAccount(self, access_token, access_token_secret):
         """@todo: Docstring for linkTwitter.
@@ -289,57 +299,16 @@ class User(BaseModel):
         )
         self.twitter_account = t.key
 
-    def heartBeat(self):
-        """ Make heart beat for users' session.
-
-        :returns: None
-        :throws: ValueError if the last seen is long time ago.
-
-        """
-        if self.isDead():
-            raise ValueError('Long time no see.')
-        self.populate(last_seen=dt.utcnow())
-        if self.token is not None:
-            memcache.set(key='User.' + self.token,  # pylint: disable=E1101
-                         value=self,
-                         time=3600)
-
-    def isDead(self):
-        """ Return whether the session is ended.
-
-        :returns: @todo
-
-        """
-        assert self.last_seen <= dt.utcnow()
-        return dt.utcnow() - self.last_seen > LONG_TIME
-
-    @staticmethod
-    def getByToken(token):
-        """ Return the user object holding the token.
-
-        :token: @todo
-        :returns: @todo
-
-        """
-        try:
-            user = (memcache.get('User.' + token)  # pylint: disable=E1101
-                    or User.query(User.token == token).fetch(1)[0])
-            user.heartBeat()
-        except IndexError:
-            raise ValueError('Token not found: ' + token)
-
 
 class GeoEntity(ndb.Model):  # pylint: disable=R0903
 
     """ A model for entities like POI, Category. """
 
-    # pylint: disable=E1101
-    tfid = ndb.StringProperty(indexed=True)
-    name = ndb.StringProperty(indexed=False)
-    group = ndb.StringProperty(indexed=False)  # e.g., category, poi
-    relation = ndb.JsonProperty(indexed=False)
-    url = ndb.StringProperty(indexed=False)
-    # pylint: enable=E1101
+    tfid = ndb.model.StringProperty(indexed=True)
+    name = ndb.model.StringProperty(indexed=False)
+    group = ndb.model.StringProperty(indexed=False)  # e.g., category, poi
+    relation = ndb.model.JsonProperty(indexed=False)
+    url = ndb.model.StringProperty(indexed=False)
 
     @staticmethod
     def getByTFId(tfid):
@@ -359,15 +328,13 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
 
     """ The judgement given by judges. """
 
-    # pylint: disable=E1101
-    judge = ndb.KeyProperty(indexed=True, kind=User)
-    candidate = ndb.KeyProperty(indexed=True, kind=User)
-    topic = ndb.KeyProperty(indexed=True, kind=GeoEntity)
-    score = ndb.IntegerProperty(indexed=False)
-    created_at = ndb.DateTimeProperty(indexed=False)
-    ipaddr = ndb.StringProperty(indexed=False)
-    user_agent = ndb.StringProperty(indexed=False)
-    # pylint: enable=E1101
+    judge = ndb.model.KeyProperty(indexed=True, kind=User)
+    candidate = ndb.model.KeyProperty(indexed=True, kind=User)
+    topic = ndb.model.KeyProperty(indexed=True, kind=GeoEntity)
+    score = ndb.model.IntegerProperty(indexed=False)
+    created_at = ndb.model.DateTimeProperty(indexed=False)
+    ipaddr = ndb.model.StringProperty(indexed=False)
+    user_agent = ndb.model.StringProperty(indexed=False)
 
     @staticmethod
     def add(judge, candidate, scores, ipaddr, user_agent):
@@ -396,14 +363,12 @@ class ExpertiseRank(ndb.Model):  # pylint: disable=R0903
 
     """ The ranking needed to be annotated. """
 
-    # pylint: disable=E1101
-    topic_id = ndb.StringProperty(indexed=False)
-    topic = ndb.KeyProperty(indexed=True, kind=GeoEntity)
-    region = ndb.StringProperty(indexed=True)
-    candidate = ndb.KeyProperty(indexed=True, kind=TwitterAccount)
-    rank = ndb.IntegerProperty(indexed=False)
-    rank_info = ndb.JsonProperty(indexed=False)  # e.g., methods, profile
-    # pylint: enable=E1101
+    topic_id = ndb.model.StringProperty(indexed=False)
+    topic = ndb.model.KeyProperty(indexed=True, kind=GeoEntity)
+    region = ndb.model.StringProperty(indexed=True)
+    candidate = ndb.model.KeyProperty(indexed=True, kind=TwitterAccount)
+    rank = ndb.model.IntegerProperty(indexed=False)
+    rank_info = ndb.model.JsonProperty(indexed=False)  # e.g., methods, profile
 
     class ExpertNotExists(Http404):
         """ Exception when the expert queried does not exist"""
@@ -424,22 +389,18 @@ class AnnotationTask(ndb.Model):  # pylint: disable=R0903
 
     """ A task usually contains all rankings from one canddiate. """
 
-    # pylint: disable=E1101
-    rankings = ndb.KeyProperty(repeated=True)
-    # pylint: enable=E1101
+    rankings = ndb.model.KeyProperty(repeated=True)
 
 
 class TaskPackage(ndb.Model):
 
     """ A package of tasks. """
 
-    # pylint: disable=E1101
-    tasks = ndb.KeyProperty(repeated=True, kind=AnnotationTask)
-    progress = ndb.KeyProperty(repeated=True, kind=AnnotationTask)
-    done_by = ndb.KeyProperty(indexed=True, repeated=True, kind=User)
-    confirm_code = ndb.StringProperty()
-    assigned_at = ndb.DateTimeProperty(indexed=True)
-    # pylint: enable=E1101
+    tasks = ndb.model.KeyProperty(repeated=True, kind=AnnotationTask)
+    progress = ndb.model.KeyProperty(repeated=True, kind=AnnotationTask)
+    done_by = ndb.model.KeyProperty(indexed=True, repeated=True, kind=User)
+    confirm_code = ndb.model.StringProperty()
+    assigned_at = ndb.model.DateTimeProperty(indexed=True)
 
     class TaskPackageNotExists(Http404):
         """ If the task_pack_id doesn't exists"""
@@ -495,14 +456,20 @@ class TaskPackage(ndb.Model):
         return self.confirm_code
 
 
-class Session(ndb.Model):
+class Session(Encodable):
 
     """ This is a class for session control. """
 
-    # pylint: disable=E1101
-    user = ndb.KeyProperty(indexed=True, kind=User)
-    token = ndb.StringProperty(indexed=True)
-    # pylint: enable=E1101
+    def __init__(self):
+        """ Init a session.
+
+        :token: @todo
+        :returns: @todo
+
+        """
+        self.user = None
+        self.token = newToken('session')
+        self.last_seen = dt.utcnow()
 
     @staticmethod
     def getOrStart(token=None):
@@ -511,9 +478,9 @@ class Session(ndb.Model):
             session = memcache.get(token)  # pylint: disable=E1101
             if isinstance(session, Session):
                 return session
-        token = newToken('session')
-        memcache.set(key=token,  # pylint: disable=E1101
-                     value=Session(user=None, token=token),
+        session = Session()
+        memcache.set(key=session.token,  # pylint: disable=E1101
+                     value=session,
                      time=1800)
         return session
 
@@ -525,6 +492,9 @@ class Session(ndb.Model):
 
         """
         self.user = user.key
+        memcache.set(key=self.token,  # pylint: disable=E1101
+                     value=self,
+                     time=1800)
         return self
 
     def isAttached(self):
@@ -534,3 +504,38 @@ class Session(ndb.Model):
 
         """
         return self.user is not None
+
+    def heartBeat(self):
+        """ Make heart beat for users' session.
+
+        :returns: None
+        :throws: ValueError if the last seen is long time ago.
+
+        """
+        if self.isDead():
+            raise ValueError('Long time no see.')
+        self.last_seen = dt.utcnow()
+        if self.token is not None:
+            memcache.set(key=self.token,  # pylint: disable=E1101
+                         value=self,
+                         time=3600)
+
+    def isDead(self):
+        """ Return whether the session is ended.
+
+        :returns: @todo
+
+        """
+        assert self.last_seen <= dt.utcnow()
+        return dt.utcnow() - self.last_seen > LONG_TIME
+
+    def as_dict(self):
+        """ Return a dict object representing the data.
+
+        :returns: @todo
+
+        """
+        return {
+            'token': self.token,
+            'isAttached': self.isAttached()
+        }

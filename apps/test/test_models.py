@@ -58,10 +58,11 @@ class TestBaseModel(unittest.TestCase):
         self.testbed.init_memcache_stub()
         self.testbed.init_datastore_v3_stub()
 
-        class AClass(M.BaseModel):
+        class AClass(M.EncodableModel):
             akey = ndb.model.KeyProperty(indexed=True)
             name = ndb.model.StringProperty(indexed=True)
             gender = ndb.model.StringProperty(indexed=False)
+            address = ndb.model.JsonProperty(indexed=False)
 
             bm_updatable = ['name']
             bm_viewable = ['gender']
@@ -71,42 +72,82 @@ class TestBaseModel(unittest.TestCase):
     def tearDown(self):
         self.testbed.deactivate()
 
+    def test_NDB_todict(self):
+        """ test ndb.Model.to_dict(). """
+        A = self.aclass
+        a = A()
+        a.put()
+        self.assertEqual(a.to_dict(), {'akey': None,
+                                       'name': None,
+                                       'gender': None,
+                                       'address': None})
+
+    def test_NDB_todict2(self):
+        """ test ndb.Model.to_dict() for json. """
+        A = self.aclass
+        a = A(address={'line1': 'Juniusstraat'})
+        self.assertEqual(a.to_dict(), {'akey': None,
+                                       'name': None,
+                                       'gender': None,
+                                       'address': {'line1': 'Juniusstraat'}})
+
     def test_BaseModel_encode(self):
         """ test_BaseModel. """
         A = self.aclass
         a = A()
-        self.assertTrue(isinstance(A.akey, ndb.model.KeyProperty))
-        self.assertEqual(a.bm_version, 0)
+        self.assertIsInstance(A.akey, ndb.model.KeyProperty)
         import subprocess
         out = subprocess.check_output(
             ['node', '-e', 'atob=require("atob");\
-             process.stdout.write(JSON.stringify(%s))'
+             process.stdout.write(JSON.stringify(%s.payload))'
              % (a.js_encode(), )])
         obj = json.loads(out)
-        self.assertEqual(obj, {u'bm_version': 0,
-                               u'gender': None,
-                               u'name': None})
+        self.assertEqual(obj, {u'gender': None,
+                               u'name': None,
+                               '__CHANGED__': False,
+                               '__KEY__': None})
 
-    def test_BaseModel_load(self):
-        """ test_jsdecode. """
+    def test_BaseModel_encode2(self):
+        """ test_BaseModel. """
         A = self.aclass
-        datapack = json.dumps({u'bm_version': 0,
-                               u'gender': 'male',
-                               u'name': 'Jack Shaphard'})
-        a = A.load(datapack)
+        a = A()
+        self.assertTrue(isinstance(A.akey, ndb.model.KeyProperty))
+        import subprocess
+        out = subprocess.check_output(
+            ['node', '-e', """atob=require("atob");
+             var x = %s;
+             x.set("name", "Swyer");
+             process.stdout.write(JSON.stringify(x.payload))"""
+             % (a.js_encode(), )])
+        obj = json.loads(out)
+        self.assertEqual(obj, {u'__CHANGED__': True,
+                               u'gender': None,
+                               u'name': 'Swyer',
+                               u'__KEY__': None})
+
+    def test_BaseModel_synced(self):
+        """ test_jsdecode. """
+        import base64
+        A = self.aclass
+        datapack = base64.b64encode(
+            json.dumps({u'__CHANGED__': True,
+                        u'gender': 'male',
+                        u'name': 'Jack Shaphard'}))
+        a = A.synced(datapack)
         self.assertEqual(a.name, 'Jack Shaphard')
         self.assertIsNone(a.key)
 
-    def test_BaseModel_load2(self):
+    def test_BaseModel_synced2(self):
         """ test_BaseModel_load2. """
+        import base64
         A = self.aclass
         a = A(name='Jack Shaphard',
               gender='male').put()
         obj = {'name': 'Swyer',
                'gender': 'female',
-               'bm_version': 1,
+               '__CHANGED__': True,
                '__KEY__': a.urlsafe()}
-        a = A.load(json.dumps(obj))
+        a = A.synced(base64.b64encode(json.dumps(obj)))
         self.assertEqual(a.name, 'Swyer')
         self.assertEqual(a.gender, 'male')
         self.assertIsNotNone(a.key)
@@ -197,7 +238,6 @@ class TestModels(unittest.TestCase):
         self.assertEquals(u.email_account.get().email, a.email)
         self.assertEqual(len(M.EmailAccount.query().fetch()), 1)
         self.assertEqual(len(M.User.query().fetch()), 1)
-        self.assertIsNotNone(u.token)
         self.assertIsNone(u.twitter_account)
         self.assertNotEquals(u.email_account.get().passwd, 'abc12345')
         self.assertEquals(u.email_account.get().passwd,
@@ -209,8 +249,8 @@ class TestModels(unittest.TestCase):
         from datetime import timedelta
         from time import sleep
         u = M.EmailAccount.signUp('spacelis@gmail.com', 'abc12345', 'Sapce Li')
-        u.heartBeat()
+        s = M.Session.getOrStart(None)
         sleep(1)
-        self.assertLessEqual(u.last_seen, dt.utcnow())
-        self.assertGreaterEqual(u.last_seen,
+        self.assertLessEqual(s.last_seen, dt.utcnow())
+        self.assertGreaterEqual(s.last_seen,
                                 dt.utcnow() - timedelta(seconds=2))
