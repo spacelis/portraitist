@@ -23,14 +23,17 @@ from google.appengine.ext import ndb
 
 from apps.profileviewer.models import _k
 from apps.profileviewer.models import Judgement
+from apps.profileviewer.models import EmailAccount
+from apps.profileviewer.models import Session
 from apps.profileviewer.util import request_property
 
 
-EndPointSpec = namedtuple('EndPointSpec', ['func', 'spec', 'secured'])
+EndPointSpec = namedtuple('EndPointSpec', ['func', 'spec',
+                                           'secured', 'jsonencoded'])
 _ENDPOINTS = dict()
 
 
-def api_endpoint(secured=False):
+def api_endpoint(secured=False, jsonencoded=False):
     """ An decorator for API registry.
 
     Usage:
@@ -45,8 +48,9 @@ def api_endpoint(secured=False):
         """ dummy. """
         name = func.__name__
         _ENDPOINTS[name] = EndPointSpec(func=func,
-                                        spec=None,
-                                        secured=secured)
+                                        spec=inspect.getargspec(func),
+                                        secured=secured,
+                                        jsonencoded=jsonencoded)
         return func
 
     return decorator
@@ -66,22 +70,23 @@ def check_secure(req):
 def call_endpoint(request, name):
     """Call endpoint by name.
 
-    :request: @todo
-    :endpoint_name: @todo
-    :returns: @todo
+    :request: Django HttpRequest object.
+    :name: The name of the endpoint to call.
+    :returns: Json string response.
 
     """
     try:
         endpoint = _ENDPOINTS[name]
         if endpoint.secured:
             check_secure(request)
-        if endpoint.spec is None:
-            endpoint.spec = inspect.getargspec(endpoint.func)
-        kwargs = {k: request.REQUEST.get(k, None) for k in endpoint.spec}
-        return HttpResponse(endpoint.func(**kwargs),  # pylint: disable=W0142
-                            mimetype="application/json")
+        kwargs = {k: request.REQUEST.get(k, None) for k in endpoint.spec.args}
     except KeyError:
         raise Http404
+    ret = endpoint.func(**kwargs)  # pylint: disable=W0142
+    if endpoint.jsonencoded:
+        return HttpResponse(ret, mimetype="application/json")
+    else:
+        return HttpResponse(_j(ret), mimetype="application/json")
 
 
 @api_endpoint(secured=True)
@@ -95,13 +100,13 @@ def checkins(candidate):
     try:
         c = _k(candidate)
         assert c.kind == 'TwitterAccount'
-        return _j(c.get().checkins)
+        return c.get().checkins
     except AssertionError:
-        return _j({'error': 'Please specify either a '
-                   'screen_name or comma separated names.'})
+        return {'error': 'Please specify either a '
+                'screen_name or comma separated names.'}
 
 
-@api_endpoint(secured=True)
+@api_endpoint(secured=True, jsonencoded=True)
 def export_judgements(_):
     """ Export all judgements as json object per line.
 
@@ -123,6 +128,7 @@ def export_judgements(_):
 
 
 # ------- Import/Export ------
+import os
 import os.path
 import gzip
 import csv
@@ -142,6 +148,16 @@ def flexopen(filename):
         return open(filename)
 
 
+@api_endpoint(secured=True)
+def list_datafiles():
+    """ List the data files in data dir.
+
+    :returns: a list of files.
+
+    """
+    return os.listdir('apps/data')
+
+
 def import_entities(filename, loader):
     """ Import entities from file.
 
@@ -150,7 +166,7 @@ def import_entities(filename, loader):
     :returns: None
 
     """
-    path = os.path.join('data', filename)
+    path = os.path.join('apps/data', filename)
 
     try:
         with flexopen(path) as fin:
@@ -158,6 +174,7 @@ def import_entities(filename, loader):
                 loader(r)
     except IOError:
         raise Http404
+    return {'import': 'succeeded'}
 
 
 from apps.profileviewer.models import TwitterAccount
@@ -175,7 +192,7 @@ def import_candidates(filename):
         """ Loader for Twitter accounts and checkins. """
         TwitterAccount(screen_name=r['screen_name'],
                        checkins=json.loads(r['checkins'])).put()
-    import_entities(filename, loader)
+    return import_entities(filename, loader)
 
 
 from apps.profileviewer.models import ExpertiseRank
@@ -195,11 +212,11 @@ def import_rankings(filename):
             topic_id=r['topic_id'],
             topic=GeoEntity.getByTFId(r['associate_id']).key,
             region=r['region'],
-            candidate=TwitterAccount.getByScreenName(r['screen_name']).key,
+            candidate=TwitterAccount.getByScreenName(r['candidate']).key,
             rank=int(r['rank']),
             rank_info={'profile': r['profile_type'],
                        'method': r['rank_method']},).put()
-    import_entities(filename, loader)
+    return import_entities(filename, loader)
 
 
 from apps.profileviewer.models import GeoEntity
@@ -215,12 +232,55 @@ def import_geoentities(filename):
     """
     def loader(r):
         """ Loader for Twitter accounts and checkins. """
-        ExpertiseRank(tfid=r['id'],
-                      name=r['name'],
-                      group=r['type'],
-                      relation=json.load(r['relation']),
-                      url='').put()
-    import_entities(filename, loader)
+        GeoEntity(tfid=r['tfid'],
+                  name=r['name'],
+                  level=r['level'],
+                  info=json.loads(r['info']),
+                  url=r['url']).put()
+    return import_entities(filename, loader)
+
+
+import re
+EMAILPTN = re.compile(r"^[-!#$%&'*+/0-9=?A-Z^_a-z{|}~]"
+                      r"(\.?[-!#$%&'*+/0-9=?A-Z^_a-z{|}~])*"
+                      r"@[a-zA-Z](-?[a-zA-Z0-9])*"
+                      r"(\.[a-zA-Z](-?[a-zA-Z0-9])*)+$")
+
+
+@api_endpoint()
+def email_login(email, passwd, token=None):
+    """ Login the user with name and passwd.
+
+    :email: the user email.
+    :passwd: the passwd.
+
+    """
+    try:
+        assert EMAILPTN.match(email)
+        assert len(passwd) < 50
+        user = EmailAccount.login(email, passwd)
+        session = Session.getOrStart(token)
+        session.attach(user)
+        return {'login': True}
+    except ValueError:
+        return {'login': False}
+
+
+@api_endpoint()
+def email_signUp(email, passwd, name):
+    """ SignUp this user.
+
+    :email: email address.
+    :passwd: the password.
+
+    """
+    try:
+        assert EMAILPTN.match(email)
+        assert len(passwd) < 50
+        assert len(name) < 50
+        EmailAccount.signUp(email, passwd, name)
+    except AssertionError:
+        return {'signup': False}
 
 
 @api_endpoint(secured=True)

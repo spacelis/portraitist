@@ -207,7 +207,8 @@ class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
 
         """
         try:
-            return TwitterAccount.query(screen_name=screen_name).fetch(1)[0]
+            return TwitterAccount.query(
+                TwitterAccount.screen_name == screen_name).fetch(1)[0]
         except IndexError:
             raise KeyError
 
@@ -272,7 +273,6 @@ class User(EncodableModel):
 
     """ A class representing users as judges or candidates."""
 
-    # pylint: disable=E1101
     name = ndb.model.StringProperty(indexed=True)
     twitter_account = ndb.model.KeyProperty(indexed=True)
     email_account = ndb.model.KeyProperty(indexed=True)
@@ -281,7 +281,6 @@ class User(EncodableModel):
     done_survey = ndb.model.BooleanProperty(default=False)
     done_tasks = ndb.model.IntegerProperty(default=0)
     info = ndb.model.JsonProperty(indexed=False)
-    # pylint: enable=E1101
 
     def addTwitterAccount(self, access_token, access_token_secret):
         """@todo: Docstring for linkTwitter.
@@ -306,8 +305,8 @@ class GeoEntity(ndb.Model):  # pylint: disable=R0903
 
     tfid = ndb.model.StringProperty(indexed=True)
     name = ndb.model.StringProperty(indexed=False)
-    group = ndb.model.StringProperty(indexed=False)  # e.g., category, poi
-    relation = ndb.model.JsonProperty(indexed=False)
+    level = ndb.model.StringProperty(indexed=False)  # e.g., category, poi
+    info = ndb.model.JsonProperty(indexed=False)
     url = ndb.model.StringProperty(indexed=False)
 
     @staticmethod
@@ -319,7 +318,7 @@ class GeoEntity(ndb.Model):  # pylint: disable=R0903
 
         """
         try:
-            return GeoEntity.query(tfid=tfid).fetch(1)[0]
+            return GeoEntity.query(GeoEntity.tfid == tfid).fetch(1)[0]
         except IndexError:
             raise KeyError()
 
@@ -382,7 +381,7 @@ class ExpertiseRank(ndb.Model):  # pylint: disable=R0903
         :returns: A list of topics
 
         """
-        return ExpertiseRank.query(user == user.key).fetch()
+        return ExpertiseRank.query(ExpertiseRank.user == user.key).fetch()
 
 
 class AnnotationTask(ndb.Model):  # pylint: disable=R0903
