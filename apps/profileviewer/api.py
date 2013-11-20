@@ -14,6 +14,7 @@ Description:
 from json import dumps as _j
 import inspect
 from collections import namedtuple
+from datetime import datetime as dt
 
 from django.http import HttpResponse
 from django.core.exceptions import PermissionDenied
@@ -25,6 +26,8 @@ from apps.profileviewer.models import _k
 from apps.profileviewer.models import Judgement
 from apps.profileviewer.models import EmailAccount
 from apps.profileviewer.models import Session
+from apps.profileviewer.models import AnnotationTask
+from apps.profileviewer.models import TaskPackage
 from apps.profileviewer.util import request_property
 
 
@@ -238,6 +241,51 @@ def import_geoentities(filename):
                   info=json.loads(r['info']),
                   url=r['url']).put()
     return import_entities(filename, loader)
+
+
+@api_endpoint(secured=False)  # FIXME should be secured
+def make_tasks():
+    """ Make tasks based on candidates. """
+    candidates = ExpertiseRank.listCandidates()
+    for c in candidates:
+        rankings = ExpertiseRank.getForCandidate(c.candidate)
+        AnnotationTask(rankings=[r.key for r in rankings],
+                       candidate=c.key).put()
+    return {'make_tasks': 'succeeded'}
+
+
+def partition(it, size=10):
+    """ Partitioning it into groups of 10 elements.
+
+    :it: An iterator through some elements.
+    :size: The maximum size of a group.
+    :yields: a group containing at most the given size of
+    the elements from it.
+
+    """
+    from itertools import cycle
+    from itertools import groupby
+    from itertools import izip
+
+    for _, g in groupby(izip(cycle([0] * size + [1] * size), it),
+                        key=lambda x: x[0]):
+        yield [x for _, x in g]
+
+
+@api_endpoint(secured=False)  # FIXME should be secured
+def make_taskpackages():
+    """ Group tasks in to packages. """
+    from apps.profileviewer.models import newToken
+    for ts in partition(AnnotationTask.query().fetch(), 10):
+        tkeys = [t.key for t in ts]
+        TaskPackage(
+            tasks=tkeys,
+            progress=tkeys,
+            done_by=list(),
+            confirm_code=newToken('').split('-')[-1],
+            assigned_at=dt(2000, 1, 1)
+        ).put()
+    return {'make_taskpackages': 'succeeded'}
 
 
 import re
