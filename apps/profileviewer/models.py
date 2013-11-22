@@ -37,14 +37,14 @@ def newToken(prefix=''):
     return prefix + str(uuid4())
 
 
-def secure_hash(s):
+def secure_hash(passwd, secret):
     """ Return sha1 hashcode.
 
     :s: @todo
     :returns: @todo
 
     """
-    return hashlib.sha512(s).hexdigest()  # pylint: disable=E1101
+    return hashlib.sha512(passwd + secret).hexdigest()  # pylint: disable=E1101
 
 
 def _k(s):
@@ -226,8 +226,9 @@ class EmailAccount(ndb.Model):
     """ The email account registered with this site. """
 
     email = ndb.model.StringProperty(indexed=True)
-    passwd = ndb.model.StringProperty(indexed=True)
+    hashed_passwd = ndb.model.StringProperty(indexed=False)
     user = ndb.model.KeyProperty(indexed=True, kind='User')
+    secret = ndb.model.StringProperty(indexed=False)
 
     @staticmethod
     def signUp(email, passwd, name):
@@ -244,8 +245,10 @@ class EmailAccount(ndb.Model):
                     name=name,
                     email_account=None,
                     twitter_account=None).put()
+        secret = newToken('passwd')
         account = EmailAccount(email=email,
-                               passwd=secure_hash(passwd),
+                               hashed_passwd=secure_hash(passwd, secret),
+                               secret=secret,
                                user=user).put()
         user.get().populate(email_account=account)
         return user.get()
@@ -260,13 +263,14 @@ class EmailAccount(ndb.Model):
 
         """
         try:
-            user = EmailAccount.query(
-                (EmailAccount.email == email),
-                (EmailAccount.passwd == secure_hash(passwd))) \
-                .fetch(1)[0].user.get()
-            return user
+            ea = EmailAccount.query(EmailAccount.email == email)\
+                .fetch(1)[0]
+            if secure_hash(passwd, ea.secret) == ea.hashed_passwd:
+                return ea.user.get()
+            else:
+                raise ValueError('Email or password wrong.')
         except IndexError:
-            raise ValueError('User not found.')
+            raise ValueError('Email or password wrong.')
 
 
 class User(EncodableModel):
@@ -299,7 +303,7 @@ class User(EncodableModel):
         self.twitter_account = t.key
 
 
-class GeoEntity(ndb.Model):  # pylint: disable=R0903
+class GeoEntity(EncodableModel):  # pylint: disable=R0903
 
     """ A model for entities like POI, Category. """
 
@@ -358,11 +362,11 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
                       user_agent=user_agent).put()
 
 
-class ExpertiseRank(ndb.Model):  # pylint: disable=R0903
+class ExpertiseRank(EncodableModel):  # pylint: disable=R0903
 
     """ The ranking needed to be annotated. """
 
-    topic_id = ndb.model.StringProperty(indexed=False)
+    topic_id = ndb.model.StringProperty(indexed=True)
     topic = ndb.model.KeyProperty(indexed=True, kind=GeoEntity)
     region = ndb.model.StringProperty(indexed=True)
     candidate = ndb.model.KeyProperty(indexed=True, kind=TwitterAccount)
@@ -374,21 +378,47 @@ class ExpertiseRank(ndb.Model):  # pylint: disable=R0903
         pass
 
     @staticmethod
-    def getTopicsForCandidate(user):
+    def getForCandidate(k_twitter_account):
         """ Get a list of Topics by given candidates.
 
-        :user: The user entity.
+        :k_twitter_account: The key to a TwitterAccount.
         :returns: A list of topics
 
         """
-        return ExpertiseRank.query(ExpertiseRank.user == user.key).fetch()
+        return ExpertiseRank.query(
+            ExpertiseRank.candidate == k_twitter_account).fetch()
+
+    @staticmethod
+    def listCandidates():
+        """ Return a list of distinct candidates. """
+        return ExpertiseRank.query(projection=['candidate'], distinct=True)
 
 
 class AnnotationTask(ndb.Model):  # pylint: disable=R0903
 
-    """ A task usually contains all rankings from one canddiate. """
+    """ A task usually contains all rankings from one candidate. """
 
     rankings = ndb.model.KeyProperty(repeated=True)
+    candidate = ndb.model.KeyProperty(indexed=True, kind=ExpertiseRank)
+
+    def as_dict(self):
+        """ Return a dict object of the task.
+
+        :returns: @todo
+
+        """
+        return {'rankings': [r.to_dict() for r in self.rankings.as_dict()],
+                'candidate': self.candidate.get().as_dict()}
+
+    @staticmethod
+    def getByKey(key):
+        """ Return the task indexed with the key.
+
+        :key: @todo
+        :returns: @todo
+
+        """
+        return ndb.Key(urlsafe=key).get()
 
 
 class TaskPackage(ndb.Model):
@@ -454,6 +484,11 @@ class TaskPackage(ndb.Model):
         """
         return self.confirm_code
 
+    def reset(self):
+        """ Reset the progress of current task package. """
+        self.progress = self.tasks
+        self.put()
+
 
 class Session(Encodable):
 
@@ -468,6 +503,7 @@ class Session(Encodable):
         """
         self.user = None
         self.token = newToken('session')
+        self.task_package = None
         self.last_seen = dt.utcnow()
 
     @staticmethod
@@ -494,6 +530,16 @@ class Session(Encodable):
         memcache.set(key=self.token,  # pylint: disable=E1101
                      value=self,
                      time=1800)
+        return self
+
+    def assign(self, task_package):
+        """ Assign a task package for this session.
+
+        :task_package: @todo
+        :returns: @todo
+
+        """
+        self.task_package = task_package
         return self
 
     def isAttached(self):
@@ -536,5 +582,6 @@ class Session(Encodable):
         """
         return {
             'token': self.token,
-            'isAttached': self.isAttached()
+            'isAttached': self.isAttached(),
+            'taskPackage': self.task_package.key
         }

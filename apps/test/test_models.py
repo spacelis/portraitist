@@ -91,6 +91,11 @@ class TestBaseModel(unittest.TestCase):
                                        'gender': None,
                                        'address': {'line1': 'Juniusstraat'}})
 
+    def test_NDB_key(self):
+        """ test_NDB_key. """
+        with self.assertRaises(TypeError):
+            ndb.Key(urlsafe='a')
+
     def test_BaseModel_encode(self):
         """ test_BaseModel. """
         A = self.aclass
@@ -239,9 +244,10 @@ class TestModels(unittest.TestCase):
         self.assertEqual(len(M.EmailAccount.query().fetch()), 1)
         self.assertEqual(len(M.User.query().fetch()), 1)
         self.assertIsNone(u.twitter_account)
-        self.assertNotEquals(u.email_account.get().passwd, 'abc12345')
-        self.assertEquals(u.email_account.get().passwd,
-                          M.secure_hash('abc12345'))
+        self.assertNotEquals(u.email_account.get().hashed_passwd, 'abc12345')
+        self.assertEquals(M.EmailAccount.login('spacelis@gmail.com',
+                                               'abc12345').key,
+                          u.key)
 
     def test_heartBeat(self):
         """ test_heartBeat(). """
