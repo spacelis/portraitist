@@ -33,7 +33,7 @@ var profileviewer_ns = (function(){
         infoWindow: {
           content: poi.name + ' (' + pois[i].value + ' check-ins)<br>' + poi.category + ', ' + poi.zcategory,
         },
-        icon: '/static/images/profileviewer/map_icons/' + poi.cate_id + '_black.png',
+        icon: '/static/profileviewer/images/map_icons/' + poi.cate_id + '_black.png',
       });
     }
     map.fitZoom();
@@ -218,7 +218,7 @@ var profileviewer_ns = (function(){
 
   function initCharts (hash_id) {
     d3.json(
-      '/api/expert_checkins?hash_id=' + hash_id,
+      '/api/checkins?candidate=' + hash_id,
       function(err, json){
         if (err){
           alert("Fail to get data for " + hash_id);
