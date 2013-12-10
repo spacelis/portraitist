@@ -1,5 +1,5 @@
 /* global ko */
-var kobj = (function(){
+var KnockObj = (function(){
   this.flattened = function(ob) {
     var toReturn = {};
     
@@ -33,6 +33,23 @@ var kobj = (function(){
   };
   this.merge = function(kobj, jobj){
     $.extend(kobj, this.buildFrom(jobj));
+  };
+  this.update = function(kobj, jobj){
+    for(var i in jobj){
+      if (kobj[i]){
+        kobj[i](jobj[i]);
+      }
+      else {
+        throw new Error("Key `" + i + "` doesn't exist for update.");
+      }
+    }
+  };
+  this.bindCookie = function(view_model, key, options){
+    if (view_model[key]){
+      view_model[key].subscribe(function(v){
+        $.cookie(key, v, options);
+      });
+    }
   };
   return this;
 }());

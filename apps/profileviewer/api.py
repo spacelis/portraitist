@@ -25,18 +25,22 @@ from google.appengine.ext import ndb
 from apps.profileviewer.models import _k
 from apps.profileviewer.models import Judgement
 from apps.profileviewer.models import EmailAccount
-from apps.profileviewer.models import Session
 from apps.profileviewer.models import AnnotationTask
 from apps.profileviewer.models import TaskPackage
+from apps.profileviewer.models import DEFAULT_PARENT_KEY
 from apps.profileviewer.util import request_property
+from apps.profileviewer.util import get_user
 
 
-EndPointSpec = namedtuple('EndPointSpec', ['func', 'spec',
-                                           'secured', 'jsonencoded'])
+EndPointSpec = namedtuple('EndPointSpec', ['func',
+                                           'spec',
+                                           'secured',
+                                           'disabled',
+                                           'jsonencoded'])
 _ENDPOINTS = dict()
 
 
-def api_endpoint(secured=False, jsonencoded=False):
+def api_endpoint(secured=False, disabled=False, jsonencoded=False):
     """ An decorator for API registry.
 
     Usage:
@@ -50,10 +54,12 @@ def api_endpoint(secured=False, jsonencoded=False):
     def decorator(func):
         """ dummy. """
         name = func.__name__
-        _ENDPOINTS[name] = EndPointSpec(func=func,
-                                        spec=inspect.getargspec(func),
-                                        secured=secured,
-                                        jsonencoded=jsonencoded)
+        _ENDPOINTS[name] = EndPointSpec(
+            func=func,
+            spec=inspect.getargspec(func),
+            secured=secured,
+            disabled=disabled,
+            jsonencoded=jsonencoded)
         return func
 
     return decorator
@@ -82,7 +88,12 @@ def call_endpoint(request, name):
         endpoint = _ENDPOINTS[name]
         if endpoint.secured:
             check_secure(request)
-        kwargs = {k: request.REQUEST.get(k, None) for k in endpoint.spec.args}
+        if endpoint.disabled:
+            raise KeyError()
+        kwargs = {k: request.REQUEST.get(k, None)
+                  for k in endpoint.spec.args if k != '_user'}
+        if '_user' in endpoint.spec.args:
+            kwargs['_user'] = get_user(request)
     except KeyError:
         raise Http404
     ret = endpoint.func(**kwargs)  # pylint: disable=W0142
@@ -92,7 +103,7 @@ def call_endpoint(request, name):
         return HttpResponse(_j(ret), mimetype="application/json")
 
 
-@api_endpoint(secured=True)
+@api_endpoint(secured=False)
 def checkins(candidate):
     """ Return all checkins for the candidate.
 
@@ -102,11 +113,11 @@ def checkins(candidate):
     """
     try:
         c = _k(candidate)
-        assert c.kind == 'TwitterAccount'
+        assert c.kind() == 'TwitterAccount'
         return c.get().checkins
     except AssertionError:
-        return {'error': 'Please specify either a '
-                'screen_name or comma separated names.'}
+        return {'error': 'Please specify a valid key to'
+                'a twiter account.'}
 
 
 @api_endpoint(secured=True, jsonencoded=True)
@@ -193,8 +204,10 @@ def import_candidates(filename):
     """
     def loader(r):
         """ Loader for Twitter accounts and checkins. """
-        TwitterAccount(screen_name=r['screen_name'],
-                       checkins=json.loads(r['checkins'])).put()
+        TwitterAccount(
+            parent=DEFAULT_PARENT_KEY,
+            screen_name=r['screen_name'],
+            checkins=json.loads(r['checkins'])).put()
     return import_entities(filename, loader)
 
 
@@ -212,6 +225,7 @@ def import_rankings(filename):
     def loader(r):
         """ Loader for Twitter accounts and checkins. """
         ExpertiseRank(
+            parent=DEFAULT_PARENT_KEY,
             topic_id=r['topic_id'],
             topic=GeoEntity.getByTFId(r['associate_id']).key,
             region=r['region'],
@@ -220,6 +234,34 @@ def import_rankings(filename):
             rank_info={'profile': r['profile_type'],
                        'method': r['rank_method']},).put()
     return import_entities(filename, loader)
+
+
+@api_endpoint(secured=False)  # FIXME should be True
+def rankings_statistics():
+    """ Return a statistics for rankings. """
+    from itertools import groupby
+    ranklists = set()
+    rankpoints = set()
+    num = 0
+    for r in ExpertiseRank.query().fetch():
+        ranklists.add((r.topic_id, r.region))
+        rankpoints.add((r.topic_id, r.region, r.candidate))
+        num += 1
+    return {
+        'ranklists': len(ranklists),
+        'rankpoints': len(rankpoints),
+        'regions': {k: len(list(g))
+                    for k, g in groupby(sorted(ranklists, key=lambda x: x[1]),
+                                        key=lambda x: x[1])},
+        'total': num
+    }
+
+
+@api_endpoint(disabled=False)  # FIXME should be True
+def clear_rankings():
+    """ Delete all rankings from data store. """
+    ndb.delete_multi([r.key for r in ExpertiseRank.query().fetch()])
+    return {'clear_rankings': 'succeeded!'}
 
 
 from apps.profileviewer.models import GeoEntity
@@ -235,23 +277,35 @@ def import_geoentities(filename):
     """
     def loader(r):
         """ Loader for Twitter accounts and checkins. """
-        GeoEntity(tfid=r['tfid'],
-                  name=r['name'],
-                  level=r['level'],
-                  info=json.loads(r['info']),
-                  url=r['url']).put()
+        GeoEntity(
+            parent=DEFAULT_PARENT_KEY,
+            tfid=r['tfid'],
+            name=r['name'],
+            level=r['level'],
+            info=json.loads(r['info']),
+            url=r['url']).put()
     return import_entities(filename, loader)
 
 
-@api_endpoint(secured=False)  # FIXME should be secured
+@api_endpoint()  # FIXME should be disabled
 def make_tasks():
     """ Make tasks based on candidates. """
     candidates = ExpertiseRank.listCandidates()
     for c in candidates:
         rankings = ExpertiseRank.getForCandidate(c.candidate)
-        AnnotationTask(rankings=[r.key for r in rankings],
-                       candidate=c.key).put()
+        AnnotationTask(
+            parent=DEFAULT_PARENT_KEY,
+            rankings=[r.key for r in rankings],
+            candidate=c.candidate).put()
     return {'make_tasks': 'succeeded'}
+
+
+@api_endpoint()
+def clear_tasks():
+    """ Remove all tasks. """
+    ts = [t.key for t in AnnotationTask.query().fetch()]
+    ndb.delete_multi(ts)
+    return {'clear_tasks': 'succeeded'}
 
 
 def partition(it, size=10):
@@ -279,6 +333,7 @@ def make_taskpackages():
     for ts in partition(AnnotationTask.query().fetch(), 10):
         tkeys = [t.key for t in ts]
         TaskPackage(
+            parent=DEFAULT_PARENT_KEY,
             tasks=tkeys,
             progress=tkeys,
             done_by=list(),
@@ -296,7 +351,7 @@ EMAILPTN = re.compile(r"^[-!#$%&'*+/0-9=?A-Z^_a-z{|}~]"
 
 
 @api_endpoint()
-def email_login(email, passwd, token=None):
+def email_login(email, passwd, _user):
     """ Login the user with name and passwd.
 
     :email: the user email.
@@ -306,16 +361,19 @@ def email_login(email, passwd, token=None):
     try:
         assert EMAILPTN.match(email)
         assert len(passwd) < 50
-        user = EmailAccount.login(email, passwd)
-        session = Session.getOrStart(token)
-        session.attach(user)
-        return {'login': True}
+        user = EmailAccount.login(email, passwd, _user)
+        user.reset_token()
+        return {'action': 'login',
+                'succeeded': True,
+                'user': user.as_viewdict()}
     except ValueError:
-        return {'login': False}
+        return {'action': 'login',
+                'succeeded': False,
+                'msg': 'The email or the password is not correct.'}
 
 
 @api_endpoint()
-def email_signUp(email, passwd, name):
+def email_signup(email, passwd, name, _user):
     """ SignUp this user.
 
     :email: email address.
@@ -326,9 +384,33 @@ def email_signUp(email, passwd, name):
         assert EMAILPTN.match(email)
         assert len(passwd) < 50
         assert len(name) < 50
-        EmailAccount.signUp(email, passwd, name)
+        user = EmailAccount.signUp(email, passwd,
+                                   name, _user)
+        user.reset_token()
+        return {'action': 'signup',
+                'succeeded': True,
+                'user': user.as_viewdict()}
     except AssertionError:
-        return {'signup': False}
+        return {'action': 'signup',
+                'succeeded': False,
+                'msg': 'Please input a valid email or password.'}
+    except ValueError:
+        return {'action': 'signup',
+                'succeeded': False,
+                'msg': 'The email address is already registered.'}
+
+
+@api_endpoint()
+def logout(_user):
+    """ SignUp this user.
+
+    :_user: the user issues the request.
+
+    :return: {"action": "logout", "succeeded": true}
+    """
+    _user.reset_token()
+    return {'action': 'logout',
+            'succeeded': True}
 
 
 @api_endpoint(secured=True)

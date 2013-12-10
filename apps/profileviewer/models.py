@@ -23,7 +23,8 @@ from django.http import Http404
 from google.appengine.ext import ndb
 from google.appengine.api import memcache
 
-DEFAULT_PARENT_KEY = ndb.Key('Version', 'geo-expertise-3', app='geo-expertise')
+DEFAULT_PARENT_KEY = ndb.Key('Version', 'geo-expertise-3',
+                             app='geo-expertise')
 LONG_TIME = timedelta(minutes=30)
 csv.field_size_limit(500000)
 
@@ -34,7 +35,7 @@ def newToken(prefix=''):
     :returns: a uuid4()
 
     """
-    return prefix + str(uuid4())
+    return prefix + '-' + str(uuid4())
 
 
 def secure_hash(passwd, secret):
@@ -47,14 +48,18 @@ def secure_hash(passwd, secret):
     return hashlib.sha512(passwd + secret).hexdigest()  # pylint: disable=E1101
 
 
-def _k(s):
+def _k(s, kind=None):
     """ Return a key of given urlsafe key s.
 
     :s: A urlsafe encoded key.
+    :kind: Assert the key to be the kind.
     :returns: A ndb.Key.
 
     """
-    return ndb.Key(urlsafe=s)
+    k = ndb.Key(urlsafe=s)
+    if kind is not None and k.kind() != kind:
+        raise ValueError('Given urlsafe key is not of kind: ' + kind)
+    return k
 
 
 def assertAbsent(model, field, value):
@@ -88,24 +93,11 @@ class Encodable(object):
 
     """
 
-    JS_CLASS = """{
-        payload: JSON.parse(atob("%s")),
-        get: function(name){
-            return this.payload[name];
-        },
-        set: function(name, val){
-            if(this.payload[name] !== val){
-                this.payload["__CHANGED__"] = true;
-                this.payload[name] = val;
-            }
-        }
-    }"""
+    JS_CLASS = """ JSON.parse(atob("%s")) """
 
     def js_encode(self):
         """ encode for javascript. """
-        d = self.as_dict()
-        assert '__CHANGED__' not in d, '__CHANGED__ key is reserved.'
-        d['__CHANGED__'] = False
+        d = self.as_viewdict()
         return self.JS_CLASS % (base64.b64encode(json.dumps(d)), )
 
     @staticmethod
@@ -113,18 +105,13 @@ class Encodable(object):
         """ decode the b64str into dict object.
 
         :b64str: the encoded json object.
-        :return: the dict, whether something changed
+        :return: the dict
 
         """
         d = json.loads(base64.b64decode(b64str))
-        if d['__CHANGED__']:
-            c = True
-        else:
-            c = False
-        del d['__CHANGED__']
-        return d, c
+        return d
 
-    def as_dict(self):
+    def as_viewdict(self):
         """ Return a dict representation of current object.
 
         :returns: A dict object.
@@ -133,12 +120,9 @@ class Encodable(object):
         raise NotImplementedError
 
 
-class EncodableModel(ndb.Model, Encodable):
+class EncodableModel(ndb.Model, Encodable):  # pylint: disable=W0223
 
     """ A ndb based model with encoding and syncing. """
-
-    bm_viewable = None
-    bm_updatable = None
 
     @classmethod
     def synced(cls, val=None, b64=False):
@@ -150,33 +134,15 @@ class EncodableModel(ndb.Model, Encodable):
         """
         assert not b64, "Base64 decoding is not supported yet."
         if isinstance(val, str) and len(val):
-            raw_obj, changed = Encodable.js_decode(val)
-            d = {k: v
-                 for k, v in raw_obj.iteritems()
-                 if k in cls.bm_updatable}
+            raw_obj = Encodable.js_decode(val)
+            d = {k: v for k, v in raw_obj.iteritems() if k != '__KEY__'}
             try:
                 mobj = _k(raw_obj['__KEY__']).get()
-                if changed:  # pylint: disable=W0212
-                    mobj.populate(**d)  # pylint: disable=W0142
+                mobj.populate(**d)  # pylint: disable=W0142
             except KeyError:
                 mobj = cls(**d)  # pylint: disable=W0142
             return mobj
-
-    def as_dict(self):
-        """ Return a dict representation of data model.
-
-        :returns: @todo
-
-        """
-        d = self.to_dict()
-        if self.key:
-            d['__KEY__'] = self.key.urlsafe()
-        else:
-            d['__KEY__'] = None
-        return {k: v for k, v in d.iteritems()
-                if k in self.bm_viewable
-                or k in self.bm_updatable
-                or k == '__KEY__'}
+        raise ValueError('`val` is not a valid string.')
 
 
 class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
@@ -191,13 +157,21 @@ class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
     user = ndb.model.KeyProperty(indexed=True, kind='User')
 
     @staticmethod
-    def singIn(access_token, access_token_secret):
+    def singIn(access_token, access_token_secret, user):
         """ Sign in with users twitter account.
 
         :returns: @todo
 
         """
-        pass
+        tkey = TwitterAccount(
+            parent=DEFAULT_PARENT_KEY,
+            access_token=access_token,
+            access_token_secret=access_token_secret,
+            user_account=user.key
+        ).put()
+        user.put()
+        user.populate(twitter_account=tkey)
+        return user
 
     @staticmethod
     def getByScreenName(screen_name):
@@ -212,7 +186,7 @@ class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
         except IndexError:
             raise KeyError
 
-    def compressedCheckins(self):
+    def fetchCheckins(self):
         """ Return the checkin as a block of base64 encoded.
 
         :returns: @todo
@@ -231,34 +205,40 @@ class EmailAccount(ndb.Model):
     secret = ndb.model.StringProperty(indexed=False)
 
     @staticmethod
-    def signUp(email, passwd, name):
+    def signUp(email, passwd, name, user):
         """ Create a new judge user.
 
         :email: An email address associate with this judge.
         :passwd: An password for login.
         :name: An nickname used for greeting.
+        :user: A user object holding temporary sesession information.
         :returns: A newly created User entity.
 
         """
         assertAbsent(EmailAccount, EmailAccount.email, email)
-        user = User(parent=DEFAULT_PARENT_KEY,
-                    name=name,
-                    email_account=None,
-                    twitter_account=None).put()
         secret = newToken('passwd')
-        account = EmailAccount(email=email,
-                               hashed_passwd=secure_hash(passwd, secret),
-                               secret=secret,
-                               user=user).put()
-        user.get().populate(email_account=account)
-        return user.get()
+        ukey = user.put()
+        account = EmailAccount(
+            parent=DEFAULT_PARENT_KEY,
+            email=email,
+            hashed_passwd=secure_hash(passwd, secret),
+            secret=secret,
+            user=ukey).put()
+        user.populate(
+            email_account=account,
+            name=name,
+            session_token=newToken('session')
+        )
+        user.put()
+        return user
 
     @staticmethod
-    def login(email, passwd):
+    def login(email, passwd, user):
         """ Sign in the account.
 
         :email: Registered email.
         :passwd: Registered password.
+        :user: A user object holds temporary session information.
         :returns: A new token.
 
         """
@@ -266,44 +246,17 @@ class EmailAccount(ndb.Model):
             ea = EmailAccount.query(EmailAccount.email == email)\
                 .fetch(1)[0]
             if secure_hash(passwd, ea.secret) == ea.hashed_passwd:
-                return ea.user.get()
+                u = ea.user.get()
+                u.inherit(user)
+                u.put()
+                return u
             else:
                 raise ValueError('Email or password wrong.')
         except IndexError:
             raise ValueError('Email or password wrong.')
 
 
-class User(EncodableModel):
-
-    """ A class representing users as judges or candidates."""
-
-    name = ndb.model.StringProperty(indexed=True)
-    twitter_account = ndb.model.KeyProperty(indexed=True)
-    email_account = ndb.model.KeyProperty(indexed=True)
-    last_seen = ndb.model.DateTimeProperty()
-    seen_instructions = ndb.model.BooleanProperty(default=False)
-    done_survey = ndb.model.BooleanProperty(default=False)
-    done_tasks = ndb.model.IntegerProperty(default=0)
-    info = ndb.model.JsonProperty(indexed=False)
-
-    def addTwitterAccount(self, access_token, access_token_secret):
-        """@todo: Docstring for linkTwitter.
-
-        :access_token: The access_token from Twitter OAuth
-        :access_token: The access_token_secret from Twitter OAuth
-        :returns: @todo
-
-        """
-        t = TwitterAccount(
-            parent=DEFAULT_PARENT_KEY,
-            access_token=access_token,
-            access_token_secret=access_token_secret,
-            user_account=self.key
-        )
-        self.twitter_account = t.key
-
-
-class GeoEntity(EncodableModel):  # pylint: disable=R0903
+class GeoEntity(EncodableModel):  # pylint: disable=R0903,W0223
 
     """ A model for entities like POI, Category. """
 
@@ -331,8 +284,8 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
 
     """ The judgement given by judges. """
 
-    judge = ndb.model.KeyProperty(indexed=True, kind=User)
-    candidate = ndb.model.KeyProperty(indexed=True, kind=User)
+    judge = ndb.model.KeyProperty(indexed=True, kind='User')
+    candidate = ndb.model.KeyProperty(indexed=True, kind='User')
     topic = ndb.model.KeyProperty(indexed=True, kind=GeoEntity)
     score = ndb.model.IntegerProperty(indexed=False)
     created_at = ndb.model.DateTimeProperty(indexed=False)
@@ -351,18 +304,20 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
         :returns: None
 
         """
+        ts = dt.utcnow()
         for t, s in scores:
-            Judgement(parent=DEFAULT_PARENT_KEY,
-                      judge=_k(judge),
-                      candidate=_k(candidate),
-                      topic=_k(t),
-                      score=s,
-                      created_at=dt.utcnow(),
-                      ipaddr=ipaddr,
-                      user_agent=user_agent).put()
+            Judgement(
+                parent=DEFAULT_PARENT_KEY,
+                judge=_k(judge),
+                candidate=_k(candidate),
+                topic=_k(t),
+                score=s,
+                created_at=ts,
+                ipaddr=ipaddr,
+                user_agent=user_agent).put()
 
 
-class ExpertiseRank(EncodableModel):  # pylint: disable=R0903
+class ExpertiseRank(EncodableModel):  # pylint: disable=R0903,W0223
 
     """ The ranking needed to be annotated. """
 
@@ -398,17 +353,17 @@ class AnnotationTask(ndb.Model):  # pylint: disable=R0903
 
     """ A task usually contains all rankings from one candidate. """
 
-    rankings = ndb.model.KeyProperty(repeated=True)
-    candidate = ndb.model.KeyProperty(indexed=True, kind=ExpertiseRank)
+    rankings = ndb.model.KeyProperty(repeated=True, kind=ExpertiseRank)
+    candidate = ndb.model.KeyProperty(indexed=True, kind=TwitterAccount)
 
-    def as_dict(self):
+    def as_viewdict(self):
         """ Return a dict object of the task.
 
         :returns: @todo
 
         """
-        return {'rankings': [r.to_dict() for r in self.rankings.as_dict()],
-                'candidate': self.candidate.get().as_dict()}
+        return {'rankings': [r.get() for r in self.rankings],
+                'candidate': self.candidate.get()}
 
     @staticmethod
     def getByKey(key):
@@ -427,7 +382,7 @@ class TaskPackage(ndb.Model):
 
     tasks = ndb.model.KeyProperty(repeated=True, kind=AnnotationTask)
     progress = ndb.model.KeyProperty(repeated=True, kind=AnnotationTask)
-    done_by = ndb.model.KeyProperty(indexed=True, repeated=True, kind=User)
+    done_by = ndb.model.KeyProperty(indexed=True, repeated=True, kind='User')
     confirm_code = ndb.model.StringProperty()
     assigned_at = ndb.model.DateTimeProperty(indexed=True)
 
@@ -490,68 +445,93 @@ class TaskPackage(ndb.Model):
         self.put()
 
 
-class Session(Encodable):
+class User(EncodableModel):
 
-    """ This is a class for session control. """
+    """ A class representing users as judges or candidates."""
 
-    def __init__(self):
-        """ Init a session.
+    name = ndb.model.StringProperty(indexed=True)
+    twitter_account = ndb.model.KeyProperty(indexed=True)
+    email_account = ndb.model.KeyProperty(indexed=True)
+    last_seen = ndb.model.DateTimeProperty()
+    finished_tasks = ndb.model.IntegerProperty(indexed=False)
+    show_instructions = ndb.model.BooleanProperty(indexed=False)
+    task_package = ndb.model.KeyProperty(indexed=False)
+    session_token = ndb.model.StringProperty(indexed=True)
 
-        :token: @todo
+    def addTwitterAccount(self, twitter_account):
+        """ Linking a twitter account to this user.
+
         :returns: @todo
 
         """
-        self.user = None
-        self.token = newToken('session')
-        self.task_package = None
-        self.last_seen = dt.utcnow()
+        self.twitter_account = twitter_account.key
 
-    @staticmethod
-    def getOrStart(token=None):
-        """ Get a session or start a new session. """
-        if token:
-            session = memcache.get(token)  # pylint: disable=E1101
-            if isinstance(session, Session):
-                return session
-        session = Session()
-        memcache.set(key=session.token,  # pylint: disable=E1101
-                     value=session,
-                     time=1800)
-        return session
-
-    def attach(self, user):
-        """ Attach the identified user to this session.
-
-        :user: A User object.
-        :returns: self
+    def as_viewdict(self):
+        """ Return a dict object encapsulate the information of this user.
+        :returns: @todo
 
         """
-        self.user = user.key
-        memcache.set(key=self.token,  # pylint: disable=E1101
+        return {
+            'name': self.name,
+            'session_token': self.session_token,
+            'finished_tasks': self.finished_tasks,
+            'show_instructions': self.show_instructions,
+            'is_known_user': self.isKnownUser(),
+            'task_package': None if self.task_package is None
+            else self.task_package.urlsafe(),
+        }
+
+    @staticmethod
+    def unit():
+        """ Return an empty user object. """
+        return User(
+            parent=DEFAULT_PARENT_KEY,
+            name='Unkown User',
+            finished_tasks=0,
+            session_token=newToken('session'),
+            show_instructions=True,
+            last_seen=dt.utcnow()
+        )
+
+    @staticmethod
+    def getOrCreate(token=None):
+        """ Get a session or start a new session. """
+        if token:
+            u = memcache.get(token)  # pylint: disable=E1101
+            if isinstance(u, User):
+                return u
+        u = User.unit()
+        u.cache()
+        return u
+
+    def cache(self):
+        """ Make self available in cache. """
+        memcache.set(key=self.session_token,  # pylint: disable=E1101
                      value=self,
                      time=1800)
         return self
 
+    def reset_token(self):
+        """ Assign a new session token to this user. """
+        self.populate(session_token=newToken('session'))
+        self.put()
+        self.cache()
+
     def assign(self, task_package):
         """ Assign a task package for this session.
 
-        :task_package: @todo
-        :returns: @todo
+        :task_package: TaskPackage object as ndb.Model
+        :returns: self
 
         """
         self.task_package = task_package
         return self
 
-    def isAttached(self):
-        """ Return whether this session has a registered user attached.
+    def touch(self):
+        """ Make heart beat for a user's session.
 
-        :returns: @todo
-
-        """
-        return self.user is not None
-
-    def heartBeat(self):
-        """ Make heart beat for users' session.
+        Updating the last_seen checkin point.
+        Updating values in memcache.
 
         :returns: None
         :throws: ValueError if the last seen is long time ago.
@@ -560,28 +540,35 @@ class Session(Encodable):
         if self.isDead():
             raise ValueError('Long time no see.')
         self.last_seen = dt.utcnow()
-        if self.token is not None:
-            memcache.set(key=self.token,  # pylint: disable=E1101
+        if self.session_token is not None:
+            memcache.set(key=self.session_token,  # pylint: disable=E1101
                          value=self,
                          time=3600)
+        self.put()
 
     def isDead(self):
         """ Return whether the session is ended.
 
-        :returns: @todo
+        :returns: True if this session is timeout
 
         """
         assert self.last_seen <= dt.utcnow()
-        return dt.utcnow() - self.last_seen > LONG_TIME
+        isdead = dt.utcnow() - self.last_seen > LONG_TIME
+        return isdead
 
-    def as_dict(self):
-        """ Return a dict object representing the data.
+    def inherit(self, user):
+        """ Inherit the property of other user.
 
+        :user: @todo
         :returns: @todo
 
         """
-        return {
-            'token': self.token,
-            'isAttached': self.isAttached(),
-            'taskPackage': self.task_package.key
-        }
+        self.finished_tasks += user.finished_tasks
+        self.show_instructions |= user.show_instructions
+
+    def isKnownUser(self):
+        """ Whether this user is known (not temporary user)self.
+        :returns: @todo
+
+        """
+        return self.key.integer_id() is not None

@@ -6,40 +6,155 @@
 <meta name="twitter:title" content="GeoExpertise: Seeking for knowledgeable friends in terms of places to go.">
 <meta name="twitter:description" content="A non-profit academic research project conducted by a PhD student from Delft University of Technology, Netherlands.">
 <meta name="twitter:creator" content="@socialmining">
-<meta name="twitter:image:src" content="https://geo-expertise.appspot.com/static/images/profileviewer/snapshot.png">
+<meta name="twitter:image:src" content="https://geo-expertise.appspot.com/images/static/profileviewer/snapshot.png">
 
   <title>GeoExpert Judgment System</title>
-  <script src="/static/js/profileviewer/jquery.min.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/js/profileviewer/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/js/profileviewer/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+          <span class="icon-bar"></span>
+        </button>
+        <a href="/home" class="navbar-brand">GeoExpert Judgment System</a>
+      </div>
+      <div class="collapse navbar-collapse navbar-ex1-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li id="id-tag-user-email" data-bind="visible: is_known_user"><a data-bind="text: name"></a></li>
+          <li id="id-tag-signup-login" data-bind="visible: is_known_user() == false"><a onClick="$('#id-dialog-signup-login').modal('show');">Sign Up / Login</a></li>
+          <li><a>Finished <span class="badge" data-bind="text: finished_tasks"></span></a></li>
+        </ul>
+      </div>
+    </nav>
 
-  <link rel="stylesheet" href="/static/css/profileviewer/bootstrap.css" type="text/css" media="screen" title="no title" charset="utf-8">
-  <link rel="stylesheet" href="/static/css/profileviewer/sticky-footer.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <!-- Login/Sign Up modal dialog -->
+    <div class="modal fade" id="id-dialog-signup-login" tabindex="-1" role="dialog" aria-labelledby="user_sign_up" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3 class="modal-title">Login / Sign Up</h3>
+          </div>
+          <div class="modal-body">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs">
+              <li><a href="#id-tab-login" data-toggle="tab">Login</a></li>
+              <li class="active"><a href="#id-tab-signup" data-toggle="tab">Sign Up</a></li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+              <div class="tab-pane" id="id-tab-login">
+                <div>
+                  <form id="id-form-login" role="form" action="/api/email_login" method="POST" accept-charset="utf-8">
+                    {% csrf_token %}
+                    <div class="form-group" data-bind="attr: {class: login_show_error}">
+                      <label class="control-label" for="email">Email address</label>
+                      <input type="email" class="form-control" name="email" placeholder="Enter email">
+                    </div>
+                    <div class="form-group" data-bind="attr: {class: login_show_error}">
+                      <label class="control-label" for="password">Password</label>
+                      <input type="password" class="form-control" name="passwd" placeholder="Enter password">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                  </form>
+                </div>
+              </div>
+              <div class="tab-pane active" id="id-tab-signup">
+                <div>
+                  <form id="id-form-signup" role="form" action="/api/email_signup" method="POST" accept-charset="utf-8">
+                    {% csrf_token %}
+                    <div class="form-group" data-bind="attr: {class: signup_show_error}">
+                      <label class="control-label" for="email">Email address</label>
+                      <input type="email" class="form-control" name="email" placeholder="Enter email">
+                    </div>
+                    <div class="form-group">
+                      <label class="control-label" for="username">Name</label>
+                      <input type="text" class="form-control" name="name" placeholder="Enter nickname">
+                    </div>
+                    <div class="form-group">
+                      <label class="control-label" for="password">Password</label>
+                      <input type="password" class="form-control" name="passwd" placeholder="Enter password">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <small> All you data will be treated confidentially. </small>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!-- Main content container -->
+    <div id="id-div-content" class="container">
+      {% block content %}{% endblock %}
+    </div>
+    <footer>
+      <div class="foot-fixed-bottom">
+        <div class="container" align="right">
+          <hr />
+          <img src="/static/profileviewer/images/dmirlogo.svg" title="Thanks for Raynor Vliegendhart's work on the vectorized logo." height="24px">
+          © DMIR • TU Delft • 2013</div>
+        </div>
+      </div>
+    </footer>
+
+  <script src="/static/profileviewer/js/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/knockout-latest.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/knockout-latest.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/kobj.js" type="text/javascript" charset="utf-8"></script>
+
+  <link rel="stylesheet" href="/static/profileviewer/css/bootstrap.min.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <link rel="stylesheet" href="/static/profileviewer/css/sticky-footer.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <script>
+    var userdata = KnockObj.buildFrom({{ user | safe }});
+    KnockObj.bindCookie(userdata, "session_token", {expires: 90, path: "/"});
+    KnockObj.merge(userdata, {login_show_error: "", signup_show_error: ""});
     $(document).ready(function () {
-      if(! $.cookie("submitted_tasks")){
-        $.cookie("submitted_tasks", 0, {expires: 90, path: "/"});
-      }
-      $("#submitted_tasks").text($.cookie("submitted_tasks"))
-      $("#save_judge_profile").click(function(){
-        $.cookie("judge_nick", $("#inputJudgeNick").val(), {"expires": 90, "path": "/"});
-        $.cookie("judge_email", $("#inputJudgeEmail").val(), {"expires": 90, "path": "/"});
-        $("#judge_profile_detail").modal('hide');
-        $("#judge_info").prepend("<ul class=\"nav navbar-nav navbar-right\"> <li><a>by <span id=\"judge_nick\"></span></a></li> </ul>");
-        $("#judge_nick").text($("#inputJudgeNick").val())
+      userdata.session_token.valueHasMutated(); // Force update cookie as only changes will set cookie in default.
+      $("#id-form-signup").submit(function(e){
+        e.preventDefault();
+        $form = $(this)
+        $.post($form.attr("action"), $form.serialize())
+          .done(function(ret){
+            if(ret.succeeded) {
+              KnockObj.update(userdata, KnockObj.flattened(ret.user))
+              $("#id-dialog-signup-login").modal("hide");
+            }
+            else {
+              userdata.signup_show_error("has-error");
+              $("#id-form-signup input[name|='email']").change(function(e){
+                userdata.signup_show_error("");
+              });
+            }
+          });
       });
-      if((! $.cookie("judge_email")) && (! $.cookie("do_not_track"))){
-        $("#judge_profile_detail").modal('show');
-      }
-      var nick = $.cookie("judge_nick");
-      if(nick){
-        $("#judge_info").prepend("<ul class=\"nav navbar-nav navbar-right\"> <li><a>by <span id=\"judge_nick\"></span></a></li> </ul>");
-        $("#judge_nick").text(nick)
-      }
-      $("#save_do_not_track").click(function(){
-        $.cookie("do_not_track", 1, {"expires": 90, "path": "/"});
-        $("#judge_profile_detail").modal('hide');
+
+      $("#id-form-login").submit(function(e){
+        e.preventDefault();
+        $form = $(this)
+        $.post($form.attr("action"), $form.serialize())
+          .done(function(ret){
+            if(ret.succeeded) {
+              KnockObj.update(userdata, KnockObj.flattened(ret.user))
+              $("#id-dialog-signup-login").modal("hide");
+            }
+            else {
+              userdata.login_show_error("has-error");
+              $("#id-form-login input[name|='email']").change(function(e){
+                userdata.login_show_error("");
+              });
+            }
+          });
       });
+
     })
   </script>
   <script>
@@ -47,80 +162,12 @@
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
     })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
     ga('create', 'UA-43808487-1', 'geo-expertise.appspot.com');
     ga('send', 'pageview');
-
   </script>
   {% block extra_header %}{% endblock %}
-</head>
-<body>
-    <nav class="navbar navbar-default" role="navigation">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-          <!--<span class="icon-bar"></span>-->
-          <!--<span class="icon-bar"></span>-->
-          <!--<span class="icon-bar"></span>-->
-          <span class="icon-bar"></span>
-        </button>
-        <a href="/home" class="navbar-brand">GeoExpert Judgment System</a>
-      </div>
-      <div id="judge_info" class="collapse navbar-collapse navbar-ex1-collapse">
-        <!--<ul class="nav navbar-nav">-->
-          <!--<li class="active"><a href="#">Unjudged</a></li>-->
-          <!--<li><a href="#">Judged</a></li>-->
-          <!--<li><a href="#">Upload/Import Tasks</a></li>-->
-          <!--<li><a href="#">Download Judgments</a></li>-->
-        <!--</ul>-->
-        <ul class="nav navbar-nav navbar-right">
-          <li><a>Submitted Tasks <span id="submitted_tasks" class="badge"></span></a></li>
-        </ul>
-      </div>
-    </nav>
-    <div class="modal fade" id="judge_profile_detail" tabindex="-1" role="dialog" aria-labelledby="judge_account_label" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3 class="modal-title">Judge Profile</h4>
-            <p>
-            Hey thanks for being interested! But it is pity that we do
-            not know to whom these thanks should go. Would you please
-            let us know who you are?<br> <small class="text-muted">
-            (The collected information are used only for distinguishing
-            judges in this research project. It will never be used for
-            any other purpose. You may also continue without filling
-            your identification.)</small>
-            </p>
-          </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <label for="Email1">Email address</label>
-              <input type="email" class="form-control" id="inputJudgeEmail" placeholder="Enter email">
-            </div>
-            <div class="form-group">
-              <label for="NickName">Nickname</label>
-              <input type="text" class="form-control" id="inputJudgeNick" placeholder="Enter nickname">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button id="save_judge_profile" type="button" class="btn btn-primary">Save</button>
-            <button id="save_do_not_track" type="button" class="btn btn-default">DO NOT TRACK</button>
-          </div>
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-    <div id="pv-content" class="container">
-      {% block content %}{% endblock %}
-    </div>
-    <footer>
-      <div class="foot-fixed-bottom">
-        <div class="container" align="right">
-          <hr />
-          <img src="/static/images/profileviewer/dmirlogo.svg" title="Thanks for Raynor Vliegendhart's work on the vectorized logo." height="24px">
-          © DMIR • TU Delft • 2013</div>
-        </div>
-      </div>
-    </footer>
+  <script>
+    ko.applyBindings(userdata);
+  </script>
 </body>
 </html>

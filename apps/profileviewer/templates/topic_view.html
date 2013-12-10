@@ -1,12 +1,12 @@
 {% extends "frame.html" %}
 {% block extra_header %}
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4oLS7DjhME0pLuTTauJw3rjs1_n4TuKM&sensor=false" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/js/profileviewer/d3.min.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/js/profileviewer/crossfilter.min.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/js/profileviewer/dc.min.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/js/profileviewer/topic_view.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/d3.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/crossfilter.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/dc.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/topic_view.js" type="text/javascript" charset="utf-8"></script>
 
-  <link rel="stylesheet" href="/static/css/profileviewer/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <link rel="stylesheet" href="/static/profileviewer/css/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function () {
       TopicView.initCharts(JSON.parse('{{ names | safe }}'));

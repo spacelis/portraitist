@@ -42,9 +42,55 @@ class TestModelUtils(unittest.TestCase):
 
     def test_secure_hash(self):
         """ test_secure_hash. """
-        self.assertNotEqual('a', M.secure_hash('a'))
-        self.assertNotEqual(M.secure_hash('b'), M.secure_hash('a'))
-        self.assertEquals(M.secure_hash('a'), M.secure_hash('a'))
+        self.assertNotEqual('a', M.secure_hash('a', ''))
+        self.assertNotEqual(M.secure_hash('b', ''), M.secure_hash('a', ''))
+        self.assertEquals(M.secure_hash('a', ''), M.secure_hash('a', ''))
+
+
+#class TestSpeed(unittest.TestCase):
+
+    #""" Test the speed regarding the key length. """
+
+    #def setUp(self):
+        #pass
+
+    #def tearDown(self):
+        #pass
+
+    #def test_noparent_key(self):
+        #""" test_noparent_key. """
+        #self.testbed = testbed.Testbed()
+        #self.testbed.setup_env()
+        #self.testbed.activate()
+        #self.testbed.init_memcache_stub()
+        #self.testbed.init_datastore_v3_stub()
+
+        #class AClass(M.EncodableModel):
+            #akey = ndb.model.KeyProperty(indexed=True)
+            #name = ndb.model.StringProperty(indexed=True)
+
+        #for _ in range(10000):
+            #AClass(name="nothing").put()
+
+        #self.testbed.deactivate()
+
+    #def test_parent_key(self):
+        #""" test_noparent_key. """
+        #self.testbed = testbed.Testbed()
+        #self.testbed.setup_env(app_id='testbed')
+        #self.testbed.activate()
+        #self.testbed.init_memcache_stub()
+        #self.testbed.init_datastore_v3_stub()
+        #parentkey = ndb.Key('test', 'parenting', app='testbed')
+
+        #class AClass(M.EncodableModel):
+            #akey = ndb.model.KeyProperty(indexed=True)
+            #name = ndb.model.StringProperty(indexed=True)
+
+        #for _ in range(10000):
+            #AClass(parent=parentkey, name="nothing").put()
+
+        #self.testbed.deactivate()
 
 
 class TestBaseModel(unittest.TestCase):
@@ -64,8 +110,12 @@ class TestBaseModel(unittest.TestCase):
             gender = ndb.model.StringProperty(indexed=False)
             address = ndb.model.JsonProperty(indexed=False)
 
-            bm_updatable = ['name']
-            bm_viewable = ['gender']
+            def as_viewdict(self):
+                """ dummy as dict function """
+                return {
+                    'name': self.name,
+                    'gender': self.gender,
+                }
 
         self.aclass = AClass
 
@@ -100,17 +150,14 @@ class TestBaseModel(unittest.TestCase):
         """ test_BaseModel. """
         A = self.aclass
         a = A()
-        self.assertIsInstance(A.akey, ndb.model.KeyProperty)
         import subprocess
         out = subprocess.check_output(
             ['node', '-e', 'atob=require("atob");\
-             process.stdout.write(JSON.stringify(%s.payload))'
+             process.stdout.write(JSON.stringify(%s))'
              % (a.js_encode(), )])
         obj = json.loads(out)
         self.assertEqual(obj, {u'gender': None,
-                               u'name': None,
-                               '__CHANGED__': False,
-                               '__KEY__': None})
+                               u'name': None})
 
     def test_BaseModel_encode2(self):
         """ test_BaseModel. """
@@ -121,22 +168,19 @@ class TestBaseModel(unittest.TestCase):
         out = subprocess.check_output(
             ['node', '-e', """atob=require("atob");
              var x = %s;
-             x.set("name", "Swyer");
-             process.stdout.write(JSON.stringify(x.payload))"""
+             x.name = "Swyer";
+             process.stdout.write(JSON.stringify(x))"""
              % (a.js_encode(), )])
         obj = json.loads(out)
-        self.assertEqual(obj, {u'__CHANGED__': True,
-                               u'gender': None,
-                               u'name': 'Swyer',
-                               u'__KEY__': None})
+        self.assertEqual(obj, {u'gender': None,
+                               u'name': 'Swyer'})
 
     def test_BaseModel_synced(self):
         """ test_jsdecode. """
         import base64
         A = self.aclass
         datapack = base64.b64encode(
-            json.dumps({u'__CHANGED__': True,
-                        u'gender': 'male',
+            json.dumps({u'gender': 'male',
                         u'name': 'Jack Shaphard'}))
         a = A.synced(datapack)
         self.assertEqual(a.name, 'Jack Shaphard')
@@ -148,17 +192,16 @@ class TestBaseModel(unittest.TestCase):
         A = self.aclass
         a = A(name='Jack Shaphard',
               gender='male').put()
-        obj = {'name': 'Swyer',
+        obj = {'name': 'Kate',
                'gender': 'female',
-               '__CHANGED__': True,
                '__KEY__': a.urlsafe()}
         a = A.synced(base64.b64encode(json.dumps(obj)))
-        self.assertEqual(a.name, 'Swyer')
-        self.assertEqual(a.gender, 'male')
+        self.assertEqual(a.name, 'Kate')
+        self.assertEqual(a.gender, 'female')
         self.assertIsNotNone(a.key)
         b = A.query().fetch()[0]
-        self.assertEqual(b.name, 'Swyer')
-        self.assertEqual(a.gender, 'male')
+        self.assertEqual(b.name, 'Kate')
+        self.assertEqual(a.gender, 'female')
 
 
 class TestNDB(unittest.TestCase):
@@ -195,7 +238,7 @@ class TestNDB(unittest.TestCase):
 
     def test_populate(self):
         """ test_populate. """
-        g = M.GeoEntity(tfid='a', name='c', group='a', relation='s', url='h')
+        g = M.GeoEntity(tfid='a', name='c', level='a', url='h')
         g.put()
         g.populate(tfid='b')
         self.assertEqual(M.GeoEntity.query().fetch()[0].tfid, 'b')
@@ -208,7 +251,7 @@ class TestNDB(unittest.TestCase):
 
     def test_memcache2(self):
         """ test_memcache2. """
-        f = M.GeoEntity(tfid='a', name='c', group='a', relation='s', url='h')
+        f = M.GeoEntity(tfid='a', name='c', level='s', url='h')
         memcache.set(key='a', value=f)
         memcache.set(key='b', value=f)
         g = memcache.get('a')
@@ -217,7 +260,7 @@ class TestNDB(unittest.TestCase):
 
     def test_keykind(self):
         """ test_keykind. """
-        g = M.GeoEntity(tfid='a', name='c', group='a', relation='s', url='h')
+        g = M.GeoEntity(tfid='a', name='c', level='a', info={}, url='h')
         self.assertEquals(g.put().kind(), 'GeoEntity')
 
 
@@ -237,7 +280,8 @@ class TestModels(unittest.TestCase):
 
     def test_EmailAccount(self):
         """ test EmailAccount. """
-        u = M.EmailAccount.signUp('spacelis@gmail.com', 'abc12345', 'Sapce Li')
+        u = M.EmailAccount.signUp('spacelis@gmail.com', 'abc12345',
+                                  'Sapce Li', M.User.unit())
         a = M.EmailAccount.query().fetch()[0]
         self.assertEquals(u.key, a.user)
         self.assertEquals(u.email_account.get().email, a.email)
@@ -246,7 +290,7 @@ class TestModels(unittest.TestCase):
         self.assertIsNone(u.twitter_account)
         self.assertNotEquals(u.email_account.get().hashed_passwd, 'abc12345')
         self.assertEquals(M.EmailAccount.login('spacelis@gmail.com',
-                                               'abc12345').key,
+                                               'abc12345', M.User.unit()).key,
                           u.key)
 
     def test_heartBeat(self):
@@ -254,8 +298,9 @@ class TestModels(unittest.TestCase):
         from datetime import datetime as dt
         from datetime import timedelta
         from time import sleep
-        u = M.EmailAccount.signUp('spacelis@gmail.com', 'abc12345', 'Sapce Li')
-        s = M.Session.getOrStart(None)
+        u = M.EmailAccount.signUp('spacelis@gmail.com', 'abc12345',
+                                  'Sapce Li', M.User.unit())
+        s = M.User.getOrCreate(None)
         sleep(1)
         self.assertLessEqual(s.last_seen, dt.utcnow())
         self.assertGreaterEqual(s.last_seen,

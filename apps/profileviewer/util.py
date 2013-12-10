@@ -17,7 +17,6 @@ import base64
 import json
 
 from collections import namedtuple
-from datetime import datetime as dt
 from itertools import chain
 from itertools import groupby
 
@@ -25,6 +24,14 @@ from django.utils.dateparse import parse_datetime
 
 from google.appengine.ext import ndb
 from google.appengine.api import mail
+
+from apps.profileviewer.models import User
+
+
+def get_user(request):
+    """ Return the session attach to this request. """
+    # session_toke is actually a token to a (temporary) user
+    return User.getOrCreate(request_property(request, 'session_token'))
 
 
 def jsonfy(obj, keys):
@@ -141,28 +148,19 @@ def flexopen(filename):
         return open(filename)
 
 
-def construct_judgement(req):
+def get_scores(req):
     """Constructing judgement object out of request.
 
     :req: @todo
     :returns: @todo
 
     """
-    ip, user_agent = get_client(req)
     scores = dict()
     for v in req.REQUEST:
         if v.startswith('pv-judgements-'):
             topic_id = v[14:]
             scores[topic_id] = req.REQUEST[v]
-    judgement = {
-        'created_at': dt.now().isoformat(),
-        'candidate': Expert.getExpertByHashId(
-            req.REQUEST['pv-candidate-hash-id']).screen_name,
-        'ip': ip,
-        'user_agent': user_agent,
-        'scores': scores
-    }
-    return judgement
+    return scores
 
 
 def request_property(req, prop, default=None, b64json=False):
@@ -180,12 +178,14 @@ def request_property(req, prop, default=None, b64json=False):
     else:
         f = lambda x: x
 
-    if prop in req.REQUEST:
-        return f(req.REQUEST[prop])
+    if prop in req.GET:
+        return f(req.GET[prop])
+    if prop in req.POST:
+        return f(req.POST[prop])
     elif prop in req.COOKIES:
         return f(req.COOKIES[prop])
     else:
-        default
+        return default
 
 
 def judgement_for_review(judgements):
