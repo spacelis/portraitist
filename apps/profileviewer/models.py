@@ -491,7 +491,7 @@ class User(EncodableModel):
             session_token=newToken('session'),
             show_instructions=True,
             last_seen=dt.utcnow()
-        )
+        ).cache()
 
     @staticmethod
     def getOrCreate(token=None):

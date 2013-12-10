@@ -27,6 +27,7 @@ from apps.profileviewer.models import Judgement
 from apps.profileviewer.models import EmailAccount
 from apps.profileviewer.models import AnnotationTask
 from apps.profileviewer.models import TaskPackage
+from apps.profileviewer.models import User
 from apps.profileviewer.models import DEFAULT_PARENT_KEY
 from apps.profileviewer.util import request_property
 from apps.profileviewer.util import get_user
@@ -410,7 +411,8 @@ def logout(_user):
     """
     _user.reset_token()
     return {'action': 'logout',
-            'succeeded': True}
+            'succeeded': True,
+            'user': User.unit().as_viewdict()}
 
 
 @api_endpoint(secured=True)

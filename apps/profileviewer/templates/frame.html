@@ -21,7 +21,14 @@
       </div>
       <div class="collapse navbar-collapse navbar-ex1-collapse">
         <ul class="nav navbar-nav navbar-right">
-          <li id="id-tag-user-email" data-bind="visible: is_known_user"><a data-bind="text: name"></a></li>
+          <li id="id-tag-user-email" data-bind="visible: is_known_user" class="dropdown">
+          <a data-bind="html: _namebtn" class="dropdown-toggle" data-toggle="dropdown"></a>
+            <ul class="dropdown-menu">
+              <li><a href="#">Overview</a></li>
+              <li class="divider"></li>
+              <li><a href="#" data-bind="click: _logout">Logout</a></li>
+            </ul>
+          </li>
           <li id="id-tag-signup-login" data-bind="visible: is_known_user() == false"><a onClick="$('#id-dialog-signup-login').modal('show');">Sign Up / Login</a></li>
           <li><a>Finished <span class="badge" data-bind="text: finished_tasks"></span></a></li>
         </ul>
@@ -47,7 +54,7 @@
             <div class="tab-content">
               <div class="tab-pane" id="id-tab-login">
                 <div>
-                  <form id="id-form-login" role="form" action="/api/email_login" method="POST" accept-charset="utf-8">
+                  <form role="form" action="/api/email_login" method="POST" accept-charset="utf-8" data-bind="submit: _login">
                     {% csrf_token %}
                     <div class="form-group" data-bind="attr: {class: login_show_error}">
                       <label class="control-label" for="email">Email address</label>
@@ -63,7 +70,7 @@
               </div>
               <div class="tab-pane active" id="id-tab-signup">
                 <div>
-                  <form id="id-form-signup" role="form" action="/api/email_signup" method="POST" accept-charset="utf-8">
+                  <form role="form" action="/api/email_signup" method="POST" accept-charset="utf-8" data-bind="submit: _signup">
                     {% csrf_token %}
                     <div class="form-group" data-bind="attr: {class: signup_show_error}">
                       <label class="control-label" for="email">Email address</label>
@@ -117,44 +124,53 @@
     var userdata = KnockObj.buildFrom({{ user | safe }});
     KnockObj.bindCookie(userdata, "session_token", {expires: 90, path: "/"});
     KnockObj.merge(userdata, {login_show_error: "", signup_show_error: ""});
+    // func signup ------------------------------------------
+    userdata._signup = function (form) {
+      $form = $(form)
+      $.post($form.attr("action"), $form.serialize())
+        .done(function(ret){
+          if(ret.succeeded) {
+            KnockObj.update(userdata, KnockObj.flattened(ret.user))
+            $("#id-dialog-signup-login").modal("hide");
+          }
+          else {
+            userdata.signup_show_error("has-error");
+            $("#id-form-signup input[name|='email']").change(function(e){
+              userdata.signup_show_error("");
+            });
+          }
+        });
+    };
+    // func login ----------------------------------------
+    userdata._login = function (form) {
+      $form = $(form)
+      $.post($form.attr("action"), $form.serialize())
+        .done(function(ret){
+          if(ret.succeeded) {
+            KnockObj.update(userdata, KnockObj.flattened(ret.user))
+            $("#id-dialog-signup-login").modal("hide");
+          }
+          else {
+            userdata.login_show_error("has-error");
+            $("#id-form-login input[name|='email']").change(function(e){
+              userdata.login_show_error("");
+            });
+          }
+        });
+    };
+    userdata._logout = function () {
+      $.post("/api/logout", {csrfmiddlewaretoken: $.cookie('csrftoken')})
+        .done(function(ret){
+          if(ret.succeeded) {
+            KnockObj.update(userdata, KnockObj.flattened(ret.user))
+          }
+        });
+    };
+    userdata._namebtn = ko.computed(function(){
+      return userdata.name() + "<b class='caret'></b>";
+    });
     $(document).ready(function () {
       userdata.session_token.valueHasMutated(); // Force update cookie as only changes will set cookie in default.
-      $("#id-form-signup").submit(function(e){
-        e.preventDefault();
-        $form = $(this)
-        $.post($form.attr("action"), $form.serialize())
-          .done(function(ret){
-            if(ret.succeeded) {
-              KnockObj.update(userdata, KnockObj.flattened(ret.user))
-              $("#id-dialog-signup-login").modal("hide");
-            }
-            else {
-              userdata.signup_show_error("has-error");
-              $("#id-form-signup input[name|='email']").change(function(e){
-                userdata.signup_show_error("");
-              });
-            }
-          });
-      });
-
-      $("#id-form-login").submit(function(e){
-        e.preventDefault();
-        $form = $(this)
-        $.post($form.attr("action"), $form.serialize())
-          .done(function(ret){
-            if(ret.succeeded) {
-              KnockObj.update(userdata, KnockObj.flattened(ret.user))
-              $("#id-dialog-signup-login").modal("hide");
-            }
-            else {
-              userdata.login_show_error("has-error");
-              $("#id-form-login input[name|='email']").change(function(e){
-                userdata.login_show_error("");
-              });
-            }
-          });
-      });
-
     })
   </script>
   <script>
