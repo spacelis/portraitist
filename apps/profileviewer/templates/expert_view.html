@@ -1,81 +1,4 @@
 {% extends "frame.html" %}
-{% block extra_header %}
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4oLS7DjhME0pLuTTauJw3rjs1_n4TuKM&sensor=false" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/profileviewer/js/d3.min.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/profileviewer/js/crossfilter.min.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/profileviewer/js/dc.min.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/profileviewer/js/gmaps.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/profileviewer/js/jquery-uuid.js" type="text/javascript" charset="utf-8"></script>
-
-  <script src="/static/profileviewer/js/expert_view.js" type="text/javascript" charset="utf-8"></script>
-
-  <link rel="stylesheet" href="/static/profileviewer/css/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
-  <script type="text/javascript" charset="utf-8">
-    $(document).ready(function () {
-      profileviewer_ns.initCharts("{{ candidate | safe }}");
-      var in_nodes = [
-        {% for t in topics %}
-        "pv-judgements-{{ t.topic_id  }}",
-        {% endfor %}
-      ];
-
-      $("#pv-judgement-form").submit(function(){
-        var is_all_marked = true;
-        var selector;
-        for(var i in in_nodes){
-          selector = "input[name='" + in_nodes[i] + "']";
-          if($(selector + ":checked").length === 0){
-            $(selector).closest(".btn-group").addClass("error");
-            is_all_marked = false;
-          }
-        }
-        return is_all_marked;
-      });
-      $(".btn-judgement").click(function(){
-        $(this).removeClass("error");
-      });
-      var topic_judgement = JSON.parse("{{ topic_judgement|escapejs }}");
-      if(topic_judgement){
-        for(var k in topic_judgement){
-          $("input[name=py-judgements-" + k + "]").prop("checked", true);
-          $("input[name=pv-judgements-" + k + "][value=" + topic_judgement[k] + "]")
-            .closest("label").addClass("active")
-        }
-      }
-    });
-  </script>
-  <style type="text/css" media="screen">
-    a:hover {
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .chart-label {
-      cursor: help;
-      text-align: center;
-    }
-    .btn-float-right {
-      float: right;
-    }
-    .btn-radio.active, .btn-radio:active {
-      background-color: #428bca;
-      color: white;
-    }
-    .has-explanation {
-      border-bottom: 1px dotted
-    }
-    .has-no-explanation {
-      border-bottom: 1px solid white;
-    }
-    .error {
-      -moz-box-shadow:    0px 0px 5px 2px #c00;
-      -webkit-box-shadow: 0px 0px 5px 2px #c00;
-      box-shadow:         0px 0px 5px 2px #c00;
-      -moz-border-radius: 3px;
-      -webkit-border-radius: 3px;
-      border-radius: 3px;
-    }
-  </style>
-{% endblock %}
 {% block content %}
 <div id="judgement-panel" class="panel panel-default" style="z-index: 100">
   <div class="panel-heading">
@@ -118,7 +41,6 @@
                 </label>
                 <label class="btn btn-default btn-radio" for="" title="He/she definately knows a lot.">
                   <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="5"> <div class="has-explanation">&nbsp;5&nbsp;</div>
-                  <!--&nbsp;<abbr title="He/she definately knows a lot.">(Likely)</abbr>&nbsp;-->
                 </label>
                 <label class="btn btn-default btn-radio" for="" title="Not sure what the topic is really about.">
                   <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="-1"> <div class="has-explanation">Not Sure</div>
@@ -220,7 +142,108 @@
     </div>
   </div>
 </div>
-<!--<div class="footer">-->
-  <!--<p> If you have any complaints or suggestions, please do not hesitate to contact us. <a href="mailto:wen.li@tudelft.nl?subject=Feedback%20on%20Geoexpert%20Judging%20System">Wen Li</a></p>-->
+
+<!-- Modal Dialogue for spam checking -->
+<div class="modal fade" id="id-dialog-verify-judgement" tabindex="-1" role="dialog" aria-labelledby="user_sign_up" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 class="modal-title">Submitting by mistakes?</h3>
+      </div>
+      <div class="modal-body">
+        You seems clicking submit button by mistake, please verify your judgement.
+      </div>
+    </div>
+  </div>
+</div>
+<!--<div class="modal-footer">-->
+  <!--<small> All you data will be treated confidentially. </small>-->
 <!--</div>-->
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4oLS7DjhME0pLuTTauJw3rjs1_n4TuKM&sensor=false" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/d3.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/crossfilter.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/dc.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/gmaps.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/jquery-uuid.js" type="text/javascript" charset="utf-8"></script>
+
+  <script src="/static/profileviewer/js/expert_view.js" type="text/javascript" charset="utf-8"></script>
+
+  <link rel="stylesheet" href="/static/profileviewer/css/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <script type="text/javascript" charset="utf-8">
+    (function () {
+      profileviewer_ns.initCharts("{{ candidate | safe }}");
+      var in_nodes = [
+        {% for t in topics %}
+        "pv-judgements-{{ t.topic_id  }}",
+        {% endfor %}
+      ];
+      var task_start_at = new Date();
+      $("#pv-judgement-form").submit(function(event){
+        var selector;
+        for(var i in in_nodes){
+          selector = "input[name='" + in_nodes[i] + "']";
+          if($(selector + ":checked").length === 0){
+            $(selector).closest(".btn-group").addClass("error");
+            event.preventDefault();
+          }
+        }
+        if(event.isDefaultPrevented()){
+          return;
+        }
+        else if(new Date() - task_start_at < 30000){
+          $("#id-dialog-verify-judgement").modal("show");
+          $(".modal-backdrop.fade.in").css({opacity: 1, background: "#900"});
+          event.preventDefault();
+        }
+      });
+      $(".btn-judgement").click(function(){
+        $(this).removeClass("error");
+      });
+
+      // For judgement reviewing
+      var topic_judgement = JSON.parse("{{ topic_judgement|escapejs }}");
+      if(topic_judgement){
+        for(var k in topic_judgement){
+          $("input[name=py-judgements-" + k + "]").prop("checked", true);
+          $("input[name=pv-judgements-" + k + "][value=" + topic_judgement[k] + "]")
+            .closest("label").addClass("active")
+        }
+      }
+    })();
+  </script>
+  <style type="text/css" media="screen">
+    a:hover {
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .chart-label {
+      cursor: help;
+      text-align: center;
+    }
+    .btn-float-right {
+      float: right;
+    }
+    .btn-radio.active, .btn-radio:active {
+      background-color: #428bca;
+      color: white;
+    }
+    .has-explanation {
+      border-bottom: 1px dotted
+    }
+    .has-no-explanation {
+      border-bottom: 1px solid white;
+    }
+    .error {
+      -moz-box-shadow:    0px 0px 5px 2px #c00;
+      -webkit-box-shadow: 0px 0px 5px 2px #c00;
+      box-shadow:         0px 0px 5px 2px #c00;
+      -moz-border-radius: 3px;
+      -webkit-border-radius: 3px;
+      border-radius: 3px;
+    }
+  </style>
 {% endblock %}

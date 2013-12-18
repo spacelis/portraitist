@@ -54,7 +54,7 @@
             <div class="tab-content">
               <div class="tab-pane" id="id-tab-login">
                 <div>
-                  <form role="form" action="/api/email_login" method="POST" accept-charset="utf-8" data-bind="submit: _login">
+                  <form role="form" action="/api/email_login" method="POST" accept-charset="utf-8" data-bind="submit: f_login">
                     {% csrf_token %}
                     <div class="form-group" data-bind="attr: {class: login_show_error}">
                       <label class="control-label" for="email">Email address</label>
@@ -70,7 +70,7 @@
               </div>
               <div class="tab-pane active" id="id-tab-signup">
                 <div>
-                  <form role="form" action="/api/email_signup" method="POST" accept-charset="utf-8" data-bind="submit: _signup">
+                  <form role="form" action="/api/email_signup" method="POST" accept-charset="utf-8" data-bind="submit: f_signup">
                     {% csrf_token %}
                     <div class="form-group" data-bind="attr: {class: signup_show_error}">
                       <label class="control-label" for="email">Email address</label>
@@ -125,7 +125,7 @@
     KnockObj.bindCookie(userdata, "session_token", {expires: 90, path: "/"});
     KnockObj.merge(userdata, {login_show_error: "", signup_show_error: ""});
     // func signup ------------------------------------------
-    userdata._signup = function (form) {
+    userdata.f_signup = function (form) {
       $form = $(form)
       $.post($form.attr("action"), $form.serialize())
         .done(function(ret){
@@ -142,7 +142,7 @@
         });
     };
     // func login ----------------------------------------
-    userdata._login = function (form) {
+    userdata.f_login = function (form) {
       $form = $(form)
       $.post($form.attr("action"), $form.serialize())
         .done(function(ret){
@@ -181,7 +181,7 @@
     ga('create', 'UA-43808487-1', 'geo-expertise.appspot.com');
     ga('send', 'pageview');
   </script>
-  {% block extra_header %}{% endblock %}
+  {% block extra_scripts %}{% endblock %}
   <script>
     ko.applyBindings(userdata);
   </script>
