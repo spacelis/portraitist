@@ -53,36 +53,46 @@
             <!-- Tab panes -->
             <div class="tab-content">
               <div class="tab-pane" id="id-tab-login">
-                <div>
-                  <form role="form" action="/api/email_login" method="POST" accept-charset="utf-8" data-bind="submit: f_login">
+                <div style="padding: 15px">
+                  <form role="form" class="form-horizontal" action="/api/email_login" method="POST" accept-charset="utf-8" data-bind="submit: f_login">
                     {% csrf_token %}
                     <div class="form-group" data-bind="attr: {class: login_show_error}">
-                      <label class="control-label" for="email">Email address</label>
-                      <input type="email" class="form-control" name="email" placeholder="Enter email">
+                      <label class="col-sm-4 control-label" for="email">Email address</label>
+                      <div class="col-sm-8">
+                        <input type="email" class="form-control" name="email" placeholder="Enter email">
+                      </div>
                     </div>
                     <div class="form-group" data-bind="attr: {class: login_show_error}">
-                      <label class="control-label" for="password">Password</label>
-                      <input type="password" class="form-control" name="passwd" placeholder="Enter password">
+                      <label class="col-sm-4 control-label" for="password">Password</label>
+                      <div class="col-sm-8">
+                        <input type="password" class="form-control" name="passwd" placeholder="Enter password">
+                      </div>
                     </div>
                     <button type="submit" class="btn btn-primary">Save</button>
                   </form>
                 </div>
               </div>
               <div class="tab-pane active" id="id-tab-signup">
-                <div>
-                  <form role="form" action="/api/email_signup" method="POST" accept-charset="utf-8" data-bind="submit: f_signup">
+                <div style="padding: 15px">
+                  <form role="form" class="form-horizontal" action="/api/email_signup" method="POST" accept-charset="utf-8" data-bind="submit: f_signup">
                     {% csrf_token %}
                     <div class="form-group" data-bind="attr: {class: signup_show_error}">
-                      <label class="control-label" for="email">Email address</label>
-                      <input type="email" class="form-control" name="email" placeholder="Enter email">
+                      <label class="col-sm-4 control-label" for="email">Email address</label>
+                      <div class="col-sm-8">
+                        <input type="email" class="form-control" name="email" placeholder="Enter email">
+                      </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label" for="username">Name</label>
-                      <input type="text" class="form-control" name="name" placeholder="Enter nickname">
+                      <label class="col-sm-4 control-label" for="username">Name</label>
+                      <div class="col-sm-8">
+                        <input type="text" class="form-control" name="name" placeholder="Enter nickname">
+                      </div>
                     </div>
                     <div class="form-group">
-                      <label class="control-label" for="password">Password</label>
-                      <input type="password" class="form-control" name="passwd" placeholder="Enter password">
+                      <label class="col-sm-4 control-label" for="passwd">Password</label>
+                      <div class="col-sm-8">
+                        <input type="password" class="form-control" name="passwd" placeholder="Enter password">
+                      </div>
                     </div>
                     <button type="submit" class="btn btn-primary">Save</button>
                   </form>
@@ -123,7 +133,7 @@
   <script>
     var userdata = KnockObj.buildFrom({{ user | safe }});
     KnockObj.bindCookie(userdata, "session_token", {expires: 90, path: "/"});
-    KnockObj.merge(userdata, {login_show_error: "", signup_show_error: ""});
+    KnockObj.merge(userdata, {login_show_error: "form-group", signup_show_error: "form-group"});
     // func signup ------------------------------------------
     userdata.f_signup = function (form) {
       $form = $(form)
@@ -134,9 +144,9 @@
             $("#id-dialog-signup-login").modal("hide");
           }
           else {
-            userdata.signup_show_error("has-error");
+            userdata.signup_show_error("form-group has-error");
             $("#id-form-signup input[name|='email']").change(function(e){
-              userdata.signup_show_error("");
+              userdata.signup_show_error("form-group ");
             });
           }
         });
@@ -151,9 +161,9 @@
             $("#id-dialog-signup-login").modal("hide");
           }
           else {
-            userdata.login_show_error("has-error");
+            userdata.login_show_error("form-group has-error");
             $("#id-form-login input[name|='email']").change(function(e){
-              userdata.login_show_error("");
+              userdata.login_show_error("form-group");
             });
           }
         });
