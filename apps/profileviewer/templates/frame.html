@@ -68,7 +68,7 @@
                         <input type="password" class="form-control" name="passwd" placeholder="Enter password">
                       </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary pull-right">Login</button>
                   </form>
                 </div>
               </div>
@@ -94,7 +94,7 @@
                         <input type="password" class="form-control" name="passwd" placeholder="Enter password">
                       </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary pull-right">Sign Up</button>
                   </form>
                 </div>
               </div>
@@ -177,7 +177,7 @@
         });
     };
     userdata._namebtn = ko.computed(function(){
-      return userdata.name() + "<b class='caret'></b>";
+      return userdata.name() + "&nbsp;<b class='caret'></b>";
     });
     $(document).ready(function () {
       userdata.session_token.valueHasMutated(); // Force update cookie as only changes will set cookie in default.
