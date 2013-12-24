@@ -3,12 +3,12 @@
 <div id="judgement-panel" class="panel panel-default" style="z-index: 100">
   <div class="panel-heading">
     <b>
-      How likely will you ask this user about
+      How likely will you get information from this user about
     </b>
   </div>
   <div class="panel-body">
-    <form id="pv-judgement-form" action="/judge_expert" method="post" accept-charset="utf-8" role="form">
-      <input type="hidden" name="pv-candidate-hash-id" value="{{ candidate }}" id="judgement-candidate">
+    <form id="pv-judgement-form" action="/submit_annotation" method="post" accept-charset="utf-8" role="form">
+      <input type="hidden" name="pv-task-key" value="{{ task_key }}" id="judgement-candidate">
       {% csrf_token %}
       <div class="list-group">
         {% for t in topics %}
@@ -193,12 +193,12 @@
         }
         if(event.isDefaultPrevented()){
           return;
-        }
+        }/* FIXME  Temporarily disable spam detecting.
         else if(new Date() - task_start_at < 30000){
           $("#id-dialog-verify-judgement").modal("show");
           $(".modal-backdrop.fade.in").css({opacity: 1, background: "#900"});
           event.preventDefault();
-        }
+        }*/
       });
       $(".btn-judgement").click(function(){
         $(this).removeClass("error");
