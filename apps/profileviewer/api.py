@@ -31,6 +31,7 @@ from apps.profileviewer.models import User
 from apps.profileviewer.models import DEFAULT_PARENT_KEY
 from apps.profileviewer.util import request_property
 from apps.profileviewer.util import get_user
+from apps.profileviewer.util import throttle_map
 
 
 EndPointSpec = namedtuple('EndPointSpec', ['func',
@@ -173,7 +174,7 @@ def list_datafiles():
     return os.listdir('apps/data')
 
 
-def import_entities(filename, loader):
+def import_entities(filename, loader, pool=20):
     """ Import entities from file.
 
     :filename: The name of file in data.
@@ -183,10 +184,14 @@ def import_entities(filename, loader):
     """
     path = os.path.join('apps/data', filename)
 
+    @ndb.tasklet
+    def async_loader(r):
+        """ Async loader. """
+        ndb.Return(loader(r))
+
     try:
         with flexopen(path) as fin:
-            for r in csv.DictReader(fin):
-                loader(r)
+            throttle_map(csv.DictReader(fin), async_loader, pool)
     except IOError:
         raise Http404
     return {'import': 'succeeded'}
@@ -196,7 +201,7 @@ from apps.profileviewer.models import TwitterAccount
 
 
 @api_endpoint(secured=True)
-def import_candidates(filename):
+def import_candidates(filename, pool=20):
     """ Import candidates from file.
 
     :filename: the name of file in data
@@ -209,7 +214,7 @@ def import_candidates(filename):
             parent=DEFAULT_PARENT_KEY,
             screen_name=r['screen_name'],
             checkins=json.loads(r['checkins'])).put()
-    return import_entities(filename, loader)
+    return import_entities(filename, loader, pool)
 
 
 from apps.profileviewer.models import ExpertiseRank
@@ -367,7 +372,7 @@ def email_login(email, passwd, _user):
         return {'action': 'login',
                 'succeeded': True,
                 'user': user.as_viewdict()}
-    except ValueError:
+    except (ValueError, AssertionError):
         return {'action': 'login',
                 'succeeded': False,
                 'msg': 'The email or the password is not correct.'}

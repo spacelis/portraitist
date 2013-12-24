@@ -52,11 +52,16 @@ class TestImportAPI(unittest.TestCase):
     def test_importEntity(self, mock_flexopen):
         """ test_importEntity. """
         mock_flexopen.return_value = ContextualStringIO(
-            'screen_name,checkins\nspaceli,"{""a"": 1}"')
+            'screen_name,checkins\n'
+            'spaceli1,"{""a"": 1}"\n'
+            'spaceli2,"{""a"": 1}"\n'
+            'spaceli3,"{""a"": 1}"\n'
+            'spaceli4,"{""a"": 1}"'
+        )
 
         def loader(r):
             """ test_loader. """
-            self.assertEqual(r['screen_name'], 'spaceli')
+            self.assertEqual(r['screen_name'][:7], 'spaceli')
             self.assertEqual(json.loads(r['checkins']), {'a': 1})
 
         from apps.profileviewer.api import import_entities
@@ -65,13 +70,17 @@ class TestImportAPI(unittest.TestCase):
     def test_import_candidates(self, mock_flexopen):
         """test_import_candidates."""
         mock_flexopen.return_value = ContextualStringIO(
-            'screen_name,checkins\nspaceli,"{""a"": 1}"')
+            'screen_name,checkins\n' +
+            '\n'.join(['spaceli,"{""a"": %s}"' % i for i in range(20)])
+        )
 
         from apps.profileviewer.api import import_candidates
         from apps.profileviewer.models import TwitterAccount
 
-        import_candidates('')
-        self.assertEqual(len(TwitterAccount.query().fetch()), 1)
+        import_candidates('', 5)
+        self.assertEqual(set([e.checkins['a']
+                              for e in TwitterAccount.query().fetch()]),
+                         set(range(20)))
 
 
 class TestUtilFunctions(unittest.TestCase):

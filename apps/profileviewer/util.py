@@ -28,6 +28,23 @@ from google.appengine.api import mail
 from apps.profileviewer.models import User
 
 
+def throttle_map(it, callback, size=20):
+    """ Looping over items utilizing async futures.
+
+    :it: The iterator.
+    :callback: A function to call which returns a future for the result.
+    :size: The max number of concurrent in-process futures.
+    """
+    l = list()
+    for r in it:
+        if len(l) < size:
+            l.append(callback(r))
+        else:
+            f = ndb.Future.wait_any(l)
+            l.remove(f)
+            l.append(callback(r))
+
+
 def get_user(request):
     """ Return the session attach to this request. """
     # session_toke is actually a token to a (temporary) user
