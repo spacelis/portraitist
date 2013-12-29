@@ -47,50 +47,65 @@ class TestModelUtils(unittest.TestCase):
         self.assertEquals(M.secure_hash('a', ''), M.secure_hash('a', ''))
 
 
-#class TestSpeed(unittest.TestCase):
+class TestKeyNoParentSpeed(unittest.TestCase):
 
-    #""" Test the speed regarding the key length. """
+    """ Test the speed regarding the key length. """
 
-    #def setUp(self):
-        #pass
+    def setUp(self):
+        self.testbed = testbed.Testbed()
+        self.testbed.setup_env()
+        self.testbed.activate()
+        self.testbed.init_memcache_stub()
+        self.testbed.init_datastore_v3_stub()
 
-    #def tearDown(self):
-        #pass
+        class AClass(M.EncodableModel):
+            akey = ndb.model.KeyProperty(indexed=True)
+            name = ndb.model.StringProperty(indexed=True)
 
-    #def test_noparent_key(self):
-        #""" test_noparent_key. """
-        #self.testbed = testbed.Testbed()
-        #self.testbed.setup_env()
-        #self.testbed.activate()
-        #self.testbed.init_memcache_stub()
-        #self.testbed.init_datastore_v3_stub()
+        for _ in range(10000):
+            akey = AClass(name="nothing").put()
 
-        #class AClass(M.EncodableModel):
-            #akey = ndb.model.KeyProperty(indexed=True)
-            #name = ndb.model.StringProperty(indexed=True)
+        self.akey = akey
+        memcache.Client().flush_all()
 
-        #for _ in range(10000):
-            #AClass(name="nothing").put()
+    def tearDown(self):
+        self.testbed.deactivate()
 
-        #self.testbed.deactivate()
+    def test_noparent_key(self):
+        """ test_noparent_key. """
+        x = self.akey.get()
 
-    #def test_parent_key(self):
-        #""" test_noparent_key. """
-        #self.testbed = testbed.Testbed()
-        #self.testbed.setup_env(app_id='testbed')
-        #self.testbed.activate()
-        #self.testbed.init_memcache_stub()
-        #self.testbed.init_datastore_v3_stub()
-        #parentkey = ndb.Key('test', 'parenting', app='testbed')
 
-        #class AClass(M.EncodableModel):
-            #akey = ndb.model.KeyProperty(indexed=True)
-            #name = ndb.model.StringProperty(indexed=True)
+class TestKeyParentSpeed(unittest.TestCase):
 
-        #for _ in range(10000):
-            #AClass(parent=parentkey, name="nothing").put()
+    """ Test the speed regarding the key length. """
 
-        #self.testbed.deactivate()
+    def setUp(self):
+        self.testbed = testbed.Testbed()
+        self.testbed.setup_env(app_id='testbed')
+        self.testbed.activate()
+        self.testbed.init_memcache_stub()
+        self.testbed.init_datastore_v3_stub()
+        parentkey = ndb.Key('test', 'parenting', app='testbed')
+
+        class AClass(M.EncodableModel):
+            akey = ndb.model.KeyProperty(indexed=True)
+            name = ndb.model.StringProperty(indexed=True)
+
+        for _ in range(10000):
+            akey = AClass(parent=parentkey, name="nothing").put()
+
+        self.akey = akey
+        memcache.Client().flush_all()
+
+    def tearDown(self):
+        self.testbed.deactivate()
+
+    def test_parent_key(self):
+        """ test_noparent_key. """
+        import cProfile
+        cProfile.runctx("self.akey.get()", locals(), globals(),
+                        filename="ParentKeyGet.profile")
 
 
 class TestBaseModel(unittest.TestCase):
@@ -121,6 +136,16 @@ class TestBaseModel(unittest.TestCase):
 
     def tearDown(self):
         self.testbed.deactivate()
+
+    def test_NDB_async_features(self):
+        """ test_NDB_async_features """
+        A = self.aclass
+        A(name='test').put()
+        fa = M.fetch_one_async(A.query())
+        self.assertEqual(fa.get_result().to_dict(), {'akey': None,
+                                                     'name': 'test',
+                                                     'gender': None,
+                                                     'address': None})
 
     def test_NDB_todict(self):
         """ test ndb.Model.to_dict(). """

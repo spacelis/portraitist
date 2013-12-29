@@ -10,21 +10,9 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-#DATABASES = {
-    #'default': {
-        #'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        #'NAME': '',                      # Or path to database file if using sqlite3.
-        ## The following settings are not used with sqlite3:
-        #'USER': '',
-        #'PASSWORD': '',
-        #'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        #'PORT': '',                      # Set to empty string for default.
-    #}
-#}
-
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ['geo-expertise-2.appspot.com', 'localhost']
+ALLOWED_HOSTS = ['geo-expertise.appspot.com', 'localhost']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -80,7 +68,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -90,7 +78,18 @@ SECRET_KEY = 'bq#!ww3)lrh6di97tej59))c-)$b^mn0^d^9g-0dzo#+0g&u1-'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    #'django.template.loaders.eggs.Loader',
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.core.context_processors.tz',
+    'django.contrib.messages.context_processors.messages',
+    'apps.profileviewer.views.user_context'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -110,11 +109,7 @@ ROOT_URLCONF = 'apps.urls'
 WSGI_APPLICATION = 'apps.wsgi.application'
 
 ROOT_PATH = os.path.dirname(__file__)
-TEMPLATE_DIRS = (os.path.join(ROOT_PATH, "profileviewer/templates")
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
+TEMPLATE_DIRS = (os.path.join(ROOT_PATH, "profileviewer/templates"))
 
 INSTALLED_APPS = (
     'django.contrib.auth',

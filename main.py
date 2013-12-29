@@ -11,3 +11,6 @@ Description:
 import django.core.handlers.wsgi
 
 application = django.core.handlers.wsgi.WSGIHandler()
+
+import gae_mini_profiler.profiler
+application = gae_mini_profiler.profiler.ProfilerWSGIMiddleware(application)

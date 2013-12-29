@@ -11,10 +11,13 @@ urlpatterns = patterns(
     '',
     url(r'^favicon\.ico$', RedirectView.as_view(
         url='/static/profileviewer/images/socialmining.ico')),
+    url(r'^$', 'apps.profileviewer.views.home'),
 
-    url(r'^goto_taskpack/(.*)$', 'apps.profileviewer.views.goto_taskpack'),
+    url(r'^taskpackage/(.*)$', 'apps.profileviewer.views.taskpackage'),
     url(r'^task_router$', 'apps.profileviewer.views.task_router'),
+    url(r'^confirm_code/(.*)$', 'apps.profileviewer.views.confirm_code_view'),
     url(r'^task/(.*)$', 'apps.profileviewer.views.annotation_view'),
+    url(r'^submit_annotation$', 'apps.profileviewer.views.submit_annotation'),
     url(r'^api/([a-zA-Z_]+).*$', 'apps.profileviewer.api.call_endpoint'),
 
     url(r'^terms$', TemplateView.as_view(template_name="terms.html")),

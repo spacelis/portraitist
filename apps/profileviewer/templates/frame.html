@@ -22,7 +22,7 @@
       </div>
       <div class="collapse navbar-collapse navbar-ex1-collapse">
         <ul class="nav navbar-nav navbar-right">
-          <li id="id-tag-user-email" data-bind="visible: is_known_user" class="dropdown">
+          <li id="id-tag-user-email" data-bind="visible: is_known" class="dropdown">
           <a data-bind="html: _namebtn" class="dropdown-toggle" data-toggle="dropdown"></a>
             <ul class="dropdown-menu">
               <li><a href="#">Overview</a></li>
@@ -196,5 +196,6 @@
   <script>
     ko.applyBindings(userdata);
   </script>
+  {% profiler_includes %}
 </body>
 </html>

@@ -15,6 +15,7 @@ import csv
 import hashlib
 from uuid import uuid4
 from datetime import timedelta
+import time
 from datetime import datetime as dt
 import base64
 import json
@@ -58,8 +59,24 @@ def _k(s, kind=None):
     """
     k = ndb.Key(urlsafe=s)
     if kind is not None and k.kind() != kind:
-        raise ValueError('Given urlsafe key is not of kind: ' + kind)
+        raise TypeError('Given urlsafe key is not of kind: ' + kind)
     return k
+
+
+def fetch_one_async(qry):
+    """ Return a Future that encapsulate the first result of the qry.
+
+    :qry: The query
+    :returns: A Future object holding the result.
+
+    """
+    @ndb.tasklet
+    def fetch_one():
+        """ Async functions for get one entity from the query. """
+        e = (yield qry.fetch_async(1))[0]
+        raise ndb.Return(e)
+
+    return fetch_one()
 
 
 def assertAbsent(model, field, value):
@@ -72,7 +89,7 @@ def assertAbsent(model, field, value):
 
     """
     if len(model.query(field == value).fetch(1)) > 0:
-        raise ValueError
+        raise ValueError('%s(%s) exists.' % (field, value))
 
 
 class Encodable(object):
@@ -164,7 +181,7 @@ class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
 
         """
         tkey = TwitterAccount(
-            parent=DEFAULT_PARENT_KEY,
+            #parent=DEFAULT_PARENT_KEY,
             access_token=access_token,
             access_token_secret=access_token_secret,
             user_account=user.key
@@ -219,7 +236,7 @@ class EmailAccount(ndb.Model):
         secret = newToken('passwd')
         ukey = user.put()
         account = EmailAccount(
-            parent=DEFAULT_PARENT_KEY,
+            #parent=DEFAULT_PARENT_KEY,
             email=email,
             hashed_passwd=secure_hash(passwd, secret),
             secret=secret,
@@ -227,6 +244,7 @@ class EmailAccount(ndb.Model):
         user.populate(
             email_account=account,
             name=name,
+            is_known=True,
             session_token=newToken('session')
         )
         user.put()
@@ -285,19 +303,19 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
     """ The judgement given by judges. """
 
     judge = ndb.model.KeyProperty(indexed=True, kind='User')
-    candidate = ndb.model.KeyProperty(indexed=True, kind='User')
-    topic = ndb.model.KeyProperty(indexed=True, kind=GeoEntity)
+    candidate = ndb.model.KeyProperty(indexed=True, kind='TwitterAccount')
+    topic_id = ndb.model.StringProperty(indexed=True)
     score = ndb.model.IntegerProperty(indexed=False)
     created_at = ndb.model.DateTimeProperty(indexed=False)
     ipaddr = ndb.model.StringProperty(indexed=False)
     user_agent = ndb.model.StringProperty(indexed=False)
 
     @staticmethod
-    def add(judge, candidate, scores, ipaddr, user_agent):
+    def add(judge, task, scores, ipaddr, user_agent):
         """ Add a the judgement to the database.
 
         :judge: The urlsafe key to the judge entity.
-        :candidate: The urlsafe key to the candidate entity.
+        :task: The urlsafe key to the candidate entity.
         :scores: A list of (topic_key, score).
         :ipaddr: IP address of the judge in str().
         :user_agent: The browser user agent string.
@@ -305,16 +323,20 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
 
         """
         ts = dt.utcnow()
-        for t, s in scores:
+
+        fs = [
             Judgement(
-                parent=DEFAULT_PARENT_KEY,
-                judge=_k(judge),
-                candidate=_k(candidate),
-                topic=_k(t),
-                score=s,
+                #parent=DEFAULT_PARENT_KEY,
+                judge=judge.key,
+                candidate=task.candidate,
+                topic_id=t,
+                score=int(s),
                 created_at=ts,
                 ipaddr=ipaddr,
-                user_agent=user_agent).put()
+                user_agent=user_agent).put_async()
+            for t, s in scores.iteritems()
+        ]
+        ndb.Future.wait_all(fs)
 
 
 class ExpertiseRank(EncodableModel):  # pylint: disable=R0903,W0223
@@ -365,16 +387,6 @@ class AnnotationTask(ndb.Model):  # pylint: disable=R0903
         return {'rankings': [r.get() for r in self.rankings],
                 'candidate': self.candidate.get()}
 
-    @staticmethod
-    def getByKey(key):
-        """ Return the task indexed with the key.
-
-        :key: @todo
-        :returns: @todo
-
-        """
-        return ndb.Key(urlsafe=key).get()
-
 
 class TaskPackage(ndb.Model):
 
@@ -407,26 +419,25 @@ class TaskPackage(ndb.Model):
         """
         return _k(safekey).get()
 
-    def nextTask(self):
+    def nextTaskKey(self):
         """ Return a task from the progress.
 
         :returns: A new task from the package.
 
         """
         try:
-            return self.progress[0].urlsafe()
+            return self.progress[0]
         except IndexError:
             raise TaskPackage.NoMoreTask(self.getConfirmationCode())
 
-    def finishATask(self, task):
+    def finish(self, task):
         """ Set the task as finished.
 
         :task: The task to be set as finished.
         :returns: None.
 
         """
-        assert task == self.progress[0].urlsafe(), \
-            'Do not know the task: ' + task
+        assert task.key == self.progress[0], 'Not assigned: ' + task
         del self.progress[0]
         self.put()
 
@@ -444,6 +455,26 @@ class TaskPackage(ndb.Model):
         self.progress = self.tasks
         self.put()
 
+    @staticmethod
+    def fetch_unassigned(self, num=1):
+        """ Fetch a number of taskpackage having not been assigned for long.
+
+        :num: The number of task_package to return.
+        :returns: @todo
+
+        """
+        return TaskPackage.query().order(TaskPackage.assigned_at).fetch(num)
+
+    def touch(self):
+        """ Update the time of the taskpackage being assigned.
+
+        :returns: self
+
+        """
+        self.assigned_at = dt.utcnow()
+        self.put()
+        return self
+
 
 class User(EncodableModel):
 
@@ -457,6 +488,7 @@ class User(EncodableModel):
     show_instructions = ndb.model.BooleanProperty(indexed=False)
     task_package = ndb.model.KeyProperty(indexed=False)
     session_token = ndb.model.StringProperty(indexed=True)
+    is_known = ndb.model.BooleanProperty(indexed=False)
 
     def addTwitterAccount(self, twitter_account):
         """ Linking a twitter account to this user.
@@ -476,8 +508,8 @@ class User(EncodableModel):
             'session_token': self.session_token,
             'finished_tasks': self.finished_tasks,
             'show_instructions': self.show_instructions,
-            'is_known_user': self.isKnownUser(),
-            'task_package': None if self.task_package is None
+            'is_known': self.is_known is True,
+            'task_package': '' if self.task_package is None
             else self.task_package.urlsafe(),
         }
 
@@ -485,11 +517,12 @@ class User(EncodableModel):
     def unit():
         """ Return an empty user object. """
         return User(
-            parent=DEFAULT_PARENT_KEY,
-            name='Unkown User',
+            #parent=DEFAULT_PARENT_KEY,
+            name='Guest-' + str(time.time()),
             finished_tasks=0,
             session_token=newToken('session'),
             show_instructions=True,
+            is_known=False,
             last_seen=dt.utcnow()
         ).cache()
 
@@ -513,7 +546,8 @@ class User(EncodableModel):
 
     def reset_token(self):
         """ Assign a new session token to this user. """
-        self.populate(session_token=newToken('session'))
+        self.session_token = newToken('session')
+        self.last_seen = dt.utcnow()
         self.put()
         self.cache()
 
@@ -524,7 +558,8 @@ class User(EncodableModel):
         :returns: self
 
         """
-        self.task_package = task_package
+        self.task_package = task_package.touch().key
+        self.touch()
         return self
 
     def touch(self):
@@ -566,9 +601,13 @@ class User(EncodableModel):
         self.finished_tasks += user.finished_tasks
         self.show_instructions |= user.show_instructions
 
-    def isKnownUser(self):
-        """ Whether this user is known (not temporary user)self.
+    def accomplish(self, task):
+        """ The user accomplish a task.
+
+        :task: @todo
         :returns: @todo
 
         """
-        return self.key.integer_id() is not None
+        self.task_package.get().finish(task)
+        self.finished_tasks += 1
+        self.touch()

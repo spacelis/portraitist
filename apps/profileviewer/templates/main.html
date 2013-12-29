@@ -1,13 +1,17 @@
 {% extends "frame.html" %}
 {% block content %}
-<ul class="list-group">
-  {% for t in topics %}
-    <li class="list-group-item">
-      <a href="/topic_view/{{t.topic_id}}">{{t.topic}} in {{t.region}}</a>
-      {% if t.judgement_number > 0 %}
-        <span class="badge">{{ t.judgement_number }}</span>
-      {% endif %}
-    </li>
-  {% endfor %}
-</ul>
+<H1> Geo-Expertise Retrieval System </H1>
+<button type="button" class="btn btn-primary" data-bind="click: gototask">Goto Tasks</button>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  userdata.gototask = function(e){
+    $.get("/api/assign_taskpackage").done(function(ret){
+      if(ret.succeeded) {
+        window.location.href = "/task_router";
+      }
+    });
+  };
+</script>
 {% endblock %}

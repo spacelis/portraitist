@@ -13,6 +13,7 @@ import json
 import urllib2
 
 from django import template
+import gae_mini_profiler.templatetags
 
 register = template.Library()
 
@@ -37,3 +38,9 @@ def urldecode(val):
 
     """
     return urllib2.unquote(val)
+
+
+@register.simple_tag
+def profiler_includes():
+    """ A template tag for including extra scripts for profiling. """
+    return gae_mini_profiler.templatetags.profiler_includes()

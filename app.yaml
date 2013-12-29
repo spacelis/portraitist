@@ -11,6 +11,13 @@ handlers:
 - url: /static
   static_dir: static
 
+# For gae_mini_profiler
+- url: /gae_mini_profiler/static
+  static_dir: gae_mini_profiler/static
+- url: /gae_mini_profiler/.*
+  script: gae_mini_profiler.main.application
+# --  END
+
 - url: /.*
   script: main.application
   secure: always

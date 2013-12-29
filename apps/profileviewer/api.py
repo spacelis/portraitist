@@ -201,7 +201,7 @@ from apps.profileviewer.models import TwitterAccount
 
 
 @api_endpoint(secured=True)
-def import_candidates(filename, pool=20):
+def import_candidates(filename):
     """ Import candidates from file.
 
     :filename: the name of file in data
@@ -211,10 +211,10 @@ def import_candidates(filename, pool=20):
     def loader(r):
         """ Loader for Twitter accounts and checkins. """
         TwitterAccount(
-            parent=DEFAULT_PARENT_KEY,
+            #parent=DEFAULT_PARENT_KEY,
             screen_name=r['screen_name'],
             checkins=json.loads(r['checkins'])).put()
-    return import_entities(filename, loader, pool)
+    return import_entities(filename, loader)
 
 
 from apps.profileviewer.models import ExpertiseRank
@@ -231,7 +231,7 @@ def import_rankings(filename):
     def loader(r):
         """ Loader for Twitter accounts and checkins. """
         ExpertiseRank(
-            parent=DEFAULT_PARENT_KEY,
+            #parent=DEFAULT_PARENT_KEY,
             topic_id=r['topic_id'],
             topic=GeoEntity.getByTFId(r['associate_id']).key,
             region=r['region'],
@@ -284,7 +284,7 @@ def import_geoentities(filename):
     def loader(r):
         """ Loader for Twitter accounts and checkins. """
         GeoEntity(
-            parent=DEFAULT_PARENT_KEY,
+            #parent=DEFAULT_PARENT_KEY,
             tfid=r['tfid'],
             name=r['name'],
             level=r['level'],
@@ -300,7 +300,7 @@ def make_tasks():
     for c in candidates:
         rankings = ExpertiseRank.getForCandidate(c.candidate)
         AnnotationTask(
-            parent=DEFAULT_PARENT_KEY,
+            #parent=DEFAULT_PARENT_KEY,
             rankings=[r.key for r in rankings],
             candidate=c.candidate).put()
     return {'make_tasks': 'succeeded'}
@@ -339,7 +339,7 @@ def make_taskpackages():
     for ts in partition(AnnotationTask.query().fetch(), 10):
         tkeys = [t.key for t in ts]
         TaskPackage(
-            parent=DEFAULT_PARENT_KEY,
+            #parent=DEFAULT_PARENT_KEY,
             tasks=tkeys,
             progress=tkeys,
             done_by=list(),
@@ -404,6 +404,21 @@ def email_signup(email, passwd, name, _user):
         return {'action': 'signup',
                 'succeeded': False,
                 'msg': 'The email address is already registered.'}
+
+
+@api_endpoint()
+def assign_taskpackage(_user):
+    """ Assign a new task package to the user.
+
+    :_user: The user/session object.
+    :returns: @todo
+
+    """
+    tp = TaskPackage.fetch_unassigned(1)[0]
+    _user.assign(tp)
+    return {'action': 'assign_taskpackage',
+            'succeeded': True,
+            'redirect': '/task_router'}
 
 
 @api_endpoint()

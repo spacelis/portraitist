@@ -27,8 +27,6 @@ from django.http import Http404
 from django.core.exceptions import PermissionDenied
 
 from apps.profileviewer.models import _k
-from apps.profileviewer.models import AnnotationTask
-from apps.profileviewer.models import TwitterAccount
 from apps.profileviewer.models import TaskPackage
 from apps.profileviewer.models import Judgement
 from apps.profileviewer.models import User
@@ -54,7 +52,24 @@ def login_required(view, *args, **kwargs):
         raise PermissionDenied
 
 
-def goto_taskpack(request, task_pack_id):
+def user_context(request):
+    """ A context processor that processing the user information.
+
+    :request: @todo
+    :returns: @todo
+
+    """
+    user = get_user(request)
+    return {'user': user.js_encode()}
+
+
+def home(request):
+    """ The welcome page. """
+    return render_to_response('main.html', {},
+                              context_instance=RequestContext(request))
+
+
+def taskpackage(request, task_pack_id):
     """
 
     :request: @todo
@@ -63,9 +78,11 @@ def goto_taskpack(request, task_pack_id):
 
     """
     user = get_user(request)
-    tp = _k(task_pack_id, 'TaskPackage')
-    user.assign(tp)
-    return redirect('/task_router')
+    tp_key = _k(task_pack_id, 'TaskPackage')
+    user.assign(tp_key)
+    r = redirect('/task_router')
+    r.set_cookie('session_token', user.session_token)
+    return r
 
 
 def task_router(request):
@@ -77,8 +94,8 @@ def task_router(request):
     """
     user = get_user(request)
     try:
-        task = user.task_package.get().nextTask()
-        return redirect('/task/' + task.key.urlsafe())
+        task_key = user.task_package.get().nextTaskKey()
+        return redirect('/task/' + task_key.urlsafe())
     except TaskPackage.NoMoreTask as e:
         return redirect('/confirm_code/' + e.cf_code)
     raise Http404
@@ -133,7 +150,7 @@ class DataViewFilterSet(object):
                 (', '.join(f.relation))
         else:
             return 'This is a general category that contains'
-        # TODO stopped here
+        # FIXME generate a list of filters for easy navigation.
 
     def addPOI(self, e):
         """ Add a new entity for filtering. """
@@ -149,7 +166,7 @@ def annotation_view(request, task_key):
 
     """
     user = get_user(request)
-    task = AnnotationTask.getByKey(task_key)
+    task = _k(task_key, 'AnnotationTask').get()
     rs = [r.get() for r in task.rankings]
     ts = [r.topic.get() for r in rs]
     topics = {r.topic_id: {
@@ -165,6 +182,7 @@ def annotation_view(request, task_key):
             'user': user.js_encode(),
             'topics': topics.values(),
             'candidate': task.candidate.urlsafe(),
+            'task_key': task_key,
             'filters': [{'name': t.name,
                         'type': t.level,
                         'description': t.level} for t in ts],
@@ -207,24 +225,23 @@ def submit_annotation(request):
 
     """
     user = get_user(request)
-    if not user.isKnownUser() or user.isDead():
+    if user.isDead():
         raise PermissionDenied
+    user.touch()
 
-    task_id = request.POST.get('jd-task-id', None)
-    task = _k(task_id, 'AnnotationTask')
-
-    if not isinstance(task, TwitterAccount):
+    try:
+        task_key = request.POST.get('pv-task-key', None)
+        task = _k(task_key, 'AnnotationTask').get()
+    except TypeError:
         raise Http404
 
     scores = get_scores(request)
-    ip, user_agent = get_client(request)
-    Judgement.add(user, task, scores, ip, user_agent)
+    ipaddr, user_agent = get_client(request)
+    Judgement.add(user, task, scores, ipaddr, user_agent)
 
-    user.task_package.finish(task)
-    user.finished_tasks += 1
-    user.touch()
+    user.accomplish(task)
 
-    return redirect('/task_route')
+    return redirect('/task_router')
 
 
 # ------------------------ OVERVIEW ---------------------
