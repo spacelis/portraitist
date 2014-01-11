@@ -18,7 +18,10 @@ urlpatterns = patterns(
     url(r'^confirm_code/(.*)$', 'apps.profileviewer.views.confirm_code_view'),
     url(r'^task/(.*)$', 'apps.profileviewer.views.annotation_view'),
     url(r'^submit_annotation$', 'apps.profileviewer.views.submit_annotation'),
-    url(r'^api/([a-zA-Z_]+).*$', 'apps.profileviewer.api.call_endpoint'),
+    url(r'^api/user/([a-zA-Z_]+).*$',
+        'apps.profileviewer.api.user.call_endpoint'),
+    url(r'^api/data/([a-zA-Z_]+).*$',
+        'apps.profileviewer.api.data.call_endpoint'),
 
     url(r'^terms$', TemplateView.as_view(template_name="terms.html")),
     url(r'^about$', TemplateView.as_view(template_name="about.html")),

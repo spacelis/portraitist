@@ -12,12 +12,8 @@ Description:
 """
 
 from json import dumps as _j
-import inspect
-from collections import namedtuple
 from datetime import datetime as dt
 
-from django.http import HttpResponse
-from django.core.exceptions import PermissionDenied
 from django.http import Http404
 
 from google.appengine.ext import ndb
@@ -28,54 +24,11 @@ from apps.profileviewer.models import EmailAccount
 from apps.profileviewer.models import AnnotationTask
 from apps.profileviewer.models import TaskPackage
 from apps.profileviewer.models import User
-from apps.profileviewer.models import DEFAULT_PARENT_KEY
-from apps.profileviewer.util import request_property
-from apps.profileviewer.util import get_user
 from apps.profileviewer.util import throttle_map
+from apps.profileviewer.util import APIRegistry
 
 
-EndPointSpec = namedtuple('EndPointSpec', ['func',
-                                           'spec',
-                                           'secured',
-                                           'disabled',
-                                           'jsonencoded'])
-_ENDPOINTS = dict()
-
-
-def api_endpoint(secured=False, disabled=False, jsonencoded=False):
-    """ An decorator for API registry.
-
-    Usage:
-        @api_endpoint(secured=True)
-        def an_api(a, b):
-            # Do some stuff with a, b
-            return # some stuff
-
-    """
-
-    def decorator(func):
-        """ dummy. """
-        name = func.__name__
-        _ENDPOINTS[name] = EndPointSpec(
-            func=func,
-            spec=inspect.getargspec(func),
-            secured=secured,
-            disabled=disabled,
-            jsonencoded=jsonencoded)
-        return func
-
-    return decorator
-
-
-def check_secure(req):
-    """ Check whether the call is secured.
-
-    :req: @todo
-    :returns: @todo
-
-    """
-    if request_property(req, '_admin_key') != 'tu2013delft':
-        raise PermissionDenied
+_REG = APIRegistry()
 
 
 def call_endpoint(request, name):
@@ -86,26 +39,10 @@ def call_endpoint(request, name):
     :returns: Json string response.
 
     """
-    try:
-        endpoint = _ENDPOINTS[name]
-        if endpoint.secured:
-            check_secure(request)
-        if endpoint.disabled:
-            raise KeyError()
-        kwargs = {k: request.REQUEST.get(k, None)
-                  for k in endpoint.spec.args if k != '_user'}
-        if '_user' in endpoint.spec.args:
-            kwargs['_user'] = get_user(request)
-    except KeyError:
-        raise Http404
-    ret = endpoint.func(**kwargs)  # pylint: disable=W0142
-    if endpoint.jsonencoded:
-        return HttpResponse(ret, mimetype="application/json")
-    else:
-        return HttpResponse(_j(ret), mimetype="application/json")
+    return _REG.call_endpoint(request, name)
 
 
-@api_endpoint(secured=False)
+@_REG.api_endpoint(secured=False)
 def checkins(candidate):
     """ Return all checkins for the candidate.
 
@@ -122,7 +59,7 @@ def checkins(candidate):
                 'a twiter account.'}
 
 
-@api_endpoint(secured=True, jsonencoded=True)
+@_REG.api_endpoint(secured=True, jsonencoded=True)
 def export_judgements(_):
     """ Export all judgements as json object per line.
 
@@ -164,7 +101,7 @@ def flexopen(filename):
         return open(filename)
 
 
-@api_endpoint(secured=True)
+@_REG.api_endpoint(secured=True)
 def list_datafiles():
     """ List the data files in data dir.
 
@@ -200,7 +137,7 @@ def import_entities(filename, loader, pool=20):
 from apps.profileviewer.models import TwitterAccount
 
 
-@api_endpoint(secured=True)
+@_REG.api_endpoint(secured=True)
 def import_candidates(filename):
     """ Import candidates from file.
 
@@ -220,7 +157,7 @@ def import_candidates(filename):
 from apps.profileviewer.models import ExpertiseRank
 
 
-@api_endpoint(secured=True)
+@_REG.api_endpoint(secured=True)
 def import_rankings(filename):
     """ Import rankings from file.
 
@@ -242,7 +179,7 @@ def import_rankings(filename):
     return import_entities(filename, loader)
 
 
-@api_endpoint(secured=False)  # FIXME should be True
+@_REG.api_endpoint(secured=False)  # FIXME should be True
 def rankings_statistics():
     """ Return a statistics for rankings. """
     from itertools import groupby
@@ -263,7 +200,7 @@ def rankings_statistics():
     }
 
 
-@api_endpoint(disabled=False)  # FIXME should be True
+@_REG.api_endpoint(disabled=False)  # FIXME should be True
 def clear_rankings():
     """ Delete all rankings from data store. """
     ndb.delete_multi([r.key for r in ExpertiseRank.query().fetch()])
@@ -273,7 +210,7 @@ def clear_rankings():
 from apps.profileviewer.models import GeoEntity
 
 
-@api_endpoint(secured=True)
+@_REG.api_endpoint(secured=True)
 def import_geoentities(filename):
     """ Import geo-entities from file.
 
@@ -293,7 +230,7 @@ def import_geoentities(filename):
     return import_entities(filename, loader)
 
 
-@api_endpoint()  # FIXME should be disabled
+@_REG.api_endpoint()  # FIXME should be disabled
 def make_tasks():
     """ Make tasks based on candidates. """
     candidates = ExpertiseRank.listCandidates()
@@ -306,7 +243,7 @@ def make_tasks():
     return {'make_tasks': 'succeeded'}
 
 
-@api_endpoint()
+@_REG.api_endpoint()
 def clear_tasks():
     """ Remove all tasks. """
     ts = [t.key for t in AnnotationTask.query().fetch()]
@@ -332,7 +269,7 @@ def partition(it, size=10):
         yield [x for _, x in g]
 
 
-@api_endpoint(secured=False)  # FIXME should be secured
+@_REG.api_endpoint(secured=False)  # FIXME should be secured
 def make_taskpackages():
     """ Group tasks in to packages. """
     from apps.profileviewer.models import newToken
@@ -349,64 +286,7 @@ def make_taskpackages():
     return {'make_taskpackages': 'succeeded'}
 
 
-import re
-EMAILPTN = re.compile(r"^[-!#$%&'*+/0-9=?A-Z^_a-z{|}~]"
-                      r"(\.?[-!#$%&'*+/0-9=?A-Z^_a-z{|}~])*"
-                      r"@[a-zA-Z](-?[a-zA-Z0-9])*"
-                      r"(\.[a-zA-Z](-?[a-zA-Z0-9])*)+$")
-
-
-@api_endpoint()
-def email_login(email, passwd, _user):
-    """ Login the user with name and passwd.
-
-    :email: the user email.
-    :passwd: the passwd.
-
-    """
-    try:
-        assert EMAILPTN.match(email)
-        assert len(passwd) < 50
-        user = EmailAccount.login(email, passwd, _user)
-        user.reset_token()
-        return {'action': 'login',
-                'succeeded': True,
-                'user': user.as_viewdict()}
-    except (ValueError, AssertionError):
-        return {'action': 'login',
-                'succeeded': False,
-                'msg': 'The email or the password is not correct.'}
-
-
-@api_endpoint()
-def email_signup(email, passwd, name, _user):
-    """ SignUp this user.
-
-    :email: email address.
-    :passwd: the password.
-
-    """
-    try:
-        assert EMAILPTN.match(email)
-        assert len(passwd) < 50
-        assert len(name) < 50
-        user = EmailAccount.signUp(email, passwd,
-                                   name, _user)
-        user.reset_token()
-        return {'action': 'signup',
-                'succeeded': True,
-                'user': user.as_viewdict()}
-    except AssertionError:
-        return {'action': 'signup',
-                'succeeded': False,
-                'msg': 'Please input a valid email or password.'}
-    except ValueError:
-        return {'action': 'signup',
-                'succeeded': False,
-                'msg': 'The email address is already registered.'}
-
-
-@api_endpoint()
+@_REG.api_endpoint()
 def assign_taskpackage(_user):
     """ Assign a new task package to the user.
 
@@ -421,21 +301,7 @@ def assign_taskpackage(_user):
             'redirect': '/task_router'}
 
 
-@api_endpoint()
-def logout(_user):
-    """ SignUp this user.
-
-    :_user: the user issues the request.
-
-    :return: {"action": "logout", "succeeded": true}
-    """
-    _user.reset_token()
-    return {'action': 'logout',
-            'succeeded': True,
-            'user': User.unit().as_viewdict()}
-
-
-@api_endpoint(secured=True)
+@_REG.api_endpoint(secured=True)
 def assert_error():
     """ Bring a debug page for console. """
     assert False

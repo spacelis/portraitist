@@ -16,9 +16,9 @@ import gzip
 import base64
 import json
 
-from collections import namedtuple
 from itertools import chain
 from itertools import groupby
+from collections import namedtuple
 
 from django.utils.dateparse import parse_datetime
 
@@ -49,6 +49,18 @@ def get_user(request):
     """ Return the session attach to this request. """
     # session_toke is actually a token to a (temporary) user
     return User.getOrCreate(request_property(request, 'session_token'))
+
+
+def set_user(response, user):
+    """ Set session token for the response.
+
+    :response: The HttpResonse
+    :user: The user that should attach to this response
+    :returns: The same response
+
+    """
+    response.set_cookie('session_token', user.session_token)
+    return response
 
 
 def jsonfy(obj, keys):

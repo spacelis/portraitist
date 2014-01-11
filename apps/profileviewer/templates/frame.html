@@ -55,7 +55,7 @@
             <div class="tab-content">
               <div class="tab-pane" id="id-tab-login">
                 <div style="padding: 15px">
-                  <form role="form" class="form-horizontal" action="/api/email_login" method="POST" accept-charset="utf-8" data-bind="submit: f_login">
+                  <form role="form" class="form-horizontal" action="/api/user/email_login" method="POST" accept-charset="utf-8" data-bind="submit: f_login">
                     {% csrf_token %}
                     <div class="form-group" data-bind="attr: {class: login_show_error}">
                       <label class="col-sm-3 control-label" for="email">Email address</label>
@@ -75,7 +75,7 @@
               </div>
               <div class="tab-pane active" id="id-tab-signup">
                 <div style="padding: 15px">
-                  <form role="form" class="form-horizontal" action="/api/email_signup" method="POST" accept-charset="utf-8" data-bind="submit: f_signup">
+                  <form role="form" class="form-horizontal" action="/api/user/email_signup" method="POST" accept-charset="utf-8" data-bind="submit: f_signup">
                     {% csrf_token %}
                     <div class="form-group" data-bind="attr: {class: signup_show_error}">
                       <label class="col-sm-3 control-label" for="email">Email address</label>
@@ -170,7 +170,7 @@
         });
     };
     userdata._logout = function () {
-      $.post("/api/logout", {csrfmiddlewaretoken: $.cookie('csrftoken')})
+      $.post("/api/user/logout", {csrfmiddlewaretoken: $.cookie('csrftoken')})
         .done(function(ret){
           if(ret.succeeded) {
             KnockObj.update(userdata, KnockObj.flattened(ret.user))

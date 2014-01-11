@@ -24,8 +24,7 @@ from django.http import Http404
 from google.appengine.ext import ndb
 from google.appengine.api import memcache
 
-DEFAULT_PARENT_KEY = ndb.Key('Version', 'geo-expertise-3',
-                             app='geo-expertise')
+
 LONG_TIME = timedelta(minutes=30)
 csv.field_size_limit(500000)
 
@@ -167,28 +166,38 @@ class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
     """Docstring for TwitterAccount. """
 
     checkins = ndb.model.JsonProperty(indexed=False, compressed=True)
-    friends = ndb.model.StringProperty(indexed=False, repeated=True)
+    friends = ndb.model.KeyProperty(indexed=False, repeated=True,
+                                    kind='TwitterAccount')
     screen_name = ndb.model.StringProperty(indexed=True)
     access_token = ndb.model.StringProperty(indexed=True)
     access_token_secret = ndb.model.StringProperty(indexed=True)
     user = ndb.model.KeyProperty(indexed=True, kind='User')
 
     @staticmethod
-    def singIn(access_token, access_token_secret, user):
+    def create(access_token, access_token_secret, screen_name):
         """ Sign in with users twitter account.
 
         :returns: @todo
 
         """
-        tkey = TwitterAccount(
-            #parent=DEFAULT_PARENT_KEY,
+        t = TwitterAccount(
             access_token=access_token,
             access_token_secret=access_token_secret,
-            user_account=user.key
-        ).put()
+            screen_name=screen_name
+        )
+        # FIXME retrieve information for this account.
+        t.put()
+        return t
+
+    def attach(self, user):
+        """ Attach the user to this twitter account.
+
+        :user: @todo
+        :returns: @todo
+
+        """
+        user.populate(twitter_account=self.key)
         user.put()
-        user.populate(twitter_account=tkey)
-        return user
 
     @staticmethod
     def getByScreenName(screen_name):
@@ -210,6 +219,13 @@ class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
 
         """
         raise NotImplementedError
+
+    def verify(self):
+        """ Verify the access_token.
+        :returns: @todo
+
+        """
+        pass
 
 
 class EmailAccount(ndb.Model):
@@ -236,7 +252,6 @@ class EmailAccount(ndb.Model):
         secret = newToken('passwd')
         ukey = user.put()
         account = EmailAccount(
-            #parent=DEFAULT_PARENT_KEY,
             email=email,
             hashed_passwd=secure_hash(passwd, secret),
             secret=secret,
@@ -326,7 +341,6 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
 
         fs = [
             Judgement(
-                #parent=DEFAULT_PARENT_KEY,
                 judge=judge.key,
                 candidate=task.candidate,
                 topic_id=t,
@@ -426,9 +440,14 @@ class TaskPackage(ndb.Model):
 
         """
         try:
+            self.touch()
             return self.progress[0]
         except IndexError:
             raise TaskPackage.NoMoreTask(self.getConfirmationCode())
+
+    def hasNextTask(self):
+        """ Return whether this taskpackage have task left to be done. """
+        return len(self.progress) > 0
 
     def finish(self, task):
         """ Set the task as finished.
@@ -456,7 +475,7 @@ class TaskPackage(ndb.Model):
         self.put()
 
     @staticmethod
-    def fetch_unassigned(self, num=1):
+    def fetch_unassigned(num=1):
         """ Fetch a number of taskpackage having not been assigned for long.
 
         :num: The number of task_package to return.
@@ -496,7 +515,11 @@ class User(EncodableModel):
         :returns: @todo
 
         """
+        if not self.key:
+            self.name = twitter_account.screen_name
+            self.is_known = True
         self.twitter_account = twitter_account.key
+        return self.put()
 
     def as_viewdict(self):
         """ Return a dict object encapsulate the information of this user.
@@ -517,7 +540,6 @@ class User(EncodableModel):
     def unit():
         """ Return an empty user object. """
         return User(
-            #parent=DEFAULT_PARENT_KEY,
             name='Guest-' + str(time.time()),
             finished_tasks=0,
             session_token=newToken('session'),
