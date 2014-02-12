@@ -11,9 +11,6 @@ Description:
 
 """
 
-#import twitter
-#import json
-#from uuid import uuid4
 from decorator import decorator
 from collections import namedtuple
 
@@ -21,8 +18,6 @@ from django.shortcuts import render_to_response
 from django.shortcuts import redirect
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
-#from django.views.decorators.csrf import csrf_exempt
-#from django.http import HttpResponse
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
 

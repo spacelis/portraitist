@@ -22,6 +22,8 @@ urlpatterns = patterns(
         'apps.profileviewer.api.user.call_endpoint'),
     url(r'^api/data/([a-zA-Z_]+).*$',
         'apps.profileviewer.api.data.call_endpoint'),
+    url(r'^api/taskworker/([a-zA-Z_]+).*$',
+        'apps.profileviewer.api.taskworker.call_endpoint'),
 
     url(r'^terms$', TemplateView.as_view(template_name="terms.html")),
     url(r'^about$', TemplateView.as_view(template_name="about.html")),

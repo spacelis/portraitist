@@ -18,14 +18,11 @@ from collections import namedtuple
 
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
+from django.http import HttpResponse
 
 from apps.profileviewer.util import request_property
 from apps.profileviewer.util import get_user
 from apps.profileviewer.util import set_user
-from django.http import HttpResponse
-
-
-TWR_CRED = yaml.load(__file__)
 
 
 class APIRegistry(object):
@@ -36,12 +33,12 @@ class APIRegistry(object):
                                                'spec',
                                                'secured',
                                                'disabled',
-                                               'jsonencoded'])
+                                               'tojson'])
 
     def __init__(self):
         self._ENDPOINTS = dict()
 
-    def api_endpoint(self, secured=False, disabled=False, jsonencoded=False):
+    def api_endpoint(self, secured=False, disabled=False, tojson=True):
         """ An decorator for API registry.
 
         Usage:
@@ -61,7 +58,7 @@ class APIRegistry(object):
                 spec=inspect.getargspec(func),
                 secured=secured,
                 disabled=disabled,
-                jsonencoded=jsonencoded)
+                tojson=tojson)
             return func
 
         return decorator
@@ -98,10 +95,10 @@ class APIRegistry(object):
         except KeyError:
             raise Http404
         ret = endpoint.func(**kwargs)  # pylint: disable=W0142
-        if endpoint.jsonencoded:
-            resp = HttpResponse(ret, mimetype="application/json")
-        else:
+        if endpoint.tojson:
             resp = HttpResponse(json.dumps(ret), mimetype="application/json")
+        else:
+            resp = ret
         if '_user' in endpoint.spec.args:
             return set_user(resp, kwargs['_user'])
         return resp

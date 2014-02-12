@@ -7,7 +7,7 @@
 {% block extra_scripts %}
 <script>
   userdata.gototask = function(e){
-    $.get("/api/assign_taskpackage").done(function(ret){
+    $.get("/api/data/assign_taskpackage").done(function(ret){
       if(ret.succeeded) {
         window.location.href = "/task_router";
       }

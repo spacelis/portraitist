@@ -3,8 +3,7 @@
 # See LICENSE for details.
 
 from tweepy.error import TweepError
-from tweepy.utils import parse_datetime, parse_html_value, parse_a_href, \
-        parse_search_datetime, unescape_html
+from tweepy.utils import parse_datetime, parse_html_value, parse_a_href
 
 
 class ResultSet(list):
@@ -65,9 +64,10 @@ class Status(Model):
     @classmethod
     def parse(cls, api, json):
         status = cls(api)
+        setattr(status, '_raw', json)
         for k, v in json.items():
             if k == 'user':
-                user_model = getattr(api.parser.model_factory, 'user')
+                user_model = getattr(api.parser.model_factory, 'user') if api else User
                 user = user_model.parse(api, v)
                 setattr(status, 'author', user)
                 setattr(status, 'user', user)  # DEPRECIATED
@@ -109,6 +109,7 @@ class User(Model):
     @classmethod
     def parse(cls, api, json):
         user = cls(api)
+        setattr(user, '_raw', json)
         for k, v in json.items():
             if k == 'created_at':
                 setattr(user, k, parse_datetime(v))
@@ -160,7 +161,7 @@ class User(Model):
         return self._api.lists_subscriptions(user=self.screen_name, *args, **kargs)
 
     def lists(self, *args, **kargs):
-        return self._api.lists(user=self.screen_name, *args, **kargs)
+        return self._api.lists_all(user=self.screen_name, *args, **kargs)
 
     def followers_ids(self, *args, **kargs):
         return self._api.followers_ids(user_id=self.id, *args, **kargs)
@@ -238,6 +239,8 @@ class SearchResults(ResultSet):
         results.refresh_url = metadata.get('refresh_url')
         results.completed_in = metadata.get('completed_in')
         results.query = metadata.get('query')
+        results.count = metadata.get('count')
+        results.next_results = metadata.get('next_results')
 
         for status in json['statuses']:
             results.append(Status.parse(api, status))

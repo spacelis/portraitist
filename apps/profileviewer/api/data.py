@@ -15,17 +15,16 @@ from json import dumps as _j
 from datetime import datetime as dt
 
 from django.http import Http404
+from django.http import HttpResponse
 
 from google.appengine.ext import ndb
 
 from apps.profileviewer.models import _k
 from apps.profileviewer.models import Judgement
-from apps.profileviewer.models import EmailAccount
 from apps.profileviewer.models import AnnotationTask
 from apps.profileviewer.models import TaskPackage
-from apps.profileviewer.models import User
 from apps.profileviewer.util import throttle_map
-from apps.profileviewer.util import APIRegistry
+from apps.profileviewer.api import APIRegistry
 
 
 _REG = APIRegistry()
@@ -59,7 +58,7 @@ def checkins(candidate):
                 'a twiter account.'}
 
 
-@_REG.api_endpoint(secured=True, jsonencoded=True)
+@_REG.api_endpoint(secured=True, tojson=False)
 def export_judgements(_):
     """ Export all judgements as json object per line.
 
@@ -77,7 +76,7 @@ def export_judgements(_):
                 else v
                 for k, v in j.to_dict()
             }) + '\n'
-    return iter_judgement()
+    return HttpResponse(iter_judgement(), mimetype='application/json')
 
 
 # ------- Import/Export ------
@@ -86,6 +85,8 @@ import os.path
 import gzip
 import csv
 import json
+
+csv.field_size_limit(1000000)
 
 
 def flexopen(filename):
@@ -179,7 +180,7 @@ def import_rankings(filename):
     return import_entities(filename, loader)
 
 
-@_REG.api_endpoint(secured=False)  # FIXME should be True
+@_REG.api_endpoint(secured=True)
 def rankings_statistics():
     """ Return a statistics for rankings. """
     from itertools import groupby
@@ -200,7 +201,7 @@ def rankings_statistics():
     }
 
 
-@_REG.api_endpoint(disabled=False)  # FIXME should be True
+@_REG.api_endpoint(secured=True, disabled=True)
 def clear_rankings():
     """ Delete all rankings from data store. """
     ndb.delete_multi([r.key for r in ExpertiseRank.query().fetch()])
@@ -220,24 +221,23 @@ def import_geoentities(filename):
     """
     def loader(r):
         """ Loader for Twitter accounts and checkins. """
+        d = json.loads(r['info'])
         GeoEntity(
-            #parent=DEFAULT_PARENT_KEY,
-            tfid=r['tfid'],
-            name=r['name'],
+            tfid=d['id'],
+            name=d['name'],
             level=r['level'],
             info=json.loads(r['info']),
-            url=r['url']).put()
+            url=d['url']).put()
     return import_entities(filename, loader)
 
 
-@_REG.api_endpoint()  # FIXME should be disabled
+@_REG.api_endpoint(secured=True)
 def make_tasks():
     """ Make tasks based on candidates. """
     candidates = ExpertiseRank.listCandidates()
     for c in candidates:
         rankings = ExpertiseRank.getForCandidate(c.candidate)
         AnnotationTask(
-            #parent=DEFAULT_PARENT_KEY,
             rankings=[r.key for r in rankings],
             candidate=c.candidate).put()
     return {'make_tasks': 'succeeded'}
@@ -269,7 +269,7 @@ def partition(it, size=10):
         yield [x for _, x in g]
 
 
-@_REG.api_endpoint(secured=False)  # FIXME should be secured
+@_REG.api_endpoint(secured=True)
 def make_taskpackages():
     """ Group tasks in to packages. """
     from apps.profileviewer.models import newToken

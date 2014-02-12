@@ -23,6 +23,9 @@ import json
 from django.http import Http404
 from google.appengine.ext import ndb
 from google.appengine.api import memcache
+from apps.profileviewer.twitter_util import iter_timeline
+from apps.profileviewer.twitter_util import new_twitter_client
+from apps.profileviewer.twitter_util import strip_checkin
 
 
 LONG_TIME = timedelta(minutes=30)
@@ -160,6 +163,12 @@ class EncodableModel(ndb.Model, Encodable):  # pylint: disable=W0223
             return mobj
         raise ValueError('`val` is not a valid string.')
 
+    @classmethod
+    def contains(cls, **kwargs):
+        """ Testing whether there is at least one entity matching. """
+        return cls.query(*((getattr(cls, k) == v)
+                         for k, v in kwargs.iteritems())).count() > 0
+
 
 class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
 
@@ -168,13 +177,15 @@ class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
     checkins = ndb.model.JsonProperty(indexed=False, compressed=True)
     friends = ndb.model.KeyProperty(indexed=False, repeated=True,
                                     kind='TwitterAccount')
+    friendset = ndb.model.StringProperty(compressed=True, indexed=False)
+    twitter_id = ndb.model.IntegerProperty(indexed=True)
     screen_name = ndb.model.StringProperty(indexed=True)
     access_token = ndb.model.StringProperty(indexed=True)
     access_token_secret = ndb.model.StringProperty(indexed=True)
     user = ndb.model.KeyProperty(indexed=True, kind='User')
 
     @staticmethod
-    def create(access_token, access_token_secret, screen_name):
+    def createForAccess(access_token, access_token_secret, screen_name):
         """ Sign in with users twitter account.
 
         :returns: @todo
@@ -189,6 +200,18 @@ class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
         t.put()
         return t
 
+    @staticmethod
+    def createForCheckins(screen_name, twitter_id):
+        """ Create a TwitterAccount of caching checkins.
+
+        :returns: @todo
+
+        """
+        t = TwitterAccount(screen_name=screen_name,
+                           twitter_id=twitter_id)
+        t.put()
+        return t
+
     def attach(self, user):
         """ Attach the user to this twitter account.
 
@@ -196,8 +219,8 @@ class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
         :returns: @todo
 
         """
-        user.populate(twitter_account=self.key)
-        user.put()
+        self.user = user.key
+        self.put()
 
     @staticmethod
     def getByScreenName(screen_name):
@@ -212,23 +235,47 @@ class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
         except IndexError:
             raise KeyError
 
-    def fetchCheckins(self):
+    @staticmethod
+    def getById(twitter_id):
+        """ Return the account with the given screen_name.
+
+        :returns: A TwitterAccount
+
+        """
+        try:
+            return TwitterAccount.query(
+                TwitterAccount.screen_name == twitter_id).fetch(1)[0]
+        except IndexError:
+            raise KeyError
+
+    def fetchCheckins(self, api_client):
         """ Return the checkin as a block of base64 encoded.
 
         :returns: @todo
 
         """
-        raise NotImplementedError
+        self.checkins = [
+            strip_checkin(s._raw)
+            for s in iter_timeline(api_client.user_timeline,
+                                   user_id=self.twitter_id,
+                                   trim_user=True)
+            if s._raw['place']]
+        self.put()
 
-    def verify(self):
+    def verified(self):
         """ Verify the access_token.
         :returns: @todo
 
         """
-        pass
+        cli = new_twitter_client(self.access_token,
+                                 self.access_token_secret)
+        if cli.verify_credentials():
+            return self
+        else:
+            return None
 
 
-class EmailAccount(ndb.Model):
+class EmailAccount(EncodableModel):
 
     """ The email account registered with this site. """
 
@@ -281,7 +328,6 @@ class EmailAccount(ndb.Model):
             if secure_hash(passwd, ea.secret) == ea.hashed_passwd:
                 u = ea.user.get()
                 u.inherit(user)
-                u.put()
                 return u
             else:
                 raise ValueError('Email or password wrong.')
@@ -298,6 +344,9 @@ class GeoEntity(EncodableModel):  # pylint: disable=R0903,W0223
     level = ndb.model.StringProperty(indexed=False)  # e.g., category, poi
     info = ndb.model.JsonProperty(indexed=False)
     url = ndb.model.StringProperty(indexed=False)
+    visitors = ndb.model.KeyProperty(indexed=False, repeated=True,
+                                     kind='TwitterAccount')
+    geopt = ndb.model.GeoPtProperty(indexed=True)
 
     @staticmethod
     def getByTFId(tfid):
@@ -519,7 +568,7 @@ class User(EncodableModel):
             self.name = twitter_account.screen_name
             self.is_known = True
         self.twitter_account = twitter_account.key
-        return self.put()
+        self.touch()
 
     def as_viewdict(self):
         """ Return a dict object encapsulate the information of this user.
@@ -546,7 +595,7 @@ class User(EncodableModel):
             show_instructions=True,
             is_known=False,
             last_seen=dt.utcnow()
-        ).cache()
+        ).touch(soft=True)
 
     @staticmethod
     def getOrCreate(token=None):
@@ -556,22 +605,13 @@ class User(EncodableModel):
             if isinstance(u, User):
                 return u
         u = User.unit()
-        u.cache()
+        u.touch()
         return u
-
-    def cache(self):
-        """ Make self available in cache. """
-        memcache.set(key=self.session_token,  # pylint: disable=E1101
-                     value=self,
-                     time=1800)
-        return self
 
     def reset_token(self):
         """ Assign a new session token to this user. """
         self.session_token = newToken('session')
-        self.last_seen = dt.utcnow()
-        self.put()
-        self.cache()
+        self.touch()
 
     def assign(self, task_package):
         """ Assign a task package for this session.
@@ -584,7 +624,7 @@ class User(EncodableModel):
         self.touch()
         return self
 
-    def touch(self):
+    def touch(self, soft=False, recover=False):
         """ Make heart beat for a user's session.
 
         Updating the last_seen checkin point.
@@ -594,14 +634,15 @@ class User(EncodableModel):
         :throws: ValueError if the last seen is long time ago.
 
         """
-        if self.isDead():
+        if self.isDead() and not recover:
             raise ValueError('Long time no see.')
         self.last_seen = dt.utcnow()
-        if self.session_token is not None:
-            memcache.set(key=self.session_token,  # pylint: disable=E1101
-                         value=self,
-                         time=3600)
-        self.put()
+        memcache.set(key=self.session_token,  # pylint: disable=E1101
+                     value=self,
+                     time=1800)
+        if not soft:
+            self.put()
+        return self
 
     def isDead(self):
         """ Return whether the session is ended.
@@ -622,6 +663,8 @@ class User(EncodableModel):
         """
         self.finished_tasks += user.finished_tasks
         self.show_instructions |= user.show_instructions
+        self.session_token = user.session_token
+        self.touch(recover=True)
 
     def accomplish(self, task):
         """ The user accomplish a task.

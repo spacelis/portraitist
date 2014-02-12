@@ -27,7 +27,7 @@
             <ul class="dropdown-menu">
               <li><a href="#">Overview</a></li>
               <li class="divider"></li>
-              <li><a href="#" data-bind="click: _logout">Logout</a></li>
+              <li><a href="#" data-bind="click: f_logout">Logout</a></li>
             </ul>
           </li>
           <li id="id-tag-signup-login" data-bind="visible: is_known() == false"><a onClick="$('#id-dialog-signup-login').modal('show');">Sign Up / Login</a></li>
@@ -37,7 +37,7 @@
     </nav>
 
     <!-- Login/Sign Up modal dialog -->
-    <div class="modal fade" id="id-dialog-signup-login" tabindex="-1" role="dialog" aria-labelledby="user_sign_up" aria-hidden="true">
+    <div class="modal fade" id="id-dialog-signup-login" tabindex="-2" role="dialog" aria-labelledby="user_sign_up" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -69,7 +69,10 @@
                         <input type="password" class="form-control" name="passwd" placeholder="Enter password">
                       </div>
                     </div>
-                    <button type="submit" class="btn btn-primary pull-right">Login</button>
+                    <div class="pull-right">
+                      <button type="submit" class="btn btn-primary">Login</button>&nbsp;or&nbsp;
+                      <img src="/static/profileviewer/images/sign-in-with-twitter-gray.png" data-bind="click: f_twlogin">
+                    </div>
                   </form>
                 </div>
               </div>
@@ -95,7 +98,10 @@
                         <input type="password" class="form-control" name="passwd" placeholder="Enter password">
                       </div>
                     </div>
-                    <button type="submit" class="btn btn-primary pull-right">Sign Up</button>
+                    <div class="pull-right">
+                      <button type="submit" class="btn btn-primary">Sign Up</button>&nbsp;or&nbsp;
+                      <img src="/static/profileviewer/images/sign-in-with-twitter-gray.png" data-bind="click: f_twlogin">
+                    </div>
                   </form>
                 </div>
               </div>
@@ -108,6 +114,30 @@
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
+    <!-- Login/Sign Up modal dialog -->
+    <div class="modal fade" id="id-dialog-twitter-login" tabindex="-2" role="dialog" aria-labelledby="user_sign_up" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3 class="modal-title">Login / Sign Up</h3>
+          </div>
+          <div class="modal-body">
+            Please authorize us for importing your friends from Twitter.
+            Be sure the browser does not block popup window. Once the
+            authorization finished, you will find yourself logged in
+            after closing this dialog.
+            
+            You may revoke your authorization afterwards. If you want
+            us to remove data obtained through your account by <a
+            href='mailto: wen.li@tudelft.nl'>wen.li@tudelft.nl</a>.
+          </div>
+          <div class="modal-footer">
+            <small> All you data will be treated confidentially. </small>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
     <!-- Main content container -->
     <div id="id-div-content" class="container">
       {% block content %}{% endblock %}
@@ -169,20 +199,48 @@
           }
         });
     };
-    userdata._logout = function () {
+    userdata.f_logout = function () {
       $.post("/api/user/logout", {csrfmiddlewaretoken: $.cookie('csrftoken')})
         .done(function(ret){
           if(ret.succeeded) {
-            KnockObj.update(userdata, KnockObj.flattened(ret.user))
+            //KnockObj.update(userdata, KnockObj.flattened(ret.user));
+            window.open("/", "_self");
           }
         });
+    };
+    userdata.f_twlogin = function () {
+      $.get("/api/user/twitter_login")
+        .done(function(ret) {
+          if(ret.succeeded) { 
+            $("#id-dialog-signup-login").modal("hide");
+            $("#id-dialog-twitter-login").modal("show");
+            var twlogin_win = window.open(ret.redirect, "twitter_login", "height=400,width=400")
+//            var pollTimer = window.setInterval(function() {
+//                if (twlogin_win.closed !== false) { // !== is required for compatibility with Opera
+//                    window.clearInterval(pollTimer);
+//                    $.get("/api/user/self").done(function(){
+//                      if(ret.succeeded) {
+//                        KnockObj.update(userdata, KnockObj.flattened(ret.user))
+//                      }
+//                    });
+//                }
+//            }, 200);
+          }
+        })
     };
     userdata._namebtn = ko.computed(function(){
       return userdata.name() + "&nbsp;<b class='caret'></b>";
     });
     $(document).ready(function () {
       userdata.session_token.valueHasMutated(); // Force update cookie as only changes will set cookie in default.
-    })
+      $('#id-dialog-twitter-login').on('hidden.bs.modal', function (e) {
+        $.get("/api/user/self").done(function(ret){
+          if(ret.succeeded) {
+            KnockObj.update(userdata, KnockObj.flattened(ret.user))
+          }
+        })
+      });
+    });
   </script>
   <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

@@ -33,7 +33,7 @@ var profileviewer_ns = (function(){
         infoWindow: {
           content: poi.name + ' (' + pois[i].value + ' check-ins)<br>' + poi.category + ', ' + poi.zcategory,
         },
-        icon: '/static/profileviewer/images/map_icons/' + poi.cate_id + '_black.png',
+        icon: '/static/profileviewer/images/map_icons/' + poi.category.id + '_black.png',
       });
     }
     map.fitZoom();
@@ -52,7 +52,8 @@ var profileviewer_ns = (function(){
     update_map(poi_groups);
   }
 
-  var time_parser = d3.time.format("%Y-%m-%dT%H:%M:%S").parse;
+  //var time_parser = d3.time.format.utc("%a %b %d %H:%M:%S +0000 %Y").parse;
+  var time_parser = function(d){return new Date(d);};
   var zcate_chart, cate_chart, poi_chart, region_chart, timeline_chart;
   var allpois;
 
@@ -64,13 +65,12 @@ var profileviewer_ns = (function(){
       return d3.time.week(c.created_at);
     });
     var by_category = fact.dimension(function(c){
-      return c.place.category;
+      return c.place.category.name;
     });
     var by_zcate = fact.dimension(function(c){
-      return c.place.zcategory;
+      return c.place.category.zcategory;
     });
     var by_poi = fact.dimension(function(c){
-      //return c.place.id + "\t" + c.place.name;
       c.place.valueOf = function(){
         return c.place.id;
       };
@@ -218,7 +218,7 @@ var profileviewer_ns = (function(){
 
   function initCharts (hash_id) {
     d3.json(
-      '/api/checkins?candidate=' + hash_id,
+      '/api/data/checkins?candidate=' + hash_id,
       function(err, json){
         if (err){
           alert("Fail to get data for " + hash_id);

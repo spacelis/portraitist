@@ -318,6 +318,13 @@ class TestModels(unittest.TestCase):
                                                'abc12345', M.User.unit()).key,
                           u.key)
 
+    def test_EmailAccount(self):
+        """ test EmailAccount. """
+        u = M.EmailAccount.signUp('spacelis@gmail.com', 'abc12345',
+                                  'Sapce Li', M.User.unit())
+        self.assertTrue(M.EmailAccount.contains(email='spacelis@gmail.com'))
+        self.assertFalse(M.EmailAccount.contains(email='Space Lis'))
+
     def test_heartBeat(self):
         """ test_heartBeat(). """
         from datetime import datetime as dt
