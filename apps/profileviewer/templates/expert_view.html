@@ -171,6 +171,7 @@
   <script src="/static/profileviewer/js/jquery-uuid.js" type="text/javascript" charset="utf-8"></script>
 
   <script src="/static/profileviewer/js/expert_view.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/control.js" type="text/javascript" charset="utf-8"></script>
 
   <link rel="stylesheet" href="/static/profileviewer/css/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <script type="text/javascript" charset="utf-8">
@@ -181,7 +182,6 @@
         "pv-judgements-{{ t.topic_id  }}",
         {% endfor %}
       ];
-      var task_start_at = new Date();
       $("#pv-judgement-form").submit(function(event){
         var selector;
         for(var i in in_nodes){
@@ -193,12 +193,13 @@
         }
         if(event.isDefaultPrevented()){
           return;
-        }/* FIXME  Temporarily disable spam detecting.
-        else if(new Date() - task_start_at < 30000){
+        }
+        else if(!control.checked()){
           $("#id-dialog-verify-judgement").modal("show");
           $(".modal-backdrop.fade.in").css({opacity: 1, background: "#900"});
           event.preventDefault();
-        }*/
+        }
+        return;
       });
       $(".btn-judgement").click(function(){
         $(this).removeClass("error");
