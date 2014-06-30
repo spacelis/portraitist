@@ -8,3 +8,6 @@ static/bower_components/**
 **.py[co]
 .**
 gae_mini_profiler
+*.json
+foursquare
+requests

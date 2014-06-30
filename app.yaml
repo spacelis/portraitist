@@ -12,10 +12,10 @@ handlers:
   static_dir: static
 
 # For gae_mini_profiler
-- url: /gae_mini_profiler/static
-  static_dir: gae_mini_profiler/static
-- url: /gae_mini_profiler/.*
-  script: gae_mini_profiler.main.application
+#- url: /gae_mini_profiler/static
+  #static_dir: gae_mini_profiler/static
+#- url: /gae_mini_profiler/.*
+  #script: gae_mini_profiler.main.application
 # --  END
 
 - url: /.*
@@ -25,6 +25,8 @@ handlers:
 libraries:
 - name: django
   version: '1.5'
+- name: ssl
+  version: latest
 
 env_variables:
   DJANGO_SETTINGS_MODULE: 'apps.settings'
