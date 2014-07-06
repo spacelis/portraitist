@@ -227,7 +227,7 @@ def import_geoentities(filename):
             name=d['name'],
             level=r['level'],
             info=json.loads(r['info']),
-            url=d['url']).put()
+            url=r['url']).put()
     return import_entities(filename, loader)
 
 
@@ -299,6 +299,22 @@ def assign_taskpackage(_user):
     return {'action': 'assign_taskpackage',
             'succeeded': True,
             'redirect': '/task_router'}
+
+
+@_REG.api_endpoint(secured=True, tojson=False)
+def export_tpkeys():
+    """ Return a list of URLs to those taskpackages.
+    :returns: @todo
+
+    """
+    import csv
+    from StringIO import StringIO
+    buf = StringIO()
+    csvwr = csv.DictWriter(buf, ['tpkey'])
+    csvwr.writeheader()
+    for tp in TaskPackage.query().fetch():
+        csvwr.writerow({'tpkey': tp.key.urlsafe()})
+    return HttpResponse(buf.getvalue(), mimetype='text/csv')
 
 
 @_REG.api_endpoint(secured=True)

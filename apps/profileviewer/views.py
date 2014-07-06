@@ -87,7 +87,7 @@ def taskpackage(request, task_pack_id):
     """
     user = get_user(request)
     tp_key = _k(task_pack_id, 'TaskPackage')
-    user.assign(tp_key)
+    user.assign(tp_key.get())
     r = redirect('/task_router')
     r.set_cookie('session_token', user.session_token)
     return r
