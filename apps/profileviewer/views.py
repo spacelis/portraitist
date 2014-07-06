@@ -13,6 +13,8 @@ Description:
 
 from decorator import decorator
 from collections import namedtuple
+from itertools import groupby
+from fn import _
 
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
@@ -26,7 +28,7 @@ from apps.profileviewer.models import TaskPackage
 from apps.profileviewer.models import Judgement
 from apps.profileviewer.models import User
 
-#from apps.profileviewer.form_map import get_gform_url
+# from apps.profileviewer.form_map import get_gform_url
 from apps.profileviewer.util import request_property
 from apps.profileviewer.util import get_scores
 from apps.profileviewer.util import get_user
@@ -34,6 +36,17 @@ from apps.profileviewer.util import get_client
 
 
 COOKIE_LIFE = 90 * 24 * 3600
+
+
+def vdebug(x):
+    """@todo: Docstring for vdebug.
+
+    :x: @todo
+    :returns: @todo
+
+    """
+    print x
+    return x
 
 
 @decorator
@@ -124,32 +137,114 @@ class DataViewFilterSet(object):
 
     """ The filter information for zoom in/out of data in web interface. """
 
-    Filter = namedtuple('Filter', ['name', 'level', 'relation'])
+    Relation = namedtuple('Relation', ('poi', 'cate', 'zcate'))
+    Filter = namedtuple('Filter', ('name', 'level', 'description'))
 
     def __init__(self):
-        self.filters = dict()
+        self.relationship = []
 
     @staticmethod
-    def getDescription(f):
-        """ Return a discription of the filter.
+    def getPoiDescription(relatives):
+        """ Return a discription of a poi filter.
 
         :f: @todo
         :returns: @todo
 
         """
-        if f.level == 'POI':
-            return 'This is a place (POI) in category of %s, %s.' % \
-                (f.relation['category'], f.relation['zcategory'])
-        elif f.level == 'CATEGORY':
-            return 'This is a category that contains %s.' % \
-                (', '.join(f.relation))
-        else:
-            return 'This is a general category that contains'
-        # FIXME generate a list of filters for easy navigation.
+        cate = [c for _, c in relatives if c]
+        return 'This is a place (POI)%s.' % (
+            ('in category of' + ', '.join(cate)) if cate else '',
+        )
 
-    def addPOI(self, e):
+    @staticmethod
+    def getCateDescription(relatives):
+        """ Return a discription of a category filter.
+
+        :f: @todo
+        :returns: @todo
+
+        """
+        poi = [p for t, p in relatives if t == 'of' and p]
+        zcate = [z for t, z in relatives if t == 'in' and z]
+
+        return '''This is a category%s%s.''' % (
+            (' that contains ' + ', '.join(poi)) if poi else '',
+            (' and a subcategory in ' + ', '.join(zcate)) if zcate else ''
+        )
+
+    @staticmethod
+    def getZCateDescription(relatives):
+        """ Return a discription of a zero_category filter.
+
+        :f: @todo
+        :returns: @todo
+
+        """
+        sub = [c for _, c in relatives if c]
+        return 'This is a top category%s.' % (
+            (' that contains ' + ', '.join(sub)) if sub else '',
+            )
+
+    def addTopic(self, t):
         """ Add a new entity for filtering. """
-        pass
+        if t.level == 'POI':
+            self.relationship.append(DataViewFilterSet.Relation(
+                t.name,
+                t.info['category']['name'],
+                t.info['category']['zero_category_name']))
+        elif t.level == 'CATEGORY':
+            self.relationship.append(DataViewFilterSet.Relation(
+                '',
+                (
+                    t.info['name']
+                    if t.info['name'] != t.info['zero_category_name']
+                    else ''
+                ),
+                t.info['zero_category_name']))
+
+    def make_filters(self):
+        """ Return a set of filters.
+        :returns: @todo
+
+        """
+        rel = [
+            DataViewFilterSet.Filter(
+                poi,
+                'p',
+                DataViewFilterSet.getPoiDescription(
+                    set(reduce((_ + _),
+                               [[('in', p.cate), ('in', p.zcate)] for p in g],
+                               []))
+                )
+            )
+            for poi, g in groupby(self.relationship, key=_.poi)
+            if poi
+        ] + [
+            DataViewFilterSet.Filter(
+                cate,
+                'c',
+                DataViewFilterSet.getCateDescription(
+                    set(reduce((_ + _),
+                               [[('has', p.poi), ('in', p.zcate)] for p in g],
+                               []))
+                )
+            )
+            for cate, g in groupby(self.relationship, key=_.cate)
+            if cate
+        ] + [
+            DataViewFilterSet.Filter(
+                zcate,
+                'z',
+                DataViewFilterSet.getZCateDescription(
+                    set(reduce((_ + _),
+                               [[('has', p.poi), ('has', p.cate)] for p in g],
+                               []))
+                )
+            )
+            for zcate, g in groupby(self.relationship, key=_.zcate)
+            if zcate
+        ]
+        return rel
 
 
 def annotation_view(request, task_key):
@@ -171,6 +266,11 @@ def annotation_view(request, task_key):
         'region': r.region
     } for t, r in zip(ts, rs)}
 
+    # make filters out of topics
+    filterset = DataViewFilterSet()
+    for x, g in groupby(ts, key=_.name):
+        filterset.addTopic(g.next())
+
     return render_to_response(
         'expert_view.html',
         {
@@ -178,37 +278,35 @@ def annotation_view(request, task_key):
             'topics': topics.values(),
             'candidate': task.candidate.urlsafe(),
             'task_key': task_key,
-            'filters': [{'name': t.name,
-                        'type': t.level,
-                        'description': t.level} for t in ts],
+            'filters': filterset.make_filters(),
             'topic_judgement': 'null'
         },
         context_instance=RequestContext(request))
 
 
 # FIXME need to be refactored since models changed
-#def judgement_review(_, judge_id):
-    #""" Showing all judgement from a judge and see the quality
-
-    #:request: @todo
-    #:returns: @todo
-
-    #"""
-    #judge = Judge.getJudgeById(judge_id)
-    #judges = [{
-        #'this': j.judge_id == judge_id,
-        #'jid': j.judge_id,
-        #'page': idx
-    #} for idx, j in enumerate(Judge.query().order(Judge.judge_id).fetch())]
-    #return render_to_response(
-        #'judgement_review.html',
-        #{'judgements': judgement_for_review(judge.judgements),
-         #'email': judge.email,
-         #'name': judge.nickname,
-         #'judge_id': judge_id,
-         #'judges': judges
-         #}
-    #)
+# def judgement_review(_, judge_id):
+#     """ Showing all judgement from a judge and see the quality
+#
+#     :request: @todo
+#     :returns: @todo
+#
+#     """
+#     judge = Judge.getJudgeById(judge_id)
+#     judges = [{
+#         'this': j.judge_id == judge_id,
+#         'jid': j.judge_id,
+#         'page': idx
+#     } for idx, j in enumerate(Judge.query().order(Judge.judge_id).fetch())]
+#     return render_to_response(
+#         'judgement_review.html',
+#         {'judgements': judgement_for_review(judge.judgements),
+#          'email': judge.email,
+#          'name': judge.nickname,
+#          'judge_id': judge_id,
+#          'judges': judges
+#          }
+#     )
 
 
 @csrf_protect
@@ -241,95 +339,95 @@ def submit_annotation(request):
 
 # ------------------------ OVERVIEW ---------------------
 
-#def judgement_overview(request):
-    #"""@todo: Docstring for judgement_overview.
-
-    #:request: @todo
-    #:returns: @todo
-
-    #"""
-    #assert_magic_signed(request)
-    #data = dict()
-    #estat = Expert.statistics()
-    #jstat = Judge.statistics()
-    #data.update(estat)
-    #data.update(jstat)
-    #return render_to_response('judgement_overview.html',
-                              #data,
-                              #context_instance=RequestContext(request))
+# def judgement_overview(request):
+#     """@todo: Docstring for judgement_overview.
+#
+#     :request: @todo
+#     :returns: @todo
+#
+#     """
+#     assert_magic_signed(request)
+#     data = dict()
+#     estat = Expert.statistics()
+#     jstat = Judge.statistics()
+#     data.update(estat)
+#     data.update(jstat)
+#     return render_to_response('judgement_overview.html',
+#                               data,
+#                               context_instance=RequestContext(request))
 
 
 # -------------- Twitter Lead Generation Cards ----------
 
-#@csrf_exempt
-#def lgc_submit(request):
-    #"""Submitting a Lead Generation Card
-
-    #:request: @todo
-    #:returns: @todo
-
-    #"""
-    #R = request.REQUEST
-    #name = R['name']
-    #token = R['token']
-    #card = R['card']
-    #email = R['email']
-    #screen_name = R['screen_name']
-    #gform_url = get_gform_url(screen_name)
-
-    #Participant.newParticipant(name=name,
-                               #token=token,
-                               #card=card,
-                               #email=email,
-                               #screen_name=screen_name,
-                               #gform_url=gform_url).put()
-    #send_self_survey_email(
-        #'https://geo-expertise.appspot.com/general_survey?token='
-        #+ token, name, email)
-    #return HttpResponse('Sucess!')
-
-
-#@csrf_protect
-#def general_survey(request):
-    #""" Showing the gernal survey for participants
-
-    #:request: @todo
-    #:returns: @todo
-
-    #"""
-    #R = request.REQUEST
-    #if 'token' in R:
-        #try:
-            #p = Participant.query(
-                #Participant.token == request.REQUEST['token']
-            #).fetch(1)[0]
-            #r = render_to_response('self_survey.html',
-                                   #{'gform_url': p.gform_url})
-            #r.set_cookie('judge_email', p.email)
-            #r.set_cookie('judge_nick', p.name)
-            #return r
-        #except:
-            #raise Http404
-    #elif 'screen_name' in R and 'email' in R:
-        #token = str(uuid4())
-        #screen_name = R['screen_name'][1:]
-        #gform_url = get_gform_url(screen_name)
-        #Participant.newParticipant(
-            #name=None,
-            #card=None,
-            #token=token,
-            #email=R['email'],
-            #screen_name=screen_name,
-            #gform_url=gform_url).put()
-        #r = render_to_response('self_survey.html',
-                               #{'gform_url': gform_url})
-        #r.set_cookie('judge_email', R['email'])
-        #r.set_cookie('judge_nick', screen_name)
-        #return r
-    #else:
-        #return render_to_response(
-            #'participant_reg.html',
-            #context_instance=RequestContext(request))
+# @csrf_exempt
+# def lgc_submit(request):
+#     """Submitting a Lead Generation Card
+#
+#     :request: @todo
+#     :returns: @todo
+#
+#     """
+#     R = request.REQUEST
+#     name = R['name']
+#     token = R['token']
+#     card = R['card']
+#     email = R['email']
+#     screen_name = R['screen_name']
+#     gform_url = get_gform_url(screen_name)
+#
+#     Participant.newParticipant(name=name,
+#                                token=token,
+#                                card=card,
+#                                email=email,
+#                                screen_name=screen_name,
+#                                gform_url=gform_url).put()
+#     send_self_survey_email(
+#         'https://geo-expertise.appspot.com/general_survey?token='
+#         + token, name, email)
+#     return HttpResponse('Sucess!')
+#
+#
+# @csrf_protect
+# def general_survey(request):
+#     """ Showing the gernal survey for participants
+#
+#     :request: @todo
+#     :returns: @todo
+#
+#     """
+#     R = request.REQUEST
+#     if 'token' in R:
+#         try:
+#             p = Participant.query(
+#                 Participant.token == request.REQUEST['token']
+#             ).fetch(1)[0]
+#             r = render_to_response('self_survey.html',
+#                                    {'gform_url': p.gform_url})
+#             r.set_cookie('judge_email', p.email)
+#             r.set_cookie('judge_nick', p.name)
+#             return r
+#         except:
+#             raise Http404
+#     elif 'screen_name' in R and 'email' in R:
+#         token = str(uuid4())
+#         screen_name = R['screen_name'][1:]
+#         gform_url = get_gform_url(screen_name)
+#         Participant.newParticipant(
+#             name=None,
+#             card=None,
+#             token=token,
+#             email=R['email'],
+#             screen_name=screen_name,
+#             gform_url=gform_url).put()
+#         r = render_to_response('self_survey.html',
+#                                {'gform_url': gform_url})
+#         r.set_cookie('judge_email', R['email'])
+#         r.set_cookie('judge_nick', screen_name)
+#         return r
+#     else:
+#         return render_to_response(
+#             'participant_reg.html',
+#             context_instance=RequestContext(request))
 
 
 # -------------------------- test view ------------------

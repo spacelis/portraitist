@@ -71,7 +71,7 @@
         <div class="btn-toolbar btn-float-right">
           <div class="btn-group">
             {% for f in filters %}
-            <button type="button" class="btn btn-default btn-xs" onClick="profileviewer_ns.focusTopic('{{ f.name }}', '{{ f.type }}')" title="{{ f.description }}">
+            <button type="button" class="btn btn-default btn-xs" onClick="profileviewer_ns.focusTopic('{{ f.name }}', '{{ f.level }}')" title="{{ f.description }}">
               <span class="glyphicon glyphicon-search"></span> {{ f.name }}
             </button>
             {% endfor %}
@@ -182,6 +182,7 @@
         "pv-judgements-{{ t.topic_id  }}",
         {% endfor %}
       ];
+      // check whether all expertise is assigned with scores
       $("#pv-judgement-form").submit(function(event){
         var selector;
         for(var i in in_nodes){
@@ -191,9 +192,11 @@
             event.preventDefault();
           }
         }
+        // return if not 
         if(event.isDefaultPrevented()){
           return;
         }
+        // check the monitored task performance
         else if(!control.checked()){
           $("#id-dialog-verify-judgement").modal("show");
           $(".modal-backdrop.fade.in").css({opacity: 1, background: "#900"});
