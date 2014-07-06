@@ -1,13 +1,22 @@
 index.yaml
-*.sqlite
-apps/data
-cred.yaml
-oauth2/**
-twitter.py
-static/bower_components/**
 **.py[co]
 .**
-gae_mini_profiler
+
+# datastore
+*.sqlite
+apps/data
 *.json
+
+# API credential
+cred.yaml
+
+# library
 foursquare
+tweepy
+fn
 requests
+oauth2
+gae_mini_profiler
+
+# JS library
+static/bower_components/**
