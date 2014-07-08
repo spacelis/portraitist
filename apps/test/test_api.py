@@ -89,7 +89,16 @@ class TestUtilFunctions(unittest.TestCase):
 
     def test_partition(self):
         """ test_partition. """
-        from apps.profileviewer.api import partition
+        from apps.profileviewer.api.data import partition
         self.assertEqual([list(g) for g in partition(range(11), 7)],
                          [[0, 1, 2, 3, 4, 5, 6],
                           [7, 8, 9, 10]])
+        self.assertEqual([list(g) for g in partition(range(17), 7)],
+                         [[0, 1, 2, 3, 4, 5, 6],
+                          [7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+                          ])
+        self.assertEqual([list(g) for g in partition(range(18), 7)],
+                         [[0, 1, 2, 3, 4, 5, 6],
+                          [7, 8, 9, 10, 11, 12, 13],
+                          [14, 15, 16, 17]
+                          ])

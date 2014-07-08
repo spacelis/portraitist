@@ -13,7 +13,13 @@ Description:
 
 from json import dumps as _j
 from datetime import datetime as dt
+from itertools import groupby
 
+from fn import Stream
+from fn import _ as L
+from fn.iters import drop
+from fn.uniform import zip_longest
+from fn.uniform import map
 from django.http import Http404
 from django.http import HttpResponse
 
@@ -149,7 +155,7 @@ def import_candidates(filename):
     def loader(r):
         """ Loader for Twitter accounts and checkins. """
         TwitterAccount(
-            #parent=DEFAULT_PARENT_KEY,
+            # parent=DEFAULT_PARENT_KEY,
             screen_name=r['screen_name'],
             checkins=json.loads(r['checkins'])).put()
     return import_entities(filename, loader)
@@ -169,7 +175,7 @@ def import_rankings(filename):
     def loader(r):
         """ Loader for Twitter accounts and checkins. """
         ExpertiseRank(
-            #parent=DEFAULT_PARENT_KEY,
+            # parent=DEFAULT_PARENT_KEY,
             topic_id=r['topic_id'],
             topic=GeoEntity.getByTFId(r['associate_id']).key,
             region=r['region'],
@@ -195,8 +201,8 @@ def rankings_statistics():
         'ranklists': len(ranklists),
         'rankpoints': len(rankpoints),
         'regions': {k: len(list(g))
-                    for k, g in groupby(sorted(ranklists, key=lambda x: x[1]),
-                                        key=lambda x: x[1])},
+                    for k, g in groupby(sorted(ranklists, key=L[1]),
+                                        key=L[1])},
         'total': num
     }
 
@@ -251,11 +257,17 @@ def clear_tasks():
     return {'clear_tasks': 'succeeded'}
 
 
-def partition(it, size=10):
-    """ Partitioning it into groups of 10 elements.
+def partition(it, size=10, margin=None):
+    """ Partitioning it into groups of elements in given size.
+
+    The margin is for the last group of elements.
+    If there are less than margin number of elements, they will be
+    grouped together. E.g., the last group may contain 15, 14, 13
+    elements if margin is 15.
 
     :it: An iterator through some elements.
     :size: The maximum size of a group.
+    :margin: If the rest of elements
     :yields: a group containing at most the given size of
     the elements from it.
 
@@ -264,9 +276,57 @@ def partition(it, size=10):
     from itertools import groupby
     from itertools import izip
 
-    for _, g in groupby(izip(cycle([0] * size + [1] * size), it),
-                        key=lambda x: x[0]):
-        yield [x for _, x in g]
+    margin = margin if margin else int(1.5 * size)
+    assert margin < 2 * size, \
+        'The margin %s is too large for size %s' % (margin, size)
+
+    grps = Stream() << map(
+        (lambda x: [i[1] for i in x]),
+        map(L[1],
+            Stream() <<
+            groupby(izip(cycle([0] * size + [1] * size), it),
+                    key=L[0])))
+    for nex, cur in zip_longest(drop(1, grps), grps):
+        print nex, cur
+        if nex and len(cur + nex) <= margin:
+            yield cur + nex
+            return
+        else:
+            yield cur
+
+
+@_REG.api_endpoint(secured=True)
+def make_qtasks():
+    """ Make tasks based on candidates. """
+    candidates = ExpertiseRank.listCandidates()
+    for c in candidates:
+        rankings = ExpertiseRank.getForCandidate(c.candidate)
+        for k, g in groupby(sorted(rankings, key=L.topic_id),
+                            key=L.topic_id):
+            AnnotationTask(
+                rankings=[r.key for r in g],
+                candidate=c.candidate).put()
+    return {'make_tasks': 'succeeded'}
+
+
+@_REG.api_endpoint(secured=True)
+def make_qtaskpackages():
+    """ Group tasks in to packages. """
+    from apps.profileviewer.models import newToken
+    mapping = sorted([(at.key, at.rankings[0].get().topic_id)
+                      for at in AnnotationTask.query().fetch()],
+                     key=L[1])
+    for topic_id, ts in groupby(mapping, key=L[1]):
+        for tkeys in partition([t[0] for t in ts], 10):
+            TaskPackage(
+                # parent=DEFAULT_PARENT_KEY,
+                tasks=tkeys,
+                progress=tkeys,
+                done_by=list(),
+                confirm_code=newToken('').split('-')[-1],
+                assigned_at=dt(2000, 1, 1)
+            ).put()
+    return {'make_taskpackages': 'succeeded'}
 
 
 @_REG.api_endpoint(secured=True)
@@ -276,7 +336,7 @@ def make_taskpackages():
     for ts in partition(AnnotationTask.query().fetch(), 10):
         tkeys = [t.key for t in ts]
         TaskPackage(
-            #parent=DEFAULT_PARENT_KEY,
+            # parent=DEFAULT_PARENT_KEY,
             tasks=tkeys,
             progress=tkeys,
             done_by=list(),
@@ -310,10 +370,11 @@ def export_tpkeys():
     import csv
     from StringIO import StringIO
     buf = StringIO()
-    csvwr = csv.DictWriter(buf, ['tpkey'])
+    csvwr = csv.DictWriter(buf, ['tpkey', 'confirm_code'])
     csvwr.writeheader()
     for tp in TaskPackage.query().fetch():
-        csvwr.writerow({'tpkey': tp.key.urlsafe()})
+        csvwr.writerow({'tpkey': tp.key.urlsafe(),
+                        'confirm_code': tp.confirm_code})
     return HttpResponse(buf.getvalue(), mimetype='text/csv')
 
 
