@@ -376,14 +376,16 @@ def export_tpkeys():
 
     """
     import csv
-    from StringIO import StringIO
-    buf = StringIO()
-    csvwr = csv.DictWriter(buf, ['tpkey', 'confirm_code'])
+    response = HttpResponse(content_type='text/plain')
+    response['Content-Disposition'] = \
+        'inline; filename="tpkeys-confirmation.csv"'
+
+    csvwr = csv.DictWriter(response, ['tpkey', 'confirm_code'])
     csvwr.writeheader()
     for tp in TaskPackage.query().fetch():
         csvwr.writerow({'tpkey': tp.key.urlsafe(),
                         'confirm_code': tp.confirm_code})
-    return HttpResponse(buf.getvalue(), mimetype='text/csv')
+    return response
 
 
 @_REG.api_endpoint(secured=True)
