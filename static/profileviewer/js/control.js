@@ -6,29 +6,52 @@ var control = (function(){
 
   var pageheight = $(document).height();
   var loadtime = new Date();
+  var pagewidth = $(document).width();
+  var percentwidth = pagewidth / 100;
 
   var state = {m_clicks: 0,
                m_travel: 0,
-               prev_x: 0,
-               prev_y: 0,
-               init: true};
+               prev_pos: {PageX: 0, PageY: 0},
+               init: true,
+               trace: []};
   var bar = {
     m_clicks: 3,
     m_travel: pageheight,
     t_int: 15000,
   };
+
+  function distance(p1, p2){
+    return sqrt(pow(p2.PageX - p1.PageX, 2) + pow(p2.PageY - p1.PageY, 2));
+  }
+
   $(document).click(function(e){
     state.m_clicks += 1;
+    state.trace.unshift({event: 'click',
+                         position: {'PageX': e.PageX, 'PageY': e.PageY},
+                         timestamp: new Date() - loadtime,
+                         travel: state.trace[0].travel});
   });
   $(document).mousemove(function(e){
-    var x = e.pageX, y = e.pageY;
+    var timestamp = new Date() - loadtime;
+    var pos = {PageX: e.pageX, PageY: e.pageY};
     if(state.init){
       state.init = false;
+      state.trace.unshift({event: 'moveto',
+                           position: pos,
+                           timestamp: timestamp,
+                           travel: 0});
     } else{
-      state.m_travel += sqrt(pow(x - state.prev_x, 2) + pow(y - state.prev_y, 2));
+      state.m_travel += distance(pos, state.prev_pos);
+      state.prev_pos = pos;
+      if(distance(state.trace[0].position, pos) > percentwidth
+        || timestamp - state.trace[0].timestamp > 1000)
+      {
+        state.trace.unshift({event: 'moveto',
+                            position: pos,
+                            timestamp: timestamp,
+                            travel: state.m_travel});
+      }
     }
-    state.prev_x = x;
-    state.prev_y = y;
   });
 
   function mouseState(){
@@ -41,6 +64,10 @@ var control = (function(){
   function checked(){
     return (mouseState() && physicalState());
   }
+  function getState(){
+    return state.trace;  // FIXME this may be unsafe, should be cloned.
+  }
 
-  return {'checked': checked};
+  return {'checked': checked,
+          'getState': getState};
 }());
