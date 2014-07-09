@@ -47,9 +47,9 @@ var control = (function(){
         || timestamp - state.trace[0].timestamp > 1000)
       {
         state.trace.unshift({event: 'moveto',
-                            position: pos,
-                            timestamp: timestamp,
-                            travel: state.m_travel});
+                             position: pos,
+                             timestamp: timestamp,
+                             travel: state.m_travel});
       }
     }
   });
@@ -68,6 +68,16 @@ var control = (function(){
     return state.trace;  // FIXME this may be unsafe, should be cloned.
   }
 
+  function record(e){
+    state.trace.unshift({event: 'record',
+                         position: {PageX: state.trace[0].position.PageX, 
+                                    PageY: state.trace[0].position.PageY},
+                         timestamp: new Date() - loadtime,
+                         travel: state.m_travel,
+                         record: e});
+  }
+
   return {'checked': checked,
-          'getState': getState};
+          'getState': getState,
+          'record': record};
 }());

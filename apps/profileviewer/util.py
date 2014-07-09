@@ -192,6 +192,16 @@ def get_scores(req):
     return scores
 
 
+def get_traceback(req):
+    """Constructing judgement object out of request.
+
+    :req: @todo
+    :returns: @todo
+
+    """
+    return v['pv-annotation-traceback']
+
+
 def request_property(req, prop, default=None, b64json=False):
     """ Get a property from a request or cookie.
 

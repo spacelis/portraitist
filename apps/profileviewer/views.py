@@ -31,6 +31,7 @@ from apps.profileviewer.models import User
 # from apps.profileviewer.form_map import get_gform_url
 from apps.profileviewer.util import request_property
 from apps.profileviewer.util import get_scores
+from apps.profileviewer.util import get_traceback
 from apps.profileviewer.util import get_user
 from apps.profileviewer.util import get_client
 
@@ -330,7 +331,8 @@ def submit_annotation(request):
 
     scores = get_scores(request)
     ipaddr, user_agent = get_client(request)
-    Judgement.add(user, task, scores, ipaddr, user_agent)
+    tb = get_traceback(request)
+    Judgement.add(user, task, scores, ipaddr, user_agent, tb)
 
     user.accomplish(task)
 

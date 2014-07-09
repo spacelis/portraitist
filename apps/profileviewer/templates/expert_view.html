@@ -56,6 +56,7 @@
       <div class="row">
         <div class="col-sm-12">
           <button type="submit" class="btn btn-primary btn-xs btn-float-right">Submit &amp; Continue</button>
+          <input type="hidden" name="pv-annotation-traceback" value="" id="id-input-traceback">
         </div>
       </div>
     </form>
@@ -192,15 +193,20 @@
             event.preventDefault();
           }
         }
-        // return if not 
+        // return if the event is prevented from score mark checking
         if(event.isDefaultPrevented()){
+          control.record('submit_without_score');
           return;
         }
         // check the monitored task performance
         else if(!control.checked()){
           $("#id-dialog-verify-judgement").modal("show");
           $(".modal-backdrop.fade.in").css({opacity: 1, background: "#900"});
+          control.record('submit_too_soon');
           event.preventDefault();
+        }
+        else {
+          $("#id-input-traceback").val(JSON.stringify(control.getState()));
         }
         return;
       });
