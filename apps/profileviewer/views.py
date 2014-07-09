@@ -154,7 +154,7 @@ class DataViewFilterSet(object):
         """
         cate = [c for _, c in relatives if c]
         return 'This is a place (POI)%s.' % (
-            ('in category of' + ', '.join(cate)) if cate else '',
+            (' in category of' + ', '.join(cate)) if cate else '',
         )
 
     @staticmethod
@@ -168,9 +168,9 @@ class DataViewFilterSet(object):
         poi = [p for t, p in relatives if t == 'of' and p]
         zcate = [z for t, z in relatives if t == 'in' and z]
 
-        return '''This is a category%s%s.''' % (
-            (' that contains ' + ', '.join(poi)) if poi else '',
-            (' and a subcategory in ' + ', '.join(zcate)) if zcate else ''
+        return '''This is a subcategory%s%s.''' % (
+            (' in ' + ', '.join(zcate)) if zcate else '',
+            (' and contains ' + ', '.join(poi)) if poi else ''
         )
 
     @staticmethod
