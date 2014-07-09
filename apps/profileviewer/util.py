@@ -199,7 +199,7 @@ def get_traceback(req):
     :returns: @todo
 
     """
-    return v['pv-annotation-traceback']
+    return req.REQUEST['pv-annotation-traceback']
 
 
 def request_property(req, prop, default=None, b64json=False):

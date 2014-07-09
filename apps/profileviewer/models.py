@@ -373,7 +373,7 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
     created_at = ndb.model.DateTimeProperty(indexed=False)
     ipaddr = ndb.model.StringProperty(indexed=False)
     user_agent = ndb.model.StringProperty(indexed=False)
-    tracebacke = ndb.model.StringProperty(indexed=False)
+    traceback = ndb.model.StringProperty(indexed=False)
 
     @staticmethod
     def add(judge, task, scores, ipaddr, user_agent, tb):
