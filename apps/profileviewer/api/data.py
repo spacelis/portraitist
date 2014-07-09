@@ -214,6 +214,14 @@ def clear_rankings():
     return {'clear_rankings': 'succeeded!'}
 
 
+@_REG.api_endpoint(secured=True, disabled=True)
+def reset_progress():
+    """ Reset taskpackage progress. """
+    for tp in TaskPackage.query.fetch():
+        tp.progress = list(tp.tasks)
+    return {'reset_progress': 'succeeded!'}
+
+
 from apps.profileviewer.models import GeoEntity
 
 
