@@ -215,7 +215,8 @@ def request_property(req, prop, default=None, b64json=False):
     if b64json:
         f = b64json_decode
     else:
-        f = lambda x: x
+        def f(x):
+            return x
 
     if prop in req.GET:
         return f(req.GET[prop])

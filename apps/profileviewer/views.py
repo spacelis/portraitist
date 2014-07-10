@@ -89,7 +89,7 @@ def taskpackage(request, task_pack_id):
     user = get_user(request)
     tp_key = _k(task_pack_id, 'TaskPackage')
     user.assign(tp_key.get())
-    r = redirect('/task_router')
+    r = redirect('/task_router?action=instructions')
     r.set_cookie('session_token', user.session_token)
     return r
 
@@ -102,9 +102,13 @@ def task_router(request):
 
     """
     user = get_user(request)
+    action = request_property(request, 'action')
+    if action == 'instructions':
+        return redirect('/instructions')
     try:
         task_key = user.task_package.get().nextTaskKey()
-        return redirect('/task/' + task_key.urlsafe())
+        return redirect('/task/%s' %
+                        (task_key.urlsafe(),))
     except TaskPackage.NoMoreTask as e:
         return redirect('/confirm_code/' + e.cf_code)
     raise Http404
@@ -436,7 +440,6 @@ def submit_annotation(request):
 
 def test_view(request):
     """ a test view """
-    return render_to_response('test_view.html',
-                              {'test': [{'x': ['food', 'bar', 'haha']},
-                                        {'x': ['xxx', 'yyy']}]},
+    return render_to_response('instructions.html',
+                              {'goto': '#'},
                               context_instance=RequestContext(request))

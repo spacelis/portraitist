@@ -1,6 +1,6 @@
 {% extends "frame.html" %}
-{% block extra_header %}
-  <script src="/static/profileviewer/js/unslider.min.js" type="text/javascript" charset="utf-8"></script>
+{% block extra_scripts %}
+  <script src="/static/profileviewer/js/unslider.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/profileviewer/js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function(){
@@ -137,7 +137,7 @@
                     Last Tip: Hover the mouse cursor over panels for more information.
                   </p>
                   <p align="right">
-                    <a class="btn btn-primary btn-lg" href="/expert_view/{{ expert }}">
+                    <a class="btn btn-primary btn-lg" href="/task_router">
                       Start
                     </a>
                   </p>
