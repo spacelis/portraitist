@@ -3,3 +3,6 @@ total_storage_limit: 120M
 queue:
 - name: crawler
   rate: 5/s
+
+- name: batch
+  rate: 100/s

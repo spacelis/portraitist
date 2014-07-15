@@ -90,7 +90,7 @@ def b64json_decode(json_obj):
     return json.loads(base64.b64decode(json_obj))
 
 
-def fixCompressed(model):
+def findBrokenFields(model):
     """ Correct the restore of the data containing the compressed field.
 
     :returns: None
@@ -108,21 +108,25 @@ def fixCompressed(model):
     """
     # pylint: disable-msg=W0212
     # Find all fixable field of data Models
-    fixable = list()
-    for n, p in model._properties.iteritems():
-        print n, p
-        if p.__class__ == ndb.model.JsonProperty and p._compressed:
-            fixable.append(n)
+    return [n
+            for n, p in model._properties.iteritems()
+            if p.__class__ == ndb.model.JsonProperty and p._compressed]
 
+
+def fixCompressedEntity(key, fields):
+    """ Fix Compressiion Error for the entity with tkey.
+        :key: The key of the entity.
+        :fields:  A list of field names.
+
+    """
     # apply the fixing
-    print fixable
-    for ins in model.query().fetch():
-        for p in fixable:
-            if not isinstance(ins._values.get(p).b_val,
-                              ndb.model._CompressedValue):
-                ins._values.get(p).b_val = \
-                    ndb.model._CompressedValue(ins._values.get(p).b_val)
-                ins.put()
+    ins = key.get()
+    for p in fields:
+        if not isinstance(ins._values.get(p).b_val,
+                          ndb.model._CompressedValue):
+            ins._values.get(p).b_val = \
+                ndb.model._CompressedValue(ins._values.get(p).b_val)
+            ins.put()
 
 
 Focus = namedtuple('Focus', ['name', 'value', 'chart'], verbose=True)

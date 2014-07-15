@@ -102,6 +102,7 @@ def task_router(request):
 
     """
     user = get_user(request)
+    print user
     action = request_property(request, 'action')
     if action == 'instructions':
         return redirect('/instructions')

@@ -31,6 +31,7 @@ from apps.profileviewer.models import AnnotationTask
 from apps.profileviewer.models import TaskPackage
 from apps.profileviewer.util import throttle_map
 from apps.profileviewer.api import APIRegistry
+from apps.profileviewer.util import fixCompressedEntity
 
 
 _REG = APIRegistry()
@@ -392,3 +393,43 @@ def export_tpkeys():
 def assert_error():
     """ Bring a debug page for console. """
     assert False
+
+
+@_REG.api_endpoint(secured=True)
+def fix_datastore():
+    """ As resutore
+    :returns: @todo
+
+    """
+    from apps.profileviewer.util import findBrokenFields
+    from apps.profileviewer.models import TwitterAccount
+    from google.appengine.api.taskqueue import Task
+    fields = findBrokenFields(TwitterAccount)
+    for k in TwitterAccount.query().fetch(keys_only=True):
+        Task(params={'key': k.urlsafe(),
+                     'fields': ','.join(fields),
+                     '_admin_key': 'tu2013delft'},
+             url='/api/data/fix_entity',
+             method='GET'
+             ).add('batch')
+    return {
+        'action': 'fix_datastore',
+        'suceeded': None,
+        'message': 'Check the batch queue for the status of fixing process.'
+    }
+
+
+@_REG.api_endpoint(secured=True)
+def fix_entity(key, fields):
+    """@todo: Docstring for fix_entity.
+
+    :key: @todo
+    :fields: @todo
+
+    """
+    fixCompressedEntity(_k(key), fields.split(','))
+    return {
+        'action': 'fix_entity',
+        'suceeded': True,
+        'message': 'Fixing compressed field for entity.'
+    }
