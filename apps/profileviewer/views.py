@@ -106,6 +106,9 @@ def task_router(request):
     action = request_property(request, 'action')
     if action == 'instructions':
         return redirect('/instructions')
+    elif action == 'survey':
+        return redirect('/survey')
+
     try:
         task_key = user.task_package.get().nextTaskKey()
         return redirect('/task/%s' %
@@ -134,9 +137,16 @@ def survey(request):
     :returns: @todo
 
     """
-    user = get_user(request)
+    user = get_user(request).touch()
+    if user.email_account is None:
+        return render_to_response('survey.html',
+                                  {'judge_email': '',
+                                   'judge_id': user.key.urlsafe(),
+                                   'user': user.js_encode()})
     ea = user.email_account.get()
-    return render_to_response('survey.html', {'assessor_email': ea.email})
+    return render_to_response('survey.html', {'judge_email': ea.email,
+                                              'judge_id': user.key.urlsafe(),
+                                              'user': user.js_encode()})
 
 
 class DataViewFilterSet(object):
