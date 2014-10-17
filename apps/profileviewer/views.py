@@ -89,12 +89,12 @@ def taskpackage(request):
     user = get_user(request)
     tp_key = _k(request_property(request, 'tpid'), 'TaskPackage')
     user.assign(tp_key.get())
-    r = redirect('/pagerouter?action=instructions')
+    r = redirect('/pagerouter')
     r.set_cookie('session_token', user.session_token)
     return r
 
 
-def page_router(request):
+def pagerouter(request):
     """ Routing tasks by tasks.
 
     :request: Django HTTP request object.
@@ -103,12 +103,12 @@ def page_router(request):
     """
     user = get_user(request)
     print user
-    action = request_property(request, 'action')
-    if action == 'instructions':
+
+    if request_property(request, 'no_instruction') != '1':
         return redirect('/instructions')
-    elif action == 'survey':
+    elif request_property(request, 'no_survey') != '1':
         return redirect('/survey')
-    elif action == 'taskpackage':
+    elif request_property(request, 'action') == 'taskpackage':
         return taskpackage(request)
 
     try:

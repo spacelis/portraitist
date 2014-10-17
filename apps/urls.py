@@ -15,7 +15,7 @@ urlpatterns = patterns(
     url(r'^$', RedirectView.as_view(url='/instructions')),
 
     # Task related pages
-    url(r'^page_router$', 'apps.profileviewer.views.page_router'),
+    url(r'^pagerouter$', 'apps.profileviewer.views.pagerouter'),
     url(r'^confirm_code/(.*)$', 'apps.profileviewer.views.confirm_code_view'),
     url(r'^task/(.*)$', 'apps.profileviewer.views.annotation_view'),
     url(r'^submit_annotation$', 'apps.profileviewer.views.submit_annotation'),

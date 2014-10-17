@@ -5,7 +5,8 @@
     if($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
       $(window).unbind('scroll');
       $('#btn-continue').click(function(){
-        window.open('/home?no_inst=1', '_self');
+        $.cookie('no_survey', 1, {expires: 30});
+        window.open('/pagerouter', '_self');
       });
       $('#btn-continue').css('display', 'inline');
     }
