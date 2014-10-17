@@ -23,6 +23,10 @@
       $('.click-to-next').click(function(e){
         slidey.data('unslider').next();
       })
+      $('.click-to-skip').click(function(e){
+        window.open('/pagerouter', '_self');
+        return false;
+      })
     });
   </script>
 
@@ -78,8 +82,8 @@
                     (Click to continue.)
                   </p>
                   <p align="right">
-                    <a class="btn btn-primary btn-lg" href="/pagerouter?action=survey">
-                      Skip This
+                    <a class="btn btn-primary btn-lg click-to-skip">
+                      Skip <span class='glyphicon glyphicon-forward'></span>
                     </a>
                   </p>
                 </div>
@@ -143,8 +147,8 @@
                     Last Tip: Hover the mouse cursor over panels for more information.
                   </p>
                   <p align="right">
-                    <a class="btn btn-primary btn-lg" href="/pagerouter?action=survey">
-                      Start
+                    <a class="btn btn-primary btn-lg click-to-skip">
+                      Start <span class='glyphicon glyphicon-play'></span>
                     </a>
                   </p>
                   <p style="float: right; text-aligin: right; font-size: 14px">
