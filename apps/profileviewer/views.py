@@ -78,7 +78,7 @@ def home(request):
                               context_instance=RequestContext(request))
 
 
-def taskpackage(request, task_pack_id):
+def taskpackage(request):
     """
 
     :request: @todo
@@ -87,14 +87,14 @@ def taskpackage(request, task_pack_id):
 
     """
     user = get_user(request)
-    tp_key = _k(task_pack_id, 'TaskPackage')
+    tp_key = _k(request_property(request, 'tpid'), 'TaskPackage')
     user.assign(tp_key.get())
-    r = redirect('/task_router?action=instructions')
+    r = redirect('/pagerouter?action=instructions')
     r.set_cookie('session_token', user.session_token)
     return r
 
 
-def task_router(request):
+def page_router(request):
     """ Routing tasks by tasks.
 
     :request: Django HTTP request object.
@@ -108,6 +108,8 @@ def task_router(request):
         return redirect('/instructions')
     elif action == 'survey':
         return redirect('/survey')
+    elif action == 'taskpackage':
+        return taskpackage(request)
 
     try:
         task_key = user.task_package.get().nextTaskKey()
@@ -351,7 +353,7 @@ def submit_annotation(request):
 
     user.accomplish(task)
 
-    return redirect('/task_router')
+    return redirect('/pagerouter')
 
 
 # ------------------------ OVERVIEW ---------------------

@@ -367,7 +367,7 @@ def assign_taskpackage(_user):
     _user.assign(tp)
     return {'action': 'assign_taskpackage',
             'succeeded': True,
-            'redirect': '/task_router'}
+            'redirect': '/pagerouter'}
 
 
 @_REG.api_endpoint(secured=True, tojson=False)

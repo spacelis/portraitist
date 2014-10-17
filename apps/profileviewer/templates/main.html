@@ -9,7 +9,7 @@
   userdata.gototask = function(e){
     $.get("/api/data/assign_taskpackage").done(function(ret){
       if(ret.succeeded) {
-        window.location.href = "/task_router?action=instructions";
+        window.location.href = "/pagerouter?action=instructions";
       }
     });
   };
