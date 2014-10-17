@@ -4,8 +4,8 @@ var control = (function(){
   var pow = Math.pow;
   var sqrt = Math.sqrt;
 
-  var pageheight = $(document).height();
   var loadtime = new Date();
+  var pageheight = $(document).height();
   var pagewidth = $(document).width();
   var percentwidth = pagewidth / 100;
 
@@ -43,8 +43,8 @@ var control = (function(){
     } else{
       state.m_travel += distance(pos, state.prev_pos);
       state.prev_pos = pos;
-      if(distance(state.trace[0].position, pos) > percentwidth
-        || timestamp - state.trace[0].timestamp > 1000)
+      if(distance(state.trace[0].position, pos) > percentwidth || 
+         timestamp - state.trace[0].timestamp > 1000)
       {
         state.trace.unshift({event: 'moveto',
                              position: pos,
@@ -70,7 +70,7 @@ var control = (function(){
 
   function record(e){
     state.trace.unshift({event: 'record',
-                         position: {PageX: state.trace[0].position.PageX, 
+                         position: {PageX: state.trace[0].position.PageX,
                                     PageY: state.trace[0].position.PageY},
                          timestamp: new Date() - loadtime,
                          travel: state.m_travel,
