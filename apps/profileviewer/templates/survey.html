@@ -2,7 +2,7 @@
 {% block extra_scripts %}
 <script type="text/javascript" charset="utf-8">
   $(window).scroll(function(){
-    if($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
+    if($(window).scrollTop() + $(window).height() > $(document).height() - 500) {
       $(window).unbind('scroll');
       $('#btn-continue').click(function(){
         $.cookie('no_survey', 1, {expires: 30});
@@ -16,14 +16,19 @@
 {% block content %}
 <div class="row">
   <div class="col-4-sm text-muted" align="right" style="margin-bottom: 5px">
-    <span>Please submit the questionnaire by clicking the button
-    "Submit" at the end of the questionnaire.</span>
+    <span>Please fill in the questionnaire and clicking the button "Submit" at the bottom.</span>
     <button id='btn-continue' class="btn btn-primary" style='display: none'>Continue<span class='glyphicon glyphicon-chevron-right'></span></button>
   </div>
 </div>
 <div class="row">
   <div class="col-12-sm">
-    <iframe id="embedded-google-form" src="https://docs.google.com/forms/d/1DlXfIaDHsks5_0gkx26brQP_QbFblmRDNvgisvNI0XQ/viewform?entry.2071166996={{ judge_id }}&entry.1102912225={{ judge_email }}&embedded=true" width="100%" height="4000px" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+    <iframe id="embedded-google-form" 
+            src="https://docs.google.com/forms/d/1DlXfIaDHsks5_0gkx26brQP_QbFblmRDNvgisvNI0XQ/viewform?entry.2071166996={{ judge_id }}&entry.1102912225={{ judge_email }}&embedded=true" 
+            width="100%" 
+            height="5000px" 
+            frameborder="0" 
+            marginheight="0" 
+            marginwidth="0">Loading...</iframe>
   </div>
 </div>
 {% endblock %}
