@@ -342,7 +342,8 @@ class GeoEntity(EncodableModel):  # pylint: disable=R0903,W0223
     tfid = ndb.model.StringProperty(indexed=True)
     name = ndb.model.StringProperty(indexed=False)
     level = ndb.model.StringProperty(indexed=False)  # e.g., category, poi
-    info = ndb.model.JsonProperty(indexed=False)
+    info = ndb.model.JsonProperty(indexed=False, compressed=True)
+    example = ndb.model.StringProperty(indexed=False, compressed=True)
     url = ndb.model.StringProperty(indexed=False)
     visitors = ndb.model.KeyProperty(indexed=False, repeated=True,
                                      kind='TwitterAccount')
@@ -373,7 +374,7 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
     created_at = ndb.model.DateTimeProperty(indexed=False)
     ipaddr = ndb.model.StringProperty(indexed=False)
     user_agent = ndb.model.StringProperty(indexed=False)
-    traceback = ndb.model.StringProperty(indexed=False)
+    traceback = ndb.model.StringProperty(indexed=False, compressed=True)
 
     @staticmethod
     def add(judge, task, scores, ipaddr, user_agent, tb):
@@ -413,7 +414,7 @@ class ExpertiseRank(EncodableModel):  # pylint: disable=R0903,W0223
     region = ndb.model.StringProperty(indexed=True)
     candidate = ndb.model.KeyProperty(indexed=True, kind=TwitterAccount)
     rank = ndb.model.IntegerProperty(indexed=False)
-    rank_info = ndb.model.JsonProperty(indexed=False)  # e.g., methods, profile
+    rank_info = ndb.model.JsonProperty(indexed=False, compressed=True)  # e.g., methods, profile
 
     class ExpertNotExists(Http404):
         """ Exception when the expert queried does not exist"""

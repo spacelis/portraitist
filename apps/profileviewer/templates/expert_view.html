@@ -3,7 +3,7 @@
 <div id="judgement-panel" class="panel panel-default" style="z-index: 100">
   <div class="panel-heading">
     <b>
-      How likely will you get information from this user about
+      How likely will you get sufficient information from this user about
     </b>
   </div>
   <div class="panel-body">
@@ -15,7 +15,7 @@
         <div class="list-group-item">
           <div class="row">
             <div class="col-sm-8">
-              <abbr title="{{ t.topic_type }}">
+              <abbr title="{{ t.example }}">
                 {% if t.topic_type == 'POI' %}
                 <a href="http://www.google.com/search?q={{ t.topic }}+{{ t.region }}" target="_blank">
                   <b>{{ t.topic }}</b>

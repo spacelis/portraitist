@@ -242,6 +242,7 @@ def import_geoentities(filename):
             name=d['name'],
             level=r['level'],
             info=json.loads(r['info']),
+            example=r['example'],
             url=r['url']).put()
     return import_entities(filename, loader)
 

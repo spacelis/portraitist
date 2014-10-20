@@ -104,12 +104,12 @@ def pagerouter(request):
     user = get_user(request)
     print user
 
-    if request_property(request, 'no_instruction') != '1':
+    if request_property(request, 'action') == 'taskpackage':
+        return taskpackage(request)
+    elif request_property(request, 'no_instruction') != '1':
         return redirect('/instructions')
     elif request_property(request, 'no_survey') != '1':
         return redirect('/survey')
-    elif request_property(request, 'action') == 'taskpackage':
-        return taskpackage(request)
 
     try:
         task_key = user.task_package.get().nextTaskKey()
