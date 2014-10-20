@@ -13,7 +13,6 @@ Description:
 
 import json
 import tweepy as tw
-import foursquare
 
 with open('cred.json') as fin:
     APICRED = json.load(fin)
@@ -34,6 +33,7 @@ def new_twitter_client(token=None, secret=None):
 
 def new_foursquare_client(token=None, secret=None):  # pylint: disable=W0613
     """ Return a Foursquare API client. """
+    import foursquare
     return foursquare.Foursquare(client_id=APICRED['foursq_client_id'],
                                  client_secret=APICRED['foursq_client_secret'])
 
