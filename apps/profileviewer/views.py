@@ -281,7 +281,8 @@ def annotation_view(request, task_key):
         'topic_id': r.topic_id,
         'topic_type': t.level,
         'topic': t.name,
-        'region': r.region
+        'region': r.region,
+        'example': '\n'.join(['Example Inquiry:'] + [q + '?' for q in t.example.split('? ')]),
     } for t, r in zip(ts, rs)}
 
     # make filters out of topics
