@@ -235,7 +235,7 @@ class DataViewFilterSet(object):
                                []))
                 )
             )
-            for poi, g in groupby(self.relationship, key=_.poi)
+            for poi, g in groupby(sorted(self.relationship, key=_.poi), key=_.poi)
             if poi
         ] + [
             DataViewFilterSet.Filter(
@@ -247,7 +247,7 @@ class DataViewFilterSet(object):
                                []))
                 )
             )
-            for cate, g in groupby(self.relationship, key=_.cate)
+            for cate, g in groupby(sorted(self.relationship, key=_.cate), key=_.cate)
             if cate
         ] + [
             DataViewFilterSet.Filter(
@@ -259,7 +259,7 @@ class DataViewFilterSet(object):
                                []))
                 )
             )
-            for zcate, g in groupby(self.relationship, key=_.zcate)
+            for zcate, g in groupby(sorted(self.relationship, key=_.zcate), key=_.zcate)
             if zcate
         ]
         return rel
