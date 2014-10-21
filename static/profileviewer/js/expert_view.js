@@ -1,4 +1,5 @@
 /* global dc */
+/* global $ */
 /* global d3 */
 /* global crossfilter */
 /* global GMaps */
@@ -55,6 +56,7 @@ var profileviewer_ns = (function(){
   //var time_parser = d3.time.format.utc("%a %b %d %H:%M:%S +0000 %Y").parse;
   var time_parser = function(d){return new Date(d);};
   var zcate_chart, cate_chart, poi_chart, region_chart, timeline_chart;
+  var chartTypeMap;
   var allpois;
 
   function render_charts (){
@@ -214,6 +216,17 @@ var profileviewer_ns = (function(){
 
     dc.renderAll();
     renderMap(checkins_by_poi);
+
+    chartTypeMap = {
+      p: poi_chart,
+      c: cate_chart,
+      z: zcate_chart,
+      r: region_chart,
+    };
+    // chartTypeMap.p = poi_chart
+    // chartTypeMap.c = cate_chart
+    // chartTypeMap.z = zcate_chart
+    // chartTypeMap.r = region_chart
   }
 
   function initCharts (hash_id) {
@@ -234,8 +247,16 @@ var profileviewer_ns = (function(){
     );
   }
 
-  function focusTopic(topic, chart){
-    if(chart === 'p'){
+  function _focus(topic, chart){
+    chart.filter(topic);
+    $(chart.anchor()).parent().parent().addClass('chart-container-focus');
+  }
+
+
+  function focusTopic(topic, chartType){
+    unfocusAll();
+
+    if(chartType === 'p'){
       var p;
       for(var i in allpois){
         if(topic === allpois[i].key.valueOf()){
@@ -243,18 +264,19 @@ var profileviewer_ns = (function(){
           break;
         }
       }
-      poi_chart.filter(p);
+      _focus(p, poi_chart);
     }
-    else if(chart === 'c'){
-      cate_chart.filter(topic);
+    else{
+      _focus(topic, chartTypeMap[chartType])
     }
-    else if(chart === 'z'){
-      zcate_chart.filter(topic);
-    }
-    else if(chart === 'r'){
-      region_chart.filter(topic);
-    }
+
     dc.redrawAll();
+  }
+
+  function unfocusAll(){
+    $('.chart-container-focus').removeClass('chart-container-focus')
+    dc.filterAll();
+    dc.redrawAll();   
   }
 
   function getChart(name){
@@ -264,6 +286,7 @@ var profileviewer_ns = (function(){
   return {
     initCharts: initCharts,
     focusTopic: focusTopic,
-    getChart: getChart
+    unfocusAll: unfocusAll,
+    getChart: getChart,
   };
 })();

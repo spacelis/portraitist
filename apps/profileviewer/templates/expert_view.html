@@ -78,7 +78,7 @@
             {% endfor %}
           </div>
           <div class="btn-group">
-            <button type="button" class="btn btn-default btn-xs" onClick="dc.filterAll();dc.redrawAll();" title="Remove all filters currently applied." >
+            <button type="button" class="btn btn-default btn-xs" onClick="profileviewer_ns.unfocusAll()" title="Remove all filters currently applied." >
               <span class="glyphicon glyphicon-repeat"></span> Reset
             </button>
           </div>
@@ -93,7 +93,7 @@
       <div class="col-sm-3">
         <div class="panel panel-info" title="This chart shows the number of check-ins at each top-level category of places.">
           <div class="panel-body">
-            <div id="chart-zcate-pie" > </div>
+            <div id="chart-zcate-pie" class="topic-chart"> </div>
           </div>
           <div class="panel-footer chart-label"> Top-level Categories </div>
         </div>
@@ -101,7 +101,7 @@
       <div class="col-sm-3">
         <div class="panel panel-info" title="This chart is similar to the one showing top-level category distribution except that it is for lower-level categories.">
           <div class="panel-body">
-            <div id="chart-cate-pie"> </div>
+            <div id="chart-cate-pie" class="topic-chart"> </div>
           </div>
           <div class="panel-footer chart-label"> Lower-level Categories </div>
         </div>
@@ -109,7 +109,7 @@
       <div class="col-sm-3">
         <div class="panel panel-info" title="This chart shows the number of check-ins the candidate have made at each place.">
           <div class="panel-body">
-            <div id="chart-poi-pie"> </div>
+            <div id="chart-poi-pie" class="topic-chart"> </div>
           </div>
           <div class="panel-footer chart-label"> Locations </div>
         </div>
@@ -117,7 +117,7 @@
       <div class="col-sm-3">
         <div class="panel panel-info" title="This chart shows the number of check-ins that were made at each of 4 cities.">
           <div class="panel-body">
-            <div id="chart-region-pie"> </div>
+            <div id="chart-region-pie" class="topic-chart"> </div>
           </div>
           <div class="panel-footer chart-label"> Regions </div>
         </div>
@@ -167,7 +167,7 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4oLS7DjhME0pLuTTauJw3rjs1_n4TuKM&sensor=false" type="text/javascript" charset="utf-8"></script>
   <script src="/static/profileviewer/js/d3.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/profileviewer/js/crossfilter.min.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/static/profileviewer/js/dc.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/static/profileviewer/js/dc.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/profileviewer/js/gmaps.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/profileviewer/js/jquery-uuid.js" type="text/javascript" charset="utf-8"></script>
 
@@ -251,6 +251,14 @@
       -moz-box-shadow:    0px 0px 5px 2px #c00;
       -webkit-box-shadow: 0px 0px 5px 2px #c00;
       box-shadow:         0px 0px 5px 2px #c00;
+      -moz-border-radius: 3px;
+      -webkit-border-radius: 3px;
+      border-radius: 3px;
+    }
+    .chart-container-focus {
+      -moz-box-shadow:    0px 0px 5px 2px #3d3;
+      -webkit-box-shadow: 0px 0px 5px 2px #3d3;
+      box-shadow:         0px 0px 5px 2px #3d3;
       -moz-border-radius: 3px;
       -webkit-border-radius: 3px;
       border-radius: 3px;
