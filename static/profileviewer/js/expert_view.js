@@ -5,14 +5,14 @@
 /* global GMaps */
 
 var profileviewer_ns = (function(){
-  var fact; // crossfilter object holding data
-  var map;
+  var _fact; // crossfilter object holding data
+  var _map;
   //var map_infowindow = new google.maps.InfoWindow({
     //maxWidth: 300
   //});
-  var data;
+  var _data;
 
-  var REGIONS = {
+  var _REGIONS = {
       'Chicago': {lat: [41.4986, 42.0232],
                   lng: [-88.1586, -87.3573]},
       'New York': {lat: [40.4110, 40.9429],
@@ -23,11 +23,11 @@ var profileviewer_ns = (function(){
                         lng: [-122.5349, -122.3546]}};
   function update_map (poi_groups){
     var pois = poi_groups.top(30);
-    map.removeMarkers();
+    _map.removeMarkers();
     for(var i in pois) {
       if(pois[i].value === 0) {continue;}
       var poi = pois[i].key;
-      map.addMarker({
+      _map.addMarker({
         lat: poi.lat,
         lng: poi.lng,
         title: poi.name + ' (' + pois[i].value + ' check-ins)\n' + poi.category.name + ', ' + poi.category.zcategory,
@@ -37,14 +37,14 @@ var profileviewer_ns = (function(){
         icon: '/static/profileviewer/images/map_icons/' + poi.category.id + '_black.png',
       });
     }
-    map.fitZoom();
-    if(map.getZoom() > 17){
-      map.setZoom(17);
+    _map.fitZoom();
+    if(_map.getZoom() > 17){
+      _map.setZoom(17);
     }
   }
 
   function renderMap (poi_groups){
-    map = new GMaps({
+    _map = new GMaps({
       lat: 41.0,
       lng: -100.0,
       div: 'map-canvas',
@@ -55,33 +55,32 @@ var profileviewer_ns = (function(){
 
   //var time_parser = d3.time.format.utc("%a %b %d %H:%M:%S +0000 %Y").parse;
   var time_parser = function(d){return new Date(d);};
-  var zcate_chart, cate_chart, poi_chart, region_chart, timeline_chart;
-  var chartTypeMap;
-  var allpois;
+  var _chartTypeMap;
+  var _allpois;
 
   function render_charts (){
-    fact = crossfilter(data);
+    _fact = crossfilter(_data);
 
-    var by_week = fact.dimension(function(c){
+    var by_week = _fact.dimension(function(c){
       //return year_month(c.created_at);
       return d3.time.week(c.created_at);
     });
-    var by_category = fact.dimension(function(c){
+    var by_category = _fact.dimension(function(c){
       return c.place.category.name;
     });
-    var by_zcate = fact.dimension(function(c){
+    var by_zcate = _fact.dimension(function(c){
       return c.place.category.zcategory;
     });
-    var by_poi = fact.dimension(function(c){
+    var by_poi = _fact.dimension(function(c){
       c.place.valueOf = function(){
         return c.place.id;
       };
       return c.place;
     });
-    var by_region = fact.dimension(function(c){
-      for(var r in REGIONS){
-        if ((REGIONS[r].lat[0] < c.place.lat && c.place.lat < REGIONS[r].lat[1] &&
-             REGIONS[r].lng[0] < c.place.lng && c.place.lng < REGIONS[r].lng[1] )){
+    var by_region = _fact.dimension(function(c){
+      for(var r in _REGIONS){
+        if ((_REGIONS[r].lat[0] < c.place.lat && c.place.lat < _REGIONS[r].lat[1] &&
+             _REGIONS[r].lng[0] < c.place.lng && c.place.lng < _REGIONS[r].lng[1] )){
           return r;
         }
       }
@@ -93,10 +92,10 @@ var profileviewer_ns = (function(){
     var checkins_by_zcate = by_zcate.group().reduceCount();
     var checkins_by_poi = by_poi.group().reduceCount();
     var checkins_by_region = by_region.group().reduceCount();
-    allpois = checkins_by_poi.all();
+    _allpois = checkins_by_poi.all();
 
     var w = $("#chart-zcate-pie").width();
-    zcate_chart = dc.pieChart("#chart-zcate-pie")
+    var zcate_chart = dc.pieChart("#chart-zcate-pie")
       .width(w) // (optional) define chart width, :default = 200
       .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
@@ -114,7 +113,7 @@ var profileviewer_ns = (function(){
       .renderTitle(true);
 
     w = $("#chart-cate-pie").width();
-    cate_chart = dc.pieChart("#chart-cate-pie")
+    var cate_chart = dc.pieChart("#chart-cate-pie")
       .width(w) // (optional) define chart width, :default = 200
       .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
@@ -133,7 +132,7 @@ var profileviewer_ns = (function(){
       .renderTitle(true);
 
     w = $("#chart-region-pie").width();
-    region_chart = dc.pieChart("#chart-region-pie")
+    var region_chart = dc.pieChart("#chart-region-pie")
       .width(w) // (optional) define chart width, :default = 200
       .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
@@ -152,7 +151,7 @@ var profileviewer_ns = (function(){
       .renderTitle(true);
 
     w = $("#chart-poi-pie").width();
-    poi_chart = dc.pieChart("#chart-poi-pie")
+    var poi_chart = dc.pieChart("#chart-poi-pie")
       .width(w) // (optional) define chart width, :default = 200
       .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
@@ -191,7 +190,7 @@ var profileviewer_ns = (function(){
       .renderTitle(true);
 
     w = $("#chart-timeline").width();
-    timeline_chart = dc.barChart("#chart-timeline")
+    var timeline_chart = dc.barChart("#chart-timeline")
       .width(w) // (optional) define chart width, :default = 200
       .height(120) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 500
@@ -217,16 +216,12 @@ var profileviewer_ns = (function(){
     dc.renderAll();
     renderMap(checkins_by_poi);
 
-    chartTypeMap = {
+    _chartTypeMap = {
       p: poi_chart,
       c: cate_chart,
       z: zcate_chart,
       r: region_chart,
     };
-    // chartTypeMap.p = poi_chart
-    // chartTypeMap.c = cate_chart
-    // chartTypeMap.z = zcate_chart
-    // chartTypeMap.r = region_chart
   }
 
   function initCharts (hash_id) {
@@ -237,8 +232,8 @@ var profileviewer_ns = (function(){
           alert("Fail to get data for " + hash_id);
         }
         else{
-          data = json;
-          data.forEach(function (c){
+          _data = json;
+          _data.forEach(function (c){
             c.created_at = time_parser(c.created_at);
           });
           render_charts();
@@ -258,25 +253,25 @@ var profileviewer_ns = (function(){
 
     if(chartType === 'p'){
       var p;
-      for(var i in allpois){
-        if(topic === allpois[i].key.valueOf()){
-          p = allpois[i].key;
+      for(var i in _allpois){
+        if(topic === _allpois[i].key.valueOf()){
+          p = _allpois[i].key;
           break;
         }
       }
-      _focus(p, poi_chart);
+      _focus(topic, _chartTypeMap[chartType]);
     }
     else{
-      _focus(topic, chartTypeMap[chartType])
+      _focus(topic, _chartTypeMap[chartType]);
     }
 
     dc.redrawAll();
   }
 
   function unfocusAll(){
-    $('.chart-container-focus').removeClass('chart-container-focus')
+    $('.chart-container-focus').removeClass('chart-container-focus');
     dc.filterAll();
-    dc.redrawAll();   
+    dc.redrawAll();
   }
 
   function getChart(name){
