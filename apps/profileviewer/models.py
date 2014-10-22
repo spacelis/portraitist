@@ -154,7 +154,7 @@ class EncodableModel(ndb.Model, Encodable):  # pylint: disable=W0223
         assert not b64, "Base64 decoding is not supported yet."
         if isinstance(val, str) and len(val):
             raw_obj = Encodable.js_decode(val)
-            d = {k: v for k, v in raw_obj.iteritems() if k != '__KEY__'}
+            d = {k: v for k, v in raw_obj.items() if k != '__KEY__'}
             try:
                 mobj = _k(raw_obj['__KEY__']).get()
                 mobj.populate(**d)  # pylint: disable=W0142
@@ -167,7 +167,7 @@ class EncodableModel(ndb.Model, Encodable):  # pylint: disable=W0223
     def contains(cls, **kwargs):
         """ Testing whether there is at least one entity matching. """
         return cls.query(*((getattr(cls, k) == v)
-                         for k, v in kwargs.iteritems())).count() > 0
+                         for k, v in kwargs.items())).count() > 0
 
 
 class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
@@ -400,7 +400,7 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
                 ipaddr=ipaddr,
                 user_agent=user_agent,
                 traceback=tb).put_async()
-            for t, s in scores.iteritems()
+            for t, s in scores.items()
         ]
         ndb.Future.wait_all(fs)
 
@@ -414,7 +414,8 @@ class ExpertiseRank(EncodableModel):  # pylint: disable=R0903,W0223
     region = ndb.model.StringProperty(indexed=True)
     candidate = ndb.model.KeyProperty(indexed=True, kind=TwitterAccount)
     rank = ndb.model.IntegerProperty(indexed=False)
-    rank_info = ndb.model.JsonProperty(indexed=False, compressed=True)  # e.g., methods, profile
+    rank_info = ndb.model.JsonProperty(indexed=False, compressed=True)
+    # e.g., methods, profile
 
     class ExpertNotExists(Http404):
         """ Exception when the expert queried does not exist"""
