@@ -72,13 +72,13 @@
         <div class="btn-toolbar btn-float-right">
           <div class="btn-group">
             {% for f in filters %}
-            <button type="button" class="btn btn-default btn-xs" onClick="profileviewer_ns.focusTopic('{{ f.name }}', '{{ f.level }}')" title="{{ f.description }}">
+            <button type="button" class="btn btn-default btn-xs" onClick="profileviewer.focusTopic('{{ f.name }}', '{{ f.level }}')" title="{{ f.description }}">
               <span class="glyphicon glyphicon-search"></span> {{ f.name }}
             </button>
             {% endfor %}
           </div>
           <div class="btn-group">
-            <button type="button" class="btn btn-default btn-xs" onClick="profileviewer_ns.unfocusAll()" title="Remove all filters currently applied." >
+            <button type="button" class="btn btn-default btn-xs" onClick="profileviewer.unfocusAll()" title="Remove all filters currently applied." >
               <span class="glyphicon glyphicon-repeat"></span> Reset
             </button>
           </div>
@@ -177,7 +177,7 @@
   <link rel="stylesheet" href="/static/profileviewer/css/dc.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <script type="text/javascript" charset="utf-8">
     (function () {
-      profileviewer_ns.initCharts("{{ candidate | safe }}");
+      profileviewer.initCharts("{{ candidate | safe }}");
       var in_nodes = [
         {% for t in topics %}
         "pv-judgements-{{ t.topic_id  }}",

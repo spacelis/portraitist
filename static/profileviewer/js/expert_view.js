@@ -1,10 +1,13 @@
+/* eslint-env node, amd */
 /* global dc */
 /* global $ */
 /* global d3 */
 /* global crossfilter */
 /* global GMaps */
 
-var profileviewer_ns = (function(){
+(function(){
+
+function _profileviewer(d3, crossfilter, dc, GMaps, $){
   var _fact; // crossfilter object holding data
   var _map;
   //var map_infowindow = new google.maps.InfoWindow({
@@ -13,15 +16,15 @@ var profileviewer_ns = (function(){
   var _data;
 
   var _REGIONS = {
-      'Chicago': {lat: [41.4986, 42.0232],
+      "Chicago": {lat: [41.4986, 42.0232],
                   lng: [-88.1586, -87.3573]},
-      'New York': {lat: [40.4110, 40.9429],
+      "New York": {lat: [40.4110, 40.9429],
                    lng: [-74.2918, -73.7097]},
-      'Los Angeles': {lat: [33.7463, 34.2302],
+      "Los Angeles": {lat: [33.7463, 34.2302],
                       lng: [-118.6368, -117.9053]},
-      'San Francisco': {lat: [37.7025, 37.8045],
+      "San Francisco": {lat: [37.7025, 37.8045],
                         lng: [-122.5349, -122.3546]}};
-  function update_map (poi_groups){
+  function _updateMap (poi_groups){
     var pois = poi_groups.top(30);
     _map.removeMarkers();
     for(var i in pois) {
@@ -30,11 +33,11 @@ var profileviewer_ns = (function(){
       _map.addMarker({
         lat: poi.lat,
         lng: poi.lng,
-        title: poi.name + ' (' + pois[i].value + ' check-ins)\n' + poi.category.name + ', ' + poi.category.zcategory,
+        title: poi.name + " (" + pois[i].value + " check-ins)\n" + poi.category.name + ", " + poi.category.zcategory,
         infoWindow: {
-          content: '<b>' + poi.name + '</b> (' + pois[i].value + ' check-ins)<br>' + poi.category.name + ', ' + poi.category.zcategory,
+          content: "<b>" + poi.name + "</b> (" + pois[i].value + " check-ins)<br>" + poi.category.name + ", " + poi.category.zcategory
         },
-        icon: '/static/profileviewer/images/map_icons/' + poi.category.id + '_black.png',
+        icon: "/static/profileviewer/images/map_icons/" + poi.category.id + "_black.png"
       });
     }
     _map.fitZoom();
@@ -47,10 +50,10 @@ var profileviewer_ns = (function(){
     _map = new GMaps({
       lat: 41.0,
       lng: -100.0,
-      div: 'map-canvas',
-      zoom: 3,
+      div: "map-canvas",
+      zoom: 3
     });
-    update_map(poi_groups);
+    _updateMap(poi_groups);
   }
 
   //var time_parser = d3.time.format.utc("%a %b %d %H:%M:%S +0000 %Y").parse;
@@ -84,7 +87,7 @@ var profileviewer_ns = (function(){
           return r;
         }
       }
-      return 'Other';
+      return "Other";
     });
 
     var checkins_by_week = by_week.group().reduceCount();
@@ -104,8 +107,8 @@ var profileviewer_ns = (function(){
       .innerRadius(w / 200 * 40)
       .dimension(by_zcate) // set dimension
       .group(checkins_by_zcate) // set group
-      .on("filtered", function(chart, filter){
-        update_map(checkins_by_poi);
+      .on("filtered", function(){
+        _updateMap(checkins_by_poi);
       })
       .title(function (obj){
         return obj.data.key + ":  " + obj.data.value + " check-in(s)";
@@ -123,8 +126,8 @@ var profileviewer_ns = (function(){
       .dimension(by_category) // set dimension
       .group(checkins_by_category) // set group
       .slicesCap(10)
-      .on("filtered", function(chart, filter){
-        update_map(checkins_by_poi);
+      .on("filtered", function(){
+        _updateMap(checkins_by_poi);
       })
       .title(function (obj){
         return obj.data.key + ":  " + obj.data.value + " check-in(s)";
@@ -142,8 +145,8 @@ var profileviewer_ns = (function(){
       .dimension(by_region) // set dimension
       .group(checkins_by_region) // set group
       .slicesCap(10)
-      .on("filtered", function(chart, filter){
-        update_map(checkins_by_poi);
+      .on("filtered", function(){
+        _updateMap(checkins_by_poi);
       })
       .title(function (obj){
         return obj.data.key + ":  " + obj.data.value + " check-in(s)";
@@ -181,10 +184,10 @@ var profileviewer_ns = (function(){
       .slicesCap(10)
       .on("filtered", function(chart, filter){
         if (chart.hasFilter(filter)){
-          update_map({top: function(x){ return [{key: filter}]; }});
+          _updateMap({top: function(){ return [{key: filter}]; }});
         }
         else{
-          update_map(checkins_by_poi);
+          _updateMap(checkins_by_poi);
         }
       })
       .renderTitle(true);
@@ -208,8 +211,8 @@ var profileviewer_ns = (function(){
       .renderVerticalGridLines(true)
       .brushOn(true)
       .title(function(d) { return "Value: " + d.value; })
-      .on("filtered", function(chart, filter){
-        update_map(checkins_by_poi);
+      .on("filtered", function(){
+        _updateMap(checkins_by_poi);
       })
       .renderTitle(true);
 
@@ -221,15 +224,16 @@ var profileviewer_ns = (function(){
       c: cate_chart,
       z: zcate_chart,
       r: region_chart,
+      t: timeline_chart
     };
   }
 
   function initCharts (hash_id) {
     d3.json(
-      '/api/data/checkins?candidate=' + hash_id,
+      "/api/data/checkins?candidate=" + hash_id,
       function(err, json){
         if (err){
-          alert("Fail to get data for " + hash_id);
+          throw "Fail to get data for " + hash_id;
         }
         else{
           _data = json;
@@ -244,14 +248,19 @@ var profileviewer_ns = (function(){
 
   function _focus(topic, chart){
     chart.filter(topic);
-    $(chart.anchor()).parent().parent().addClass('chart-container-focus');
+    $(chart.anchor()).parent().parent().addClass("chart-container-focus");
   }
 
+  function unfocusAll(){
+    $(".chart-container-focus").removeClass("chart-container-focus");
+    dc.filterAll();
+    dc.redrawAll();
+  }
 
   function focusTopic(topic, chartType){
     unfocusAll();
 
-    if(chartType === 'p'){
+    if(chartType === "p"){
       var p;
       for(var i in _allpois){
         if(topic === _allpois[i].key.valueOf()){
@@ -259,7 +268,7 @@ var profileviewer_ns = (function(){
           break;
         }
       }
-      _focus(topic, _chartTypeMap[chartType]);
+      _focus(p, _chartTypeMap[chartType]);
     }
     else{
       _focus(topic, _chartTypeMap[chartType]);
@@ -268,20 +277,20 @@ var profileviewer_ns = (function(){
     dc.redrawAll();
   }
 
-  function unfocusAll(){
-    $('.chart-container-focus').removeClass('chart-container-focus');
-    dc.filterAll();
-    dc.redrawAll();
-  }
-
-  function getChart(name){
-    return poi_chart;
-  }
-
   return {
     initCharts: initCharts,
     focusTopic: focusTopic,
-    unfocusAll: unfocusAll,
-    getChart: getChart,
+    unfocusAll: unfocusAll
   };
-})();
+}
+
+  // FOOTER
+  if(typeof define === "function" && define.amd) {
+    define(["d3", "dc", "crossfilter", "GMaps", "$"], _profileviewer);
+  } else if(typeof module === "object" && module.exports) {
+    module.exports = _profileviewer(d3, crossfilter, dc, GMaps, $);
+  } else {
+    this.profileviewer = _profileviewer(d3, crossfilter, dc, GMaps, $);
+  }
+}
+)();
