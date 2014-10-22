@@ -91,50 +91,60 @@
   <div class="panel-body">
     <div class="row">
       <div class="col-sm-3">
-        <div class="panel panel-info" title="This chart shows the number of check-ins at each top-level category of places.">
+        <div class="panel panel-info">
           <div class="panel-body">
             <div id="chart-zcate-pie" class="topic-chart"> </div>
           </div>
-          <div class="panel-footer chart-label"> Top-level Categories </div>
+          <div class="panel-footer chart-label" title="This chart shows the number of check-ins at each top-level category of places."> 
+            Top-level Categories 
+          </div>
         </div>
       </div>
       <div class="col-sm-3">
-        <div class="panel panel-info" title="This chart is similar to the one showing top-level category distribution except that it is for lower-level categories.">
+        <div class="panel panel-info">
           <div class="panel-body">
             <div id="chart-cate-pie" class="topic-chart"> </div>
           </div>
-          <div class="panel-footer chart-label"> Lower-level Categories </div>
+          <div class="panel-footer chart-label" title="This chart is similar to the one showing top-level category distribution except that it is for lower-level categories."> 
+            Lower-level Categories 
+          </div>
         </div>
       </div>
       <div class="col-sm-3">
-        <div class="panel panel-info" title="This chart shows the number of check-ins the candidate have made at each place.">
+        <div class="panel panel-info">
           <div class="panel-body">
             <div id="chart-poi-pie" class="topic-chart"> </div>
           </div>
-          <div class="panel-footer chart-label"> Locations </div>
+          <div class="panel-footer chart-label" title="This chart shows the number of check-ins the candidate have made at each place."> 
+            Locations 
+          </div>
         </div>
       </div>
       <div class="col-sm-3">
-        <div class="panel panel-info" title="This chart shows the number of check-ins that were made at each of 4 cities.">
+        <div class="panel panel-info">
           <div class="panel-body">
             <div id="chart-region-pie" class="topic-chart"> </div>
           </div>
-          <div class="panel-footer chart-label"> Regions </div>
+          <div class="panel-footer chart-label" title="This chart shows the number of check-ins that were made at each of 4 cities."> 
+            Regions 
+          </div>
         </div>
       </div>
     </div>
     <div class="row">
       <div class="col-sm-12">
-        <div class="panel panel-info" title="This chart shows the number of check-ins per week.">
-          <div class="panel-heading"> Check-ins per week (after filtering)</div>
+        <div class="panel panel-info">
+          <div class="panel-heading chart-label" title="This chart shows the number of check-ins per week."> 
+            Check-ins per week (after filtering)
+          </div>
           <div class="panel-body">
             <div id="chart-timeline"> </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="panel panel-info" title="The top 30 popular places from the candidate are marked on the map.">
-      <div class="panel-heading">
+    <div class="panel panel-info">
+      <div class="panel-heading chart-label" title="The top 30 popular places from the candidate are marked on the map.">
         Top 30 places (after filtering)
       </div>
       <div class="panel-body">
@@ -233,6 +243,7 @@
     .chart-label {
       cursor: help;
       text-align: center;
+      font-weight: bold;
     }
     .btn-float-right {
       float: right;
