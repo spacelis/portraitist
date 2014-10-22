@@ -200,7 +200,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
           return x;
         }
         else{
-          return obj.data.key;
+          return obj.data.key.valueOf();
         }
       })
       .title(function (obj){
