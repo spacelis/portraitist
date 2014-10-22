@@ -31,6 +31,13 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       "San Francisco": {lat: [37.7025, 37.8045],
                         lng: [-122.5349, -122.3546]}};
 
+  var _COLORPALETTE = d3.scale.ordinal().range(
+    [
+      0x1f77b4, 0xff7f0e, 0x2ca02c, 0xd62728, 0x9467bd, 0x8c564b, 0xe377c2, 0xbcbd22, 0x17becf, 
+      0xaec7e8, 0xffbb78, 0x98df8a, 0xff9896, 0xc5b0d5, 0xc49c94, 0xf7b6d2, 0xdbdb8d, 0x9edae5
+    ].map(function(value){return new d3.rgb(value >> 16, value >> 8 & 0xff, value & 0xff) + ""; })
+  )
+
   function _updateMap (poi_groups){
     var pois = poi_groups.top(30);
     _map.removeMarkers();
@@ -131,7 +138,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       .width(w) // (optional) define chart width, :default = 200
       .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
-      .colors(d3.scale.category20b())
+      .colors(_COLORPALETTE)
       .radius(w / 200 * 90) // define pie radius
       .innerRadius(w / 200 * 40)
       .dimension(by_zcate) // set dimension
@@ -150,7 +157,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       .width(w) // (optional) define chart width, :default = 200
       .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
-      .colors(d3.scale.category20b())
+      .colors(_COLORPALETTE)
       .radius(w / 200 * 90) // define pie radius
       .innerRadius(w / 200 * 40)
       .dimension(by_category) // set dimension
@@ -170,7 +177,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       .width(w) // (optional) define chart width, :default = 200
       .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
-      .colors(d3.scale.category20b())
+      .colors(_COLORPALETTE)
       .radius(w / 200 * 90) // define pie radius
       .innerRadius(w / 200 * 40)
       .dimension(by_region) // set dimension
@@ -189,7 +196,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       .width(w) // (optional) define chart width, :default = 200
       .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
-      .colors(d3.scale.category20b())
+      .colors(_COLORPALETTE)
       .radius(w / 200 * 90) // define pie radius
       .innerRadius(w / 200 * 40)
       .dimension(by_poi) // set dimension
