@@ -106,8 +106,16 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       _chart.othersGrouper(function(topRows){
         var allrows = _chart.group().all();
         var rows = allrows.filter(function(g){
-          return excludes.some(function(x){return x === g.key;}) && !topRows.some(function(x){return x.key === g.key});});
+          return excludes.some(function(x){
+            return x === g.key.valueOf();
+          }) && !topRows.some(function(x){
+            return x.key.valueOf() === g.key.valueOf()
+          });});
         rows.forEach(function(d){topRows.push(d)});
+        // Fixes D3 transitions on "Others" slice of pie
+        if(typeof(topRows[0].key) === "object"){
+          _chart.othersLabel({valueOf: function(){return "Others";}});
+        }
         oldGrouper(topRows);
       });
     }
@@ -115,7 +123,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
     function levelFilters(level){
       return _filter_set
         .filter(function(f){return f.level === level;})
-        .map(function(f){return f.name;});
+        .map(function(f){return f.pid || f.name;});
     }
 
     var w = $("#chart-zcate-pie").width();
@@ -288,7 +296,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
     if(chartType === "p"){
       var p;
       for(var i in _allpois){
-        if(topic === _allpois[i].key.valueOf()){
+        if(topic === _allpois[i].key.name){
           p = _allpois[i].key;
           break;
         }

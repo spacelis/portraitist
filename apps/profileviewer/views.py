@@ -155,8 +155,8 @@ class FilterSetMaker(object):
 
     """ The filter information for zoom in/out of data in web interface. """
 
-    Relation = namedtuple('Relation', ('poi', 'cate', 'zcate'))
-    Filter = namedtuple('Filter', ('name', 'level', 'description'))
+    Relation = namedtuple('Relation', ('poi', 'pid', 'cate', 'zcate'))
+    Filter = namedtuple('Filter', ('name', 'pid', 'level', 'description'))
 
     def __init__(self):
         self.relationship = []
@@ -208,11 +208,13 @@ class FilterSetMaker(object):
         if t.level == 'POI':
             self.relationship.append(FilterSetMaker.Relation(
                 t.name,
+                t.info['id'],
                 t.info['category']['name'],
                 t.info['category']['zero_category_name']))
         elif t.level == 'CATEGORY':
             self.relationship.append(FilterSetMaker.Relation(
                 '',
+                None,
                 (
                     t.info['name']
                     if t.info['name'] != t.info['zero_category_name']
@@ -228,6 +230,7 @@ class FilterSetMaker(object):
         rel = [
             FilterSetMaker.Filter(
                 poi,
+                g.next().pid,
                 'p',
                 FilterSetMaker.getPoiDescription(
                     set(reduce((_ + _),
@@ -241,6 +244,7 @@ class FilterSetMaker(object):
         ] + [
             FilterSetMaker.Filter(
                 cate,
+                None,
                 'c',
                 FilterSetMaker.getCateDescription(
                     set(reduce((_ + _),
@@ -254,6 +258,7 @@ class FilterSetMaker(object):
         ] + [
             FilterSetMaker.Filter(
                 zcate,
+                None,
                 'z',
                 FilterSetMaker.getZCateDescription(
                     set(reduce((_ + _),
@@ -265,6 +270,7 @@ class FilterSetMaker(object):
                                     key=_.zcate)
             if zcate
         ]
+        # print '\n'.join([str(r) for r in rel])
         return rel
 
 
@@ -295,7 +301,7 @@ def annotation_view(request, task_key):
         fsm.addTopic(g.next())
     fs = fsm.getFilterSet()
     fs_injson = json.dumps([
-        {'name': f.name, 'level': f.level} for f in fs
+        {'name': f.name, 'level': f.level, 'pid': f.pid} for f in fs
     ])
 
     return render_to_response(
