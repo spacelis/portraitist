@@ -11,6 +11,7 @@ Description:
 
 """
 
+import json
 from decorator import decorator
 from collections import namedtuple
 from itertools import groupby
@@ -150,7 +151,7 @@ def survey(request):
                                               'user': user.js_encode()})
 
 
-class DataViewFilterSet(object):
+class FilterSetMaker(object):
 
     """ The filter information for zoom in/out of data in web interface. """
 
@@ -205,12 +206,12 @@ class DataViewFilterSet(object):
     def addTopic(self, t):
         """ Add a new entity for filtering. """
         if t.level == 'POI':
-            self.relationship.append(DataViewFilterSet.Relation(
+            self.relationship.append(FilterSetMaker.Relation(
                 t.name,
                 t.info['category']['name'],
                 t.info['category']['zero_category_name']))
         elif t.level == 'CATEGORY':
-            self.relationship.append(DataViewFilterSet.Relation(
+            self.relationship.append(FilterSetMaker.Relation(
                 '',
                 (
                     t.info['name']
@@ -219,16 +220,16 @@ class DataViewFilterSet(object):
                 ),
                 t.info['zero_category_name']))
 
-    def make_filters(self):
+    def getFilterSet(self):
         """ Return a set of filters.
         :returns: @todo
 
         """
         rel = [
-            DataViewFilterSet.Filter(
+            FilterSetMaker.Filter(
                 poi,
                 'p',
-                DataViewFilterSet.getPoiDescription(
+                FilterSetMaker.getPoiDescription(
                     set(reduce((_ + _),
                                [[('in', p.cate), ('in', p.zcate)] for p in g],
                                []))
@@ -238,10 +239,10 @@ class DataViewFilterSet(object):
                                   key=_.poi)
             if poi
         ] + [
-            DataViewFilterSet.Filter(
+            FilterSetMaker.Filter(
                 cate,
                 'c',
-                DataViewFilterSet.getCateDescription(
+                FilterSetMaker.getCateDescription(
                     set(reduce((_ + _),
                                [[('has', p.poi), ('in', p.zcate)] for p in g],
                                []))
@@ -251,10 +252,10 @@ class DataViewFilterSet(object):
                                    key=_.cate)
             if cate
         ] + [
-            DataViewFilterSet.Filter(
+            FilterSetMaker.Filter(
                 zcate,
                 'z',
-                DataViewFilterSet.getZCateDescription(
+                FilterSetMaker.getZCateDescription(
                     set(reduce((_ + _),
                                [[('has', p.poi), ('has', p.cate)] for p in g],
                                []))
@@ -289,9 +290,13 @@ def annotation_view(request, task_key):
     } for t, r in zip(ts, rs)}
 
     # make filters out of topics
-    filterset = DataViewFilterSet()
+    fsm = FilterSetMaker()
     for x, g in groupby(ts, key=_.name):
-        filterset.addTopic(g.next())
+        fsm.addTopic(g.next())
+    fs = fsm.getFilterSet()
+    fs_injson = json.dumps([
+        {'name': f.name, 'level': f.level} for f in fs
+    ])
 
     return render_to_response(
         'expert_view.html',
@@ -300,8 +305,8 @@ def annotation_view(request, task_key):
             'topics': topics.values(),
             'candidate': task.candidate.urlsafe(),
             'task_key': task_key,
-            'filters': filterset.make_filters(),
-            'filters_json': filterset.make_filters(),
+            'filters': fs,
+            'filters_json': fs_injson,
             'topic_judgement': 'null'
         },
         context_instance=RequestContext(request))

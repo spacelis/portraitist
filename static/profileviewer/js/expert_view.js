@@ -1,6 +1,6 @@
 /* eslint-env node, amd */
 /* global dc */
-/* global $ */
+/* global jQuery */
 /* global d3 */
 /* global crossfilter */
 /* global GMaps */
@@ -15,6 +15,12 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
   //});
   var _data;
 
+  //var time_parser = d3.time.format.utc("%a %b %d %H:%M:%S +0000 %Y").parse;
+  var time_parser = function(d){return new Date(d);};
+  var _chartTypeMap;
+  var _allpois;
+  var _filter_set;
+
   var _REGIONS = {
       "Chicago": {lat: [41.4986, 42.0232],
                   lng: [-88.1586, -87.3573]},
@@ -24,6 +30,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
                       lng: [-118.6368, -117.9053]},
       "San Francisco": {lat: [37.7025, 37.8045],
                         lng: [-122.5349, -122.3546]}};
+
   function _updateMap (poi_groups){
     var pois = poi_groups.top(30);
     _map.removeMarkers();
@@ -56,10 +63,6 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
     _updateMap(poi_groups);
   }
 
-  //var time_parser = d3.time.format.utc("%a %b %d %H:%M:%S +0000 %Y").parse;
-  var time_parser = function(d){return new Date(d);};
-  var _chartTypeMap;
-  var _allpois;
 
   function render_charts (){
     _fact = crossfilter(_data);
@@ -97,6 +100,24 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
     var checkins_by_region = by_region.group().reduceCount();
     _allpois = checkins_by_poi.all();
 
+    function patchGrouper(_chart, excludes){
+      if(!excludes) {return;}
+      var oldGrouper = _chart.othersGrouper();
+      _chart.othersGrouper(function(topRows){
+        var allrows = _chart.group().all();
+        var rows = allrows.filter(function(g){
+          return excludes.some(function(x){return x === g.key;}) && !topRows.some(function(x){return x.key === g.key});});
+        rows.forEach(function(d){topRows.push(d)});
+        oldGrouper(topRows);
+      });
+    }
+
+    function levelFilters(level){
+      return _filter_set
+        .filter(function(f){return f.level === level;})
+        .map(function(f){return f.name;});
+    }
+
     var w = $("#chart-zcate-pie").width();
     var zcate_chart = dc.pieChart("#chart-zcate-pie")
       .width(w) // (optional) define chart width, :default = 200
@@ -114,6 +135,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
         return obj.data.key + ":  " + obj.data.value + " check-in(s)";
       })
       .renderTitle(true);
+    patchGrouper(zcate_chart, levelFilters("z"));
 
     w = $("#chart-cate-pie").width();
     var cate_chart = dc.pieChart("#chart-cate-pie")
@@ -133,6 +155,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
         return obj.data.key + ":  " + obj.data.value + " check-in(s)";
       })
       .renderTitle(true);
+    patchGrouper(cate_chart, levelFilters("c"));
 
     w = $("#chart-region-pie").width();
     var region_chart = dc.pieChart("#chart-region-pie")
@@ -191,6 +214,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
         }
       })
       .renderTitle(true);
+    patchGrouper(poi_chart, levelFilters("p"));
 
     w = $("#chart-timeline").width();
     var timeline_chart = dc.barChart("#chart-timeline")
@@ -228,7 +252,8 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
     };
   }
 
-  function initCharts (hash_id) {
+  function initCharts (hash_id, filter_set) {
+    _filter_set = filter_set;
     d3.json(
       "/api/data/checkins?candidate=" + hash_id,
       function(err, json){
@@ -286,11 +311,11 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
 
   // FOOTER
   if(typeof define === "function" && define.amd) {
-    define(["d3", "dc", "crossfilter", "GMaps", "$"], _profileviewer);
+    define(["d3", "dc", "crossfilter", "GMaps", "jQuery"], _profileviewer);
   } else if(typeof module === "object" && module.exports) {
-    module.exports = _profileviewer(d3, crossfilter, dc, GMaps, $);
+    module.exports = _profileviewer(d3, crossfilter, dc, GMaps, jQuery);
   } else {
-    this.profileviewer = _profileviewer(d3, crossfilter, dc, GMaps, $);
+    this.profileviewer = _profileviewer(d3, crossfilter, dc, GMaps, jQuery);
   }
 }
 )();
