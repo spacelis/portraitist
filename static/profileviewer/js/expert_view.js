@@ -131,7 +131,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       .width(w) // (optional) define chart width, :default = 200
       .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
-      .colors(d3.scale.category20())
+      .colors(d3.scale.category20b())
       .radius(w / 200 * 90) // define pie radius
       .innerRadius(w / 200 * 40)
       .dimension(by_zcate) // set dimension
@@ -150,7 +150,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       .width(w) // (optional) define chart width, :default = 200
       .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
-      .colors(d3.scale.category20())
+      .colors(d3.scale.category20b())
       .radius(w / 200 * 90) // define pie radius
       .innerRadius(w / 200 * 40)
       .dimension(by_category) // set dimension
@@ -170,7 +170,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       .width(w) // (optional) define chart width, :default = 200
       .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
-      .colors(d3.scale.category20())
+      .colors(d3.scale.category20b())
       .radius(w / 200 * 90) // define pie radius
       .innerRadius(w / 200 * 40)
       .dimension(by_region) // set dimension
@@ -189,7 +189,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       .width(w) // (optional) define chart width, :default = 200
       .height(w) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 350
-      .colors(d3.scale.category20())
+      .colors(d3.scale.category20b())
       .radius(w / 200 * 90) // define pie radius
       .innerRadius(w / 200 * 40)
       .dimension(by_poi) // set dimension
