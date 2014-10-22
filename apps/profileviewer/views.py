@@ -15,7 +15,7 @@ import json
 from decorator import decorator
 from collections import namedtuple
 from itertools import groupby
-from fn import _
+from fn import _ as X
 
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
@@ -233,13 +233,13 @@ class FilterSetMaker(object):
                 g.next().pid,
                 'p',
                 FilterSetMaker.getPoiDescription(
-                    set(reduce((_ + _),
+                    set(reduce((X + X),
                                [[('in', p.cate), ('in', p.zcate)] for p in g],
                                []))
                 )
             )
-            for poi, g in groupby(sorted(self.relationship, key=_.poi),
-                                  key=_.poi)
+            for poi, g in groupby(sorted(self.relationship, key=X.poi),
+                                  key=X.poi)
             if poi
         ] + [
             FilterSetMaker.Filter(
@@ -247,13 +247,13 @@ class FilterSetMaker(object):
                 None,
                 'c',
                 FilterSetMaker.getCateDescription(
-                    set(reduce((_ + _),
+                    set(reduce((X + X),
                                [[('has', p.poi), ('in', p.zcate)] for p in g],
                                []))
                 )
             )
-            for cate, g in groupby(sorted(self.relationship, key=_.cate),
-                                   key=_.cate)
+            for cate, g in groupby(sorted(self.relationship, key=X.cate),
+                                   key=X.cate)
             if cate
         ] + [
             FilterSetMaker.Filter(
@@ -261,13 +261,13 @@ class FilterSetMaker(object):
                 None,
                 'z',
                 FilterSetMaker.getZCateDescription(
-                    set(reduce((_ + _),
+                    set(reduce((X + X),
                                [[('has', p.poi), ('has', p.cate)] for p in g],
                                []))
                 )
             )
-            for zcate, g in groupby(sorted(self.relationship, key=_.zcate),
-                                    key=_.zcate)
+            for zcate, g in groupby(sorted(self.relationship, key=X.zcate),
+                                    key=X.zcate)
             if zcate
         ]
         # print '\n'.join([str(r) for r in rel])
@@ -297,7 +297,7 @@ def annotation_view(request, task_key):
 
     # make filters out of topics
     fsm = FilterSetMaker()
-    for x, g in groupby(ts, key=_.name):
+    for _, g in groupby(ts, key=X.name):
         fsm.addTopic(g.next())
     fs = fsm.getFilterSet()
     fs_injson = json.dumps([
