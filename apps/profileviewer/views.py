@@ -46,7 +46,7 @@ def vdebug(x):
     :returns: @todo
 
     """
-    print x
+    print(x)
     return x
 
 
@@ -102,7 +102,6 @@ def pagerouter(request):
 
     """
     user = get_user(request)
-    print user
 
     if request_property(request, 'action') == 'taskpackage':
         return taskpackage(request)
@@ -235,7 +234,8 @@ class DataViewFilterSet(object):
                                []))
                 )
             )
-            for poi, g in groupby(sorted(self.relationship, key=_.poi), key=_.poi)
+            for poi, g in groupby(sorted(self.relationship, key=_.poi),
+                                  key=_.poi)
             if poi
         ] + [
             DataViewFilterSet.Filter(
@@ -247,7 +247,8 @@ class DataViewFilterSet(object):
                                []))
                 )
             )
-            for cate, g in groupby(sorted(self.relationship, key=_.cate), key=_.cate)
+            for cate, g in groupby(sorted(self.relationship, key=_.cate),
+                                   key=_.cate)
             if cate
         ] + [
             DataViewFilterSet.Filter(
@@ -259,7 +260,8 @@ class DataViewFilterSet(object):
                                []))
                 )
             )
-            for zcate, g in groupby(sorted(self.relationship, key=_.zcate), key=_.zcate)
+            for zcate, g in groupby(sorted(self.relationship, key=_.zcate),
+                                    key=_.zcate)
             if zcate
         ]
         return rel
@@ -282,7 +284,8 @@ def annotation_view(request, task_key):
         'topic_type': t.level,
         'topic': t.name,
         'region': r.region,
-        'example': '\n'.join(['Example Inquiry:'] + [q + '?' for q in t.example.split('? ')])[:-1],
+        'example': '\n'.join(['Example Inquiry:'] +
+                             [q + '?' for q in t.example.split('? ')])[:-1],
     } for t, r in zip(ts, rs)}
 
     # make filters out of topics
@@ -298,6 +301,7 @@ def annotation_view(request, task_key):
             'candidate': task.candidate.urlsafe(),
             'task_key': task_key,
             'filters': filterset.make_filters(),
+            'filters_json': filterset.make_filters(),
             'topic_judgement': 'null'
         },
         context_instance=RequestContext(request))
