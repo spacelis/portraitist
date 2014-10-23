@@ -3,7 +3,7 @@
 <div id="judgement-panel" class="panel panel-default" style="z-index: 100">
   <div class="panel-heading">
     <b>
-      How likely will you get sufficient information from this user about
+      How likely is it for you to get sufficient information about the following places by inquerying the user depicted in the diagrams?
     </b>
   </div>
   <div class="panel-body">
@@ -23,7 +23,7 @@
                 {% else %}
                   <b>{{ t.topic }}</b>
                 {% endif %}
-              </abbr> in <b>{{ t.region }}</b>?
+              </abbr> in <b>{{ t.region }}</b>
             </div>
             <div class="col-sm-4" align="right">
               <div class="btn-group btn-group-xs btn-judgement" data-toggle="buttons">
@@ -135,7 +135,7 @@
       <div class="col-sm-12">
         <div class="panel panel-info">
           <div class="panel-heading chart-label" title="This chart shows the number of check-ins per week."> 
-            Check-ins per week (after filtering)
+            Check-ins per week (filtered)
           </div>
           <div class="panel-body">
             <div id="chart-timeline"> </div>
@@ -145,7 +145,7 @@
     </div>
     <div class="panel panel-info">
       <div class="panel-heading chart-label" title="The top 30 popular places from the candidate are marked on the map.">
-        Top 30 places (after filtering)
+        Top 30 places (filtered)
       </div>
       <div class="panel-body">
         <div id="map-canvas" style="height: 500px;width: 100%"></div>
