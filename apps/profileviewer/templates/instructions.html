@@ -1,6 +1,5 @@
 {% extends "frame.html" %}
 {% block extra_scripts %}
-  <script src="/static/profileviewer/js/unslider.js" type="text/javascript" charset="utf-8"></script>
   <script src="/static/profileviewer/js/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function(){
@@ -13,16 +12,6 @@
           $.cookie('no_instruction', 1);
         }
       });
-      $('#slides').unslider({
-        delay: 30000000,
-        keys: true,
-        dots: true,
-        fluid: false
-      });
-      slidey = $('#slides')
-      $('.click-to-next').click(function(e){
-        slidey.data('unslider').next();
-      })
       $('.click-to-skip').click(function(e){
         window.open('/pagerouter', '_self');
         return false;
@@ -32,131 +21,157 @@
 
   <link rel="stylesheet" href="/static/profileviewer/css/instruction.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <style type="text/css" media="screen">
-    #slides {
-      position: relative;
-      overflow: auto;
-    }
-    #slides li {
-      list-style: none;
-    }
-    .slide-instruction {
-      background: #888888;
-      color: white;
-      width: 830px;
-      height: 600px;
-      margin-bottom: 0;
-    }
-    .container div.slide-image-instruction {
-      background: #444444;
+    .page-wrapper {
+      max-width: 60em;
+      margin-left: auto;
+      margin-right: auto;
       padding-left: 10px;
       padding-right: 0;
       padding-top: 10px;
       padding-bottom: 0;
-    }
-    .click-to-next{
-
+      font-size: 12pt;
     }
     abbr[title] {
       font-weight: bold;
       border-bottom: 2px dotted white;
     }
+    .description {
+      float:none;
+      display:inline-block;
+      vertical-align:middle;
+      margin-right:-4px;
+    }
+    div.row {
+      padding-top: 80px;
+    }
+    img { 
+      -webkit-border-radius: 5px;
+      -moz-border-radius: 5px;
+      border-radius: 5px;
+    }
   </style>
 {% endblock %}
 {% block content %}
-<div id="slides" class="row banner">
-  <ul>
-    <li>
-            <div class="col-lg-12 click-to-next" align="center">
-              <div class="jumbotron slide-instruction">
-                <div class="container" style="text-align: left">
-                  <H1> Welcome </H1>
-                  <p>
-                    We are conducting a research on finding experts among active users of location sharing services
-                    (e.g. Foursquare). We are pleased that you come and help us evaluate the candidate by looking into
-                    their profiles and assign a score to their <abbr title="Knowledge about places">expertise</abbr>
-                    on a scale from 1 (<abbr title="Unlikely to be an expert">Novice</abbr>) to 5 (<abbr title="Likely to be an expert">Expert</abbr>).
-                  </p>
-                  <p>
-                    (Click to continue.)
-                  </p>
-                  <p align="right">
-                    <a class="btn btn-primary btn-lg click-to-skip">
-                      Skip <span class='glyphicon glyphicon-forward'></span>
-                    </a>
-                  </p>
-                </div>
-              </div>
-            </div>
-    </li>
-    {# <li> #}
-    {#         <div class="col-lg-12 click-to-next" align="center"> #}
-    {#           <div class="jumbotron slide-instruction"> #}
-    {#             <div class="container" style="text-align: left"> #}
-    {#               <H1> How </H1> #}
-    {#               <p> #}
-    {#                 Since each user has a huge volume of #}
-    {#                 <abbr title="A message or tweet with location information">check-ins</abbr>, #}
-    {#                 it is not possible to view them all. Thus we provide a comprehensive panel for #}
-    {#                 judges to investigate users' expertise. By applying filters, you can zoom into #}
-    {#                 a particular part of facet (e.g., categories, places) to study their check-in #}
-    {#                 behavior. For example, you may apply a fiter to see only the check-ins at bars. #}
-    {#               </p> #}
-    {#               <p> #}
-    {#                 (Click to continue.) #}
-    {#               </p> #}
-    {#             </div> #}
-    {#           </div> #}
-    {#         </div> #}
-    {# </li> #}
-    <li>
-            <div class="col-lg-12 click-to-next" align="center">
-              <div class="jumbotron slide-instruction slide-image-instruction">
-                <img src="/static/profileviewer/images/inst_2_1.png" alt="">
-              </div>
-            </div>
-    </li>
-    <li>
-            <div class="col-lg-12 click-to-next" align="center">
-              <div class="jumbotron slide-instruction slide-image-instruction">
-                <img src="/static/profileviewer/images/inst_2_2.png" alt="">
-              </div>
-            </div>
-    </li>
-    <li>
-            <div class="col-lg-12 click-to-next" align="center">
-              <div class="jumbotron slide-instruction slide-image-instruction">
-                <img src="/static/profileviewer/images/inst_3.png" alt="">
-              </div>
-            </div>
-    </li>
-    <li>
-            <div class="col-lg-12 click-to-next" align="center">
-              <div class="jumbotron slide-instruction slide-image-instruction">
-                <img src="/static/profileviewer/images/inst_1.png" alt="">
-              </div>
-            </div>
-    </li>
-    <li>
-            <div class="col-lg-12" align="center">
-              <div class="jumbotron slide-instruction">
-                <div class="container" align="left">
-                  <H1> Let's start </H1>
-                  <p>
-                    Last Tip: Hover the mouse cursor over panels for more information.
-                  </p>
-                  <p align="right">
-                    <a class="btn btn-primary btn-lg click-to-skip">
-                      Start <span class='glyphicon glyphicon-play'></span>
-                    </a>
-                  </p>
-                  <p style="float: right; text-aligin: right; font-size: 14px">
-                    <input id="no_inst" type="checkbox"> Do not show these instructions
-                    next time.
-                  </p>
-                </div>
-              </div>
-            </div>
-    </li>
-  </ul>
+<div class="page-wrapper">
+  <div class="row">
+    <div class="col-lg-4"></div>
+    <div class="col-lg-8">
+      <div class="" style="text-align: left">
+        <H1> Welcome </H1>
+        <p>
+          We are conducting a research on finding experts who can give suggestions about where to go.
+          It is great that you come and help us evaluate the candidates.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="col-lg-4 description" align="right">
+        <img src="/static/profileviewer/images/instructions/piechart-9cate.png" alt="">
+      </div>
+      <div class="col-lg-8 description">
+        <p>
+        Basically you will look into the profile of the user depicted in a bunch of charts.
+        These charts show the distribution of places the user have been to.
+        For example the chart on the right shows that the user have been to a lot of food places.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 ">
+      <div class="col-lg-4 description" align="right">
+        <img src="/static/profileviewer/images/instructions/timeline2.png" alt="">
+      </div>
+      <div class="col-lg-8 description">
+        <p>
+          Besides the distribution over various kinds of locations, we also provide a bar chart displaying a candidate visiting timeline.
+          It shows how many times user visited a place in a week.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 description">
+      <div class="col-lg-4 description" align="right">
+        <img src="/static/profileviewer/images/instructions/map2.png" alt="">
+      </div>
+      <div class="col-lg-8 description">
+        <p>
+        The map can render a candidate's foot print around different places.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div align="center">
+      <img src="/static/profileviewer/images/instructions/piecharts.png" alt="">
+    </div>
+    <div class="text-center">
+        <p>
+          The interface also features interactivity.
+        </p>
+        <p>
+          When you click on a pie slice or drag mouse over the timeline, other charts will update to show only the select range of visits.
+        </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 ">
+      <div class="col-lg-4 description" align="right">
+        <img src="/static/profileviewer/images/instructions/filter-buttons.png" alt="">
+      </div>
+      <div class="col-lg-8 description">
+        <p>
+          To help you quickly get to interesting parts of users' visits, a list of recommended filters are provided.
+          Clicking on these buttons will make the interface focus on the selected visits, just like clicking on a pie slice.
+          <b>Do not</b> fully rely on the recommended filters, they may not be sufficient for a judgement.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 ">
+      <div class="col-lg-4 description" align="right">
+        <img src="/static/profileviewer/images/instructions/filter-reset.png" alt="">
+      </div>
+      <div class="col-lg-8 description">
+        <p>
+          If you having trouble of restoring the states of charts, you may always click the reset button.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 ">
+      <div class="col-lg-4 description" align="right">
+        <img src="/static/profileviewer/images/instructions/score-scale.png" alt="">
+      </div>
+      <div class="col-lg-8 description">
+        <p>
+          After your investigation, you assign a score to their <abbr title="Knowledge about places">expertise</abbr> 
+          on a scale from 1 (<abbr title="Unlikely to be an expert">Novice</abbr>) to 5 (<abbr title="Likely to be an expert">Expert</abbr>).
+          We sincerely appreciate your work!
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12" style="margin-bottom: 50px">
+      <p align="center">
+        <b>Pro tip: When you are confused about a chart or a term, try hover your mouse over it.</b>
+      </p>
+      <p align="right">
+        <input id="no_inst" type="checkbox"> Do not show these instructions
+        next time.
+      </p>
+      <p align="center">
+        <a class="btn btn-primary btn-lg click-to-skip">
+          Start <span class='glyphicon glyphicon-play'></span>
+        </a>
+      </p>
+    </div>
+  </div>
 </div>
 {% endblock %}
