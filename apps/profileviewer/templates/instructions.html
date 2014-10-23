@@ -20,16 +20,12 @@
   </script>
 
   <link rel="stylesheet" href="/static/profileviewer/css/instruction.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <link href='http://fonts.googleapis.com/css?family=Lato:300,900|Poiret+One' rel='stylesheet' type='text/css'>
   <style type="text/css" media="screen">
     .page-wrapper {
-      max-width: 60em;
-      margin-left: auto;
-      margin-right: auto;
-      padding-left: 10px;
-      padding-right: 0;
-      padding-top: 10px;
-      padding-bottom: 0;
-      font-size: 12pt;
+      font-size: 18px;
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
     }
     abbr[title] {
       font-weight: bold;
@@ -41,137 +37,168 @@
       vertical-align:middle;
       margin-right:-4px;
     }
+    div.section {
+      margin-top: 80px;
+    }
     div.row {
-      padding-top: 80px;
+      max-width: 60em;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    div.heading {
+      background: #888888;
+      color: white;
     }
     img { 
       -webkit-border-radius: 5px;
       -moz-border-radius: 5px;
       border-radius: 5px;
     }
+    b {
+      font-weight: 900;
+    }
   </style>
 {% endblock %}
 {% block content %}
 <div class="page-wrapper">
-  <div class="row">
-    <div class="col-lg-4"></div>
-    <div class="col-lg-8">
-      <div class="" style="text-align: left">
-        <H1> Welcome </H1>
-        <p>
-          We are conducting a research on finding experts who can give suggestions about where to go.
-          It is great that you come and help us evaluate the candidates.
-        </p>
+  <div class="section heading">
+    <div class="row">
+      <div class="col-lg-4"></div>
+      <div class="col-lg-8" style="font-family: 'Poiret One', cursive; font-size: 72px;">
+        Welcome
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-4"></div>
+      <div class="col-lg-8">
+        <div class="" style="text-align: left">
+          <p>
+            We are conducting a research on finding experts who can give suggestions about where to go.
+            Basically you will look into a candidate's profile depicted in a bunch of charts and determine to what extent the candidate knows about the given places.
+          </p>
+        </div>
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col-lg-12">
-      <div class="col-lg-4 description" align="right">
-        <img src="/static/profileviewer/images/instructions/piechart-9cate.png" alt="">
-      </div>
-      <div class="col-lg-8 description">
-        <p>
-        Basically you will look into a candidate's profile depicted in a bunch of charts.
-        These charts show the distribution of places the candidate has been to.
-        For example, the chart on the left shows that the candidate has been to a lot of places about food.
-        </p>
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-lg-12 ">
-      <div class="col-lg-4 description" align="right">
-        <img src="/static/profileviewer/images/instructions/timeline2.png" alt="">
-      </div>
-      <div class="col-lg-8 description">
-        <p>
-          Besides the distribution over places, we also provide a bar chart displaying a candidate's visiting timeline.
-          It shows the number of times the candidate visited different places per week.
-        </p>
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="col-lg-4 description" align="right">
+          <img src="/static/profileviewer/images/instructions/piechart-9cate.png" alt="">
+        </div>
+        <div class="col-lg-8 description">
+          <p>
+            Four pie charts show what kinds of places a candidate has been to and the distribution of frequency.
+          </p>
+        </div>
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col-lg-12 description">
-      <div class="col-lg-4 description" align="right">
-        <img src="/static/profileviewer/images/instructions/map2.png" alt="">
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12 ">
+        <div class="col-lg-4 description" align="right">
+          <img src="/static/profileviewer/images/instructions/timeline2.png" alt="">
+        </div>
+        <div class="col-lg-8 description">
+          <p>
+            A bar chart displays a candidate's visiting timeline: the number of times the candidate visited different places per week.
+          </p>
+        </div>
       </div>
-      <div class="col-lg-8 description">
-        <p>
-          In addition, a map is provided to show a candidate's foot print around different places.
-        </p>
+  </div>
+  </div>
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12 description">
+        <div class="col-lg-4 description" align="right">
+          <img src="/static/profileviewer/images/instructions/map2.png" alt="">
+        </div>
+        <div class="col-lg-8 description">
+          <p>
+            A map shows a candidate's foot print around different places.
+          </p>
+        </div>
       </div>
     </div>
   </div>
-  <div class="row">
-    <div align="center">
-      <img src="/static/profileviewer/images/instructions/piecharts.png" alt="">
-    </div>
-    <div class="text-center">
-        <p>
-          All the charts are interactive:
-        </p>
-        <p>
-          When you click on a slice of pie charts or drag a segment with the mouse on the timeline, the other charts will be updated to show only the selected range of visits.
-        </p>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-lg-12 ">
-      <div class="col-lg-4 description" align="right">
-        <img src="/static/profileviewer/images/instructions/filter-buttons.png" alt="">
-      </div>
-      <div class="col-lg-8 description">
-        <p>
-          To help you quickly get to interesting parts of the candidates' visits, a list of recommended filters are provided.
-          Clicking on these buttons will make the interface focus on the selected visits, similar to clicking on a pie slice.
-          <b>Do not</b> fully rely on the recommended filters, they may not be sufficient for a judgement.
-        </p>
+  <div class="heading section">
+    <div class="row">
+      {# <div align="center"> #}
+      {#   <img src="/static/profileviewer/images/instructions/piecharts.png" alt=""> #}
+      {# </div> #}
+      <div class="text-center">
+          <div class="col-lg-12" align="center" style="font-family: 'Poiret One', cursive; font-size: 64px">
+            All the charts are interactive
+          </div>
+          <p>
+            When you <b>click on a pie slice</b> or <b>drag a segment over the timeline</b>, the other charts will be updated to show the selected range of visits.
+          </p>
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col-lg-12 ">
-      <div class="col-lg-4 description" align="right">
-        <img src="/static/profileviewer/images/instructions/filter-reset.png" alt="">
-      </div>
-      <div class="col-lg-8 description">
-        <p>
-          If you have trouble restoring the states of charts, you may always click the reset button.
-        </p>
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-lg-12 ">
-      <div class="col-lg-4 description" align="right">
-        <img src="/static/profileviewer/images/instructions/score-scale.png" alt="">
-      </div>
-      <div class="col-lg-8 description">
-        <p>
-          After your investigation, you may have a feeling about how likely is it for you to get sufficient information about the places from a candidate.
-          Based on this, you assign a score to their <abbr title="Knowledge about places">expertise</abbr> 
-          on a scale from 1 (<abbr title="Do not know much about the places.">Novice</abbr>) to 5 (<abbr title="Know a lot about the places.">Expert</abbr>).
-          We sincerely appreciate your work!
-        </p>
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12 ">
+        <div class="col-lg-4 description" align="right">
+          <img src="/static/profileviewer/images/instructions/filter-buttons.png" alt="">
+        </div>
+        <div class="col-lg-8 description">
+          <p>
+            A list of recommended <b>filters</b> are provided.
+            Clicking on these buttons will make the charts focus on the selected visits, similar to clicking on a pie slice.
+            <b>DO NOT</b> fully rely on the recommended filters, they may not be sufficient for a judgement.
+          </p>
+        </div>
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col-lg-12" style="margin-bottom: 50px">
-      <p align="center">
-        <b>Pro tip: If you are confused about a chart or a term, try hover your mouse over it.</b>
-      </p>
-      <p align="right">
-        <input id="no_inst" type="checkbox"> Do not show these instructions
-        next time.
-      </p>
-      <p align="center">
-        <a class="btn btn-primary btn-lg click-to-skip">
-          Start <span class='glyphicon glyphicon-play'></span>
-        </a>
-      </p>
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12 ">
+        <div class="col-lg-4 description" align="right">
+          <img src="/static/profileviewer/images/instructions/filter-reset.png" alt="">
+        </div>
+        <div class="col-lg-8 description">
+          <p>
+            Having trouble restoring the states of the charts? Click the <b>reset</b> button.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="row">
+      <div class="col-lg-12 ">
+        <div class="col-lg-4 description" align="right">
+          <img src="/static/profileviewer/images/instructions/score-scale.png" alt="">
+        </div>
+        <div class="col-lg-8 description">
+          <p>
+            After investigation, you may have a feeling about how likely is it, from the candidate, to get sufficient information about the given places.
+            Based on this, please assign a score to their <abbr title="Knowledge about places">expertise</abbr> 
+            on a scale from 1 (<abbr title="Do not know much about the places.">Novice</abbr>) to 5 (<abbr title="Know a lot about the places.">Expert</abbr>).
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section heading">
+    <div class="row">
+      <div class="col-lg-12" style="margin-bottom: 50px; padding-top: 20px">
+        <p align="center">
+          <b>Pro tip: If you are confused about a chart or a term, hover your mouse over it.</b>
+        </p>
+        <p align="center">
+          <a class="btn btn-primary btn-lg click-to-skip">
+            Start <span class='glyphicon glyphicon-play'></span>
+          </a>
+        </p>
+        <p align="right">
+          <input id="no_inst" type="checkbox"> Do not show these instructions
+          next time.
+        </p>
+      </div>
     </div>
   </div>
 </div>
