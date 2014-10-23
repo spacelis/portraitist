@@ -23,6 +23,7 @@ from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
+from django.conf import settings
 
 from apps.profileviewer.models import _k
 from apps.profileviewer.models import TaskPackage
@@ -283,7 +284,7 @@ def annotation_view(request, task_key):
 
     """
     user = get_user(request)
-    if user.task_package is None:
+    if user.task_package is None and not settings.DEBUG:
         raise Http404
     task = _k(task_key, 'AnnotationTask').get()
     rs = [r.get() for r in task.rankings]
