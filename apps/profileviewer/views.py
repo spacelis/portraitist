@@ -283,6 +283,8 @@ def annotation_view(request, task_key):
 
     """
     user = get_user(request)
+    if user.task_package is None:
+        raise Http404
     task = _k(task_key, 'AnnotationTask').get()
     rs = [r.get() for r in task.rankings]
     ts = [r.topic.get() for r in rs]
