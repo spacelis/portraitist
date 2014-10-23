@@ -257,12 +257,15 @@
     ko.applyBindings(userdata);
   </script>
   <script>
-    $(window).scroll(function(){
-      if($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
-        $(window).unbind('scroll');
-        $('#not-until-bottom').css('display', 'none');
+    (function(){
+      var arrow_handler = function(){
+        if($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
+          $(window).unbind('scroll', arrow_handler);
+          $('#not-until-bottom').css('display', 'none');
+        }
       }
-    })
+      $(window).scroll(arrow_handler);
+    })();
   </script>
   <style>
     div.gradient-out {

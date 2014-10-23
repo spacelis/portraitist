@@ -1,16 +1,19 @@
 {% extends "frame.html" %}
 {% block extra_scripts %}
 <script type="text/javascript" charset="utf-8">
-  $(window).scroll(function(){
-    if($(window).scrollTop() + $(window).height() > $(document).height() - 500) {
-      $(window).unbind('scroll');
-      $('#btn-continue').click(function(){
-        $.cookie('no_survey', 1, {expires: 30});
-        window.open('/pagerouter', '_self');
-      });
-      $('#btn-continue').css('display', 'inline');
+  (function(){
+    var button_handler = function(){
+      if($(window).scrollTop() + $(window).height() > $(document).height() - 500) {
+        $(window).unbind('scroll', button_handler);
+        $('#btn-continue').click(function(){
+          $.cookie('no_survey', 1, {expires: 30});
+          window.open('/pagerouter', '_self');
+        });
+        $('#btn-continue').css('display', 'inline');
+      }
     }
-  })
+    $(window).scroll(button_handler);
+  })();
 </script>
 {% endblock %}
 {% block content %}
