@@ -18,7 +18,7 @@
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
           <span class="icon-bar"></span>
         </button>
-        <a href="/home" class="navbar-brand">GeoExpert Judgment System</a>
+        <a href="/instructions" class="navbar-brand">GeoExpert Judgment System</a>
       </div>
       <div class="collapse navbar-collapse navbar-ex1-collapse">
         <ul class="nav navbar-nav navbar-right">
@@ -30,7 +30,7 @@
               <li><a href="#" data-bind="click: f_logout">Logout</a></li>
             </ul>
           </li>
-          <li id="id-tag-signup-login" data-bind="visible: is_known() == false"><a onClick="$('#id-dialog-signup-login').modal('show');">Sign Up / Login</a></li>
+          {# <li id="id-tag-signup-login" data-bind="visible: is_known() == false"><a onClick="$('#id-dialog-signup-login').modal('show');">Sign Up / Login</a></li> #}
           <li><a>Finished <span class="badge" data-bind="text: finished_tasks"></span></a></li>
         </ul>
       </div>
