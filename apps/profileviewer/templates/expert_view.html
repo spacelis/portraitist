@@ -1,169 +1,171 @@
 {% extends "frame.html" %}
 {% block content %}
-<div id="judgement-panel" class="panel panel-default" style="z-index: 100">
-  <div class="panel-heading">
-    <b>
-      How likely is it for you to get sufficient information about the following places by inquerying the user depicted in the diagrams?
-    </b>
-  </div>
-  <div class="panel-body">
-    <form id="pv-judgement-form" action="/submit_annotation" method="post" accept-charset="utf-8" role="form">
-      <input type="hidden" name="pv-task-key" value="{{ task_key }}" id="judgement-candidate">
-      {% csrf_token %}
-      <div class="list-group">
-        {% for t in topics %}
-        <div class="list-group-item">
-          <div class="row">
-            <div class="col-sm-8">
-              <abbr title="{{ t.example }}">
-                {% if t.topic_type == 'POI' %}
-                <a href="http://www.google.com/search?q={{ t.topic }}+{{ t.region }}" target="_blank">
-                  <b>{{ t.topic }}</b>
-                </a>
-                {% else %}
-                  <b>{{ t.topic }}</b>
-                {% endif %}
-              </abbr> in <b>{{ t.region }}</b>
-            </div>
-            <div class="col-sm-4" align="right">
-              <div class="btn-group btn-group-xs btn-judgement" data-toggle="buttons">
-                <label class="btn btn-default btn-radio" for="" title="He/she probably knows nothing">
-                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="1"> <div class="has-explanation">&nbsp;1&nbsp;</div>
-                </label>
-                <label class="btn btn-default btn-radio" for="">
-                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="2"> <div class="has-no-explanation">&nbsp;2&nbsp;</div>
-                </label>
-                <label class="btn btn-default btn-radio" for="">
-                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="3"> <div class="has-no-explanation">&nbsp;3&nbsp;</div>
-                </label>
-                <label class="btn btn-default btn-radio" for="">
-                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="4"> <div class="has-no-explanation">&nbsp;4&nbsp;</div>
-                </label>
-                <label class="btn btn-default btn-radio" for="" title="He/she definately knows a lot.">
-                  <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="5"> <div class="has-explanation">&nbsp;5&nbsp;</div>
-                </label>
-                {# <label class="btn btn-default btn-radio" for="" title="Not sure what the topic is really about."> #}
-                {#   <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="-1"> <div class="has-explanation">Not Sure</div> #}
-                {# </label> #}
+<div class='container'>
+  <div id="judgement-panel" class="panel panel-default" style="z-index: 100">
+    <div class="panel-heading">
+      <b>
+        How likely is it for you to get sufficient information about the following places by inquerying the user depicted in the diagrams?
+      </b>
+    </div>
+    <div class="panel-body">
+      <form id="pv-judgement-form" action="/submit_annotation" method="post" accept-charset="utf-8" role="form">
+        <input type="hidden" name="pv-task-key" value="{{ task_key }}" id="judgement-candidate">
+        {% csrf_token %}
+        <div class="list-group">
+          {% for t in topics %}
+          <div class="list-group-item">
+            <div class="row">
+              <div class="col-sm-8">
+                <abbr title="{{ t.example }}">
+                  {% if t.topic_type == 'POI' %}
+                  <a href="http://www.google.com/search?q={{ t.topic }}+{{ t.region }}" target="_blank">
+                    <b>{{ t.topic }}</b>
+                  </a>
+                  {% else %}
+                    <b>{{ t.topic }}</b>
+                  {% endif %}
+                </abbr> in <b>{{ t.region }}</b>
+              </div>
+              <div class="col-sm-4" align="right">
+                <div class="btn-group btn-group-xs btn-judgement" data-toggle="buttons">
+                  <label class="btn btn-default btn-radio" for="" title="He/she probably knows nothing">
+                    <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="1"> <div class="has-explanation">&nbsp;1&nbsp;</div>
+                  </label>
+                  <label class="btn btn-default btn-radio" for="">
+                    <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="2"> <div class="has-no-explanation">&nbsp;2&nbsp;</div>
+                  </label>
+                  <label class="btn btn-default btn-radio" for="">
+                    <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="3"> <div class="has-no-explanation">&nbsp;3&nbsp;</div>
+                  </label>
+                  <label class="btn btn-default btn-radio" for="">
+                    <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="4"> <div class="has-no-explanation">&nbsp;4&nbsp;</div>
+                  </label>
+                  <label class="btn btn-default btn-radio" for="" title="He/she definately knows a lot.">
+                    <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="5"> <div class="has-explanation">&nbsp;5&nbsp;</div>
+                  </label>
+                  {# <label class="btn btn-default btn-radio" for="" title="Not sure what the topic is really about."> #}
+                  {#   <input type="radio" name="pv-judgements-{{ t.topic_id  }}" value="-1"> <div class="has-explanation">Not Sure</div> #}
+                  {# </label> #}
+                </div>
+              </div>
+              <div class="col-sm-1" align="right">
               </div>
             </div>
-            <div class="col-sm-1" align="right">
+          </div>
+          {% endfor %}
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <button type="submit" class="btn btn-primary btn-xs btn-float-right">Submit &amp; Continue</button>
+            <input type="hidden" name="pv-annotation-traceback" value="" id="id-input-traceback">
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <div class="row">
+        <div class="col-sm-12">
+          <b>Statistics</b>
+          <div class="btn-toolbar btn-float-right">
+            <div class="btn-group">
+              {% for f in filters %}
+              <button type="button" class="btn btn-default btn-xs" onClick="profileviewer.focusTopic('{{ f.name }}', '{{ f.level }}')" title="{{ f.description }}">
+                <span class="glyphicon glyphicon-search"></span> {{ f.name }}
+              </button>
+              {% endfor %}
+            </div>
+            <div class="btn-group">
+              <button type="button" class="btn btn-default btn-xs" onClick="profileviewer.unfocusAll()" title="Remove all filters currently applied." >
+                <span class="glyphicon glyphicon-repeat"></span> Reset
+              </button>
             </div>
           </div>
         </div>
-        {% endfor %}
+        <div class="col-sm-1">
+        </div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-sm-3">
+          <div class="panel panel-info">
+            <div class="panel-body">
+              <div id="chart-zcate-pie" class="topic-chart"> </div>
+            </div>
+            <div class="panel-footer chart-label" title="This chart shows the number of check-ins at each top-level category of places."> 
+              Top-level Categories 
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="panel panel-info">
+            <div class="panel-body">
+              <div id="chart-cate-pie" class="topic-chart"> </div>
+            </div>
+            <div class="panel-footer chart-label" title="This chart is similar to the one showing top-level category distribution except that it is for lower-level categories."> 
+              Lower-level Categories 
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="panel panel-info">
+            <div class="panel-body">
+              <div id="chart-poi-pie" class="topic-chart"> </div>
+            </div>
+            <div class="panel-footer chart-label" title="This chart shows the number of check-ins the candidate have made at each place."> 
+              Locations 
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="panel panel-info">
+            <div class="panel-body">
+              <div id="chart-region-pie" class="topic-chart"> </div>
+            </div>
+            <div class="panel-footer chart-label" title="This chart shows the number of check-ins that were made at each of 4 cities."> 
+              Regions 
+            </div>
+          </div>
+        </div>
       </div>
       <div class="row">
         <div class="col-sm-12">
-          <button type="submit" class="btn btn-primary btn-xs btn-float-right">Submit &amp; Continue</button>
-          <input type="hidden" name="pv-annotation-traceback" value="" id="id-input-traceback">
-        </div>
-      </div>
-    </form>
-
-  </div>
-</div>
-
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <div class="row">
-      <div class="col-sm-12">
-        <b>Statistics</b>
-        <div class="btn-toolbar btn-float-right">
-          <div class="btn-group">
-            {% for f in filters %}
-            <button type="button" class="btn btn-default btn-xs" onClick="profileviewer.focusTopic('{{ f.name }}', '{{ f.level }}')" title="{{ f.description }}">
-              <span class="glyphicon glyphicon-search"></span> {{ f.name }}
-            </button>
-            {% endfor %}
-          </div>
-          <div class="btn-group">
-            <button type="button" class="btn btn-default btn-xs" onClick="profileviewer.unfocusAll()" title="Remove all filters currently applied." >
-              <span class="glyphicon glyphicon-repeat"></span> Reset
-            </button>
+          <div class="panel panel-info">
+            <div class="panel-heading chart-label" title="This chart shows the number of check-ins per week."> 
+              Check-ins per week (filtered)
+            </div>
+            <div class="panel-body">
+              <div id="chart-timeline"> </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-sm-1">
+      <div class="panel panel-info">
+        <div class="panel-heading chart-label" title="The top 30 popular places from the candidate are marked on the map.">
+          Top 30 places (filtered)
+        </div>
+        <div class="panel-body">
+          <div id="map-canvas" style="height: 500px;width: 100%"></div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="panel-body">
-    <div class="row">
-      <div class="col-sm-3">
-        <div class="panel panel-info">
-          <div class="panel-body">
-            <div id="chart-zcate-pie" class="topic-chart"> </div>
-          </div>
-          <div class="panel-footer chart-label" title="This chart shows the number of check-ins at each top-level category of places."> 
-            Top-level Categories 
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-3">
-        <div class="panel panel-info">
-          <div class="panel-body">
-            <div id="chart-cate-pie" class="topic-chart"> </div>
-          </div>
-          <div class="panel-footer chart-label" title="This chart is similar to the one showing top-level category distribution except that it is for lower-level categories."> 
-            Lower-level Categories 
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-3">
-        <div class="panel panel-info">
-          <div class="panel-body">
-            <div id="chart-poi-pie" class="topic-chart"> </div>
-          </div>
-          <div class="panel-footer chart-label" title="This chart shows the number of check-ins the candidate have made at each place."> 
-            Locations 
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-3">
-        <div class="panel panel-info">
-          <div class="panel-body">
-            <div id="chart-region-pie" class="topic-chart"> </div>
-          </div>
-          <div class="panel-footer chart-label" title="This chart shows the number of check-ins that were made at each of 4 cities."> 
-            Regions 
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-sm-12">
-        <div class="panel panel-info">
-          <div class="panel-heading chart-label" title="This chart shows the number of check-ins per week."> 
-            Check-ins per week (filtered)
-          </div>
-          <div class="panel-body">
-            <div id="chart-timeline"> </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="panel panel-info">
-      <div class="panel-heading chart-label" title="The top 30 popular places from the candidate are marked on the map.">
-        Top 30 places (filtered)
-      </div>
-      <div class="panel-body">
-        <div id="map-canvas" style="height: 500px;width: 100%"></div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Modal Dialogue for spam checking -->
-<div class="modal fade" id="id-dialog-verify-judgement" tabindex="-1" role="dialog" aria-labelledby="user_sign_up" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3 class="modal-title">Submitting by mistakes?</h3>
-      </div>
-      <div class="modal-body">
-        You seems clicking submit button by mistake, please verify your judgement.
+  <!-- Modal Dialogue for spam checking -->
+  <div class="modal fade" id="id-dialog-verify-judgement" tabindex="-1" role="dialog" aria-labelledby="user_sign_up" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h3 class="modal-title">Submitting by mistakes?</h3>
+        </div>
+        <div class="modal-body">
+          You seems clicking submit button by mistake, please verify your judgement.
+        </div>
       </div>
     </div>
   </div>
