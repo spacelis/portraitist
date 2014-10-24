@@ -297,7 +297,6 @@ def partition(it, size=10, margin=None):
             groupby(izip(cycle([0] * size + [1] * size), it),
                     key=L[0])))
     for nex, cur in zip_longest(drop(1, grps), grps):
-        print nex, cur
         if nex and len(cur + nex) <= margin:
             yield cur + nex
             return
