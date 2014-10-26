@@ -371,21 +371,25 @@ def assign_taskpackage(_user):
 
 
 @_REG.api_endpoint(secured=True, tojson=False)
-def export_tpkeys():
+def export_taskpackages(_request):
     """ Return a list of URLs to those taskpackages.
     :returns: @todo
 
     """
     import csv
+    url_template = lambda tpid: _request.build_absolute_uri(
+        '/pagerouter?action=taskpackage&tpid=%s' % (tpid,))
     response = HttpResponse(content_type='text/plain')
     response['Content-Disposition'] = \
         'inline; filename="tpkeys-confirmation.csv"'
 
-    csvwr = csv.DictWriter(response, ['tpkey', 'confirm_code'])
+    csvwr = csv.DictWriter(response, ['tpkey', 'confirm_code', 'package_size'])
     csvwr.writeheader()
     for tp in TaskPackage.query().fetch():
-        csvwr.writerow({'tpkey': tp.key.urlsafe(),
-                        'confirm_code': tp.confirm_code})
+        csvwr.writerow({'tpkey': url_template(tp.key.urlsafe()),
+                        'confirm_code': tp.confirm_code,
+                        'package_size': str(len(tp.tasks)),
+                        })
     return response
 
 
