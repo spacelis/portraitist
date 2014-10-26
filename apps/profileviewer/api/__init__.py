@@ -94,7 +94,8 @@ class APIRegistry(object):
             if endpoint.disabled:
                 raise KeyError()
             kwargs = {k: request.REQUEST.get(k, None)
-                      for k in endpoint.spec.args if k not in ReservedArgName}
+                      for k in endpoint.spec.args
+                      if k not in APIRegistry.ReservedArguments}
             for k in APIRegistry.ReservedArguments.keys():
                 if k in endpoint.spec.args:
                     kwargs[k] = APIRegistry.ReservedArguments[k](request)
