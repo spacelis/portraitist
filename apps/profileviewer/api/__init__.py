@@ -35,6 +35,11 @@ class APIRegistry(object):
                                                'disabled',
                                                'tojson'])
 
+    ReservedArguments = {
+        '_user': lambda req: get_user(req),
+        '_request': lambda req: req
+    }
+
     def __init__(self):
         self._ENDPOINTS = dict()
 
@@ -89,9 +94,10 @@ class APIRegistry(object):
             if endpoint.disabled:
                 raise KeyError()
             kwargs = {k: request.REQUEST.get(k, None)
-                      for k in endpoint.spec.args if k != '_user'}
-            if '_user' in endpoint.spec.args:
-                kwargs['_user'] = get_user(request)
+                      for k in endpoint.spec.args if k not in ReservedArgName}
+            for k in APIRegistry.ReservedArguments.keys():
+                if k in endpoint.spec.args:
+                    kwargs[k] = APIRegistry.ReservedArguments[k](request)
         except KeyError:
             raise Http404
         ret = endpoint.func(**kwargs)  # pylint: disable=W0142
