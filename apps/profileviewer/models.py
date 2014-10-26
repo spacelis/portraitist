@@ -579,14 +579,18 @@ class User(EncodableModel):
         :returns: @todo
 
         """
+        tp = None if self.task_package is None \
+            else self.task_package.get()
+        progress = 0 if tp is None else len(tp.tasks) - len(tp.progress)
         return {
             'name': self.name,
             'session_token': self.session_token,
             'finished_tasks': self.finished_tasks,
             'show_instructions': self.show_instructions,
             'is_known': self.is_known is True,
-            'task_package': '' if self.task_package is None
-            else self.task_package.urlsafe(),
+            'tpid': '' if tp is None else tp.key.urlsafe(),
+            'package_progress': progress,
+            'package_size': 0 if tp is None else len(tp.tasks)
         }
 
     @staticmethod
