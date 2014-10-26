@@ -2,19 +2,9 @@
 {% block extra_scripts %}
 <script type="text/javascript" charset="utf-8">
   (function(){
-    // var button_handler = function(){
-      // if($(window).scrollTop() + $(window).height() > $(document).height() - 500) {
-        // $(window).unbind('scroll', button_handler);
-        $('#btn-continue').click(function(){
-          $.cookie('no_survey', 1, {expires: 30});
-          window.open('/pagerouter', '_self');
-        });
-        $('#btn-continue').css('display', 'inline');
-      // }
-    // }
-    // $(window).scroll(button_handler);
-    $("#embedded-google-form").height($(window).height() - 120);
-    $("#not-until-bottom").hide();
+    $('#embedded-google-form').load(function() {
+          this.style.height = this.contentWindow.document.body.offsetHeight + 'px';
+    });
   })();
 </script>
 {% endblock %}
@@ -29,9 +19,10 @@
   <div class="row">
     <div class="col-12-sm">
       <iframe id="embedded-google-form" 
-              src="https://docs.google.com/forms/d/1DlXfIaDHsks5_0gkx26brQP_QbFblmRDNvgisvNI0XQ/viewform?entry.2071166996={{ judge_id }}&entry.1102912225={{ judge_email }}&embedded=true" 
+              {# src="https://docs.google.com/forms/d/1DlXfIaDHsks5_0gkx26brQP_QbFblmRDNvgisvNI0XQ/viewform?entry.2071166996={{ judge_id }}&entry.1102912225={{ judge_email }}&embedded=true"  #}
+              src="survey_form" 
               width="100%" 
-              height="5000px" 
+              height="100%" 
               frameborder="0" 
               marginheight="0" 
               marginwidth="0">Loading...</iframe>

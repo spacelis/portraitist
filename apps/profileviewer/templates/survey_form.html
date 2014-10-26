@@ -1,0 +1,542 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"><html><head><link rel="shortcut icon" href="https://ssl.gstatic.com/docs/spreadsheets/forms/favicon_jfk2.png" type="image/x-icon">
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=10; chrome=1;">
+<meta name="fragment" content="!">
+<meta name="viewport" content="width=device-width">
+<base target="_blank">
+<link rel="stylesheet" type="text/css" href="">
+
+<link href='https://docs.google.com/static/forms/client/css/587995168-formview_embedded_ltr.css' type='text/css' rel='stylesheet'>
+<style type="text/css">
+body.ss-base-body {
+  background-color: #ababab;
+  font-family: sans-serif,sans-serif;
+}
+div.ss-form-container {
+  padding: 15px;
+  background-color: #f7f7f7;
+  border-color: #4a4a4a;
+  border-style: solid;
+  border-width: 1px;
+}
+h1.ss-form-title {
+  background-color: #5e5e5e;
+  padding: 15px;
+  margin: -15px -15px 15px;
+  color: #ebebeb;
+  text-align: left;
+}
+div.errorbox-bad {
+  background-color: #e8dfdf;
+}
+h2.ss-section-title {
+  background-color: transparent;
+}
+div.ss-submit div.ss-form-entry {
+  background: none;
+  border: none;
+}
+
+</style>
+
+
+
+<style type="text/css">
+      
+    </style>
+<script type="text/javascript">
+      /**
+ * @license
+ *! H5F
+ * https://github.com/ryanseddon/H5F/
+ * Copyright (c) Ryan Seddon | Licensed MIT
+ */
+var form_submitted = false;
+(function(e,t){"function"==typeof define&&define.amd?define(t):e.H5F=t()})(this,function(){var e,t,a,i,n,r,s,l,u,o,c,d,v,f,p,m,h,g,b,y,w,C,N,A,E,$,k=document,x=k.createElement("input"),q=/^[a-zA-Z0-9.!#$%&'*+-\/=?\^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,M=/[a-z][\-\.+a-z]*:\/\//i,L=/^(input|select|textarea)$/i;return r=function(e,t){var a=!e.nodeType||!1,i={validClass:"valid",invalidClass:"error",requiredClass:"required",placeholderClass:"placeholder"};if("object"==typeof t)for(var r in i)t[r]===void 0&&(t[r]=i[r]);if(n=t||i,a)for(var l=0,u=e.length;u>l;l++)s(e[l]);else s(e)},s=function(a){var i,n=a.elements,r=n.length,s=!!a.attributes.novalidate;if(b(a,"invalid",u,!0),b(a,"blur",u,!0),b(a,"input",u,!0),b(a,"keyup",u,!0),b(a,"focus",u,!0),b(a,"change",u,!0),b(a,"click",o,!0),b(a,"submit",function(i){e=!0,t||s||a.checkValidity()||w(i)},!1),!v())for(a.checkValidity=function(){return c(a)};r--;)i=!!n[r].attributes.required,"fieldset"!==n[r].nodeName.toLowerCase()&&l(n[r])},l=function(e){var t=e,a=g(t),n={type:t.getAttribute("type"),pattern:t.getAttribute("pattern"),placeholder:t.getAttribute("placeholder")},r=/^(email|url)$/i,s=/^(input|keyup)$/i,l=r.test(n.type)?n.type:n.pattern?n.pattern:!1,u=f(t,l),o=m(t,"step"),v=m(t,"min"),h=m(t,"max"),b=!(""===t.validationMessage||void 0===t.validationMessage);t.checkValidity=function(){return c.call(this,t)},t.setCustomValidity=function(e){d.call(t,e)},t.validity={valueMissing:a,patternMismatch:u,rangeUnderflow:v,rangeOverflow:h,stepMismatch:o,customError:b,valid:!(a||u||o||v||h||b)},n.placeholder&&!s.test(i)&&p(t)},u=function(e){var t=C(e)||e,a=/^(input|keyup|focusin|focus|change)$/i,r=/^(submit|image|button|reset)$/i,s=/^(checkbox|radio)$/i,o=!0;!L.test(t.nodeName)||r.test(t.type)||r.test(t.nodeName)||(i=e.type,v()||l(t),t.validity.valid&&(""!==t.value||s.test(t.type))||t.value!==t.getAttribute("placeholder")&&t.validity.valid?(A(t,[n.invalidClass,n.requiredClass]),N(t,n.validClass)):a.test(i)?t.validity.valueMissing&&A(t,[n.requiredClass,n.invalidClass,n.validClass]):t.validity.valueMissing?(A(t,[n.invalidClass,n.validClass]),N(t,n.requiredClass)):t.validity.valid||(A(t,[n.validClass,n.requiredClass]),N(t,n.invalidClass)),"input"===i&&o&&(y(t.form,"keyup",u,!0),o=!1))},c=function(t){var a,i,n,r,s=!1;if("form"===t.nodeName.toLowerCase()){a=t.elements;for(var l=0,o=a.length;o>l;l++)i=a[l],n=!!i.attributes.required,r=!!i.attributes.pattern,"fieldset"!==i.nodeName.toLowerCase()&&(n||r&&n)&&(u(i),i.validity.valid||s||(e&&i.focus(),s=!0));return!s}return u(t),t.validity.valid},d=function(e){var t=this;t.validationMessage=e},o=function(e){var a=C(e);a.attributes.formnovalidate&&"submit"===a.type&&(t=!0)},v=function(){return E(x,"validity")&&E(x,"checkValidity")},f=function(e,t){if("email"===t)return!q.test(e.value);if("url"===t)return!M.test(e.value);if(t){var i=e.getAttribute("placeholder"),n=e.value;return a=RegExp("^(?:"+t+")$"),n===i?!1:""===n?!1:!a.test(e.value)}return!1},p=function(e){var t={placeholder:e.getAttribute("placeholder")},a=/^(focus|focusin|submit)$/i,r=/^(input|textarea)$/i,s=/^password$/i,l=!!("placeholder"in x);l||!r.test(e.nodeName)||s.test(e.type)||(""!==e.value||a.test(i)?e.value===t.placeholder&&a.test(i)&&(e.value="",A(e,n.placeholderClass)):(e.value=t.placeholder,b(e.form,"submit",function(){i="submit",p(e)},!0),N(e,n.placeholderClass)))},m=function(e,t){var a=parseInt(e.getAttribute("min"),10)||0,i=parseInt(e.getAttribute("max"),10)||!1,n=parseInt(e.getAttribute("step"),10)||1,r=parseInt(e.value,10),s=(r-a)%n;return g(e)||isNaN(r)?"number"===e.getAttribute("type")?!0:!1:"step"===t?e.getAttribute("step")?0!==s:!1:"min"===t?e.getAttribute("min")?a>r:!1:"max"===t?e.getAttribute("max")?r>i:!1:void 0},h=function(e){var t=!!e.attributes.required;return t?g(e):!1},g=function(e){var t=e.getAttribute("placeholder"),a=/^(checkbox|radio)$/i,i=!!e.attributes.required;return!(!i||""!==e.value&&e.value!==t&&(!a.test(e.type)||$(e)))},b=function(e,t,a,i){E(window,"addEventListener")?e.addEventListener(t,a,i):E(window,"attachEvent")&&window.event!==void 0&&("blur"===t?t="focusout":"focus"===t&&(t="focusin"),e.attachEvent("on"+t,a))},y=function(e,t,a,i){E(window,"removeEventListener")?e.removeEventListener(t,a,i):E(window,"detachEvent")&&window.event!==void 0&&e.detachEvent("on"+t,a)},w=function(e){e=e||window.event,e.stopPropagation&&e.preventDefault?(e.stopPropagation(),e.preventDefault()):(e.cancelBubble=!0,e.returnValue=!1)},C=function(e){return e=e||window.event,e.target||e.srcElement},N=function(e,t){var a;e.className?(a=RegExp("(^|\\s)"+t+"(\\s|$)"),a.test(e.className)||(e.className+=" "+t)):e.className=t},A=function(e,t){var a,i,n="object"==typeof t?t.length:1,r=n;if(e.className)if(e.className===t)e.className="";else for(;n--;)a=RegExp("(^|\\s)"+(r>1?t[n]:t)+"(\\s|$)"),i=e.className.match(a),i&&3===i.length&&(e.className=e.className.replace(a,i[1]&&i[2]?" ":""))},E=function(e,t){var a=typeof e[t],i=RegExp("^function|object$","i");return!!(i.test(a)&&e[t]||"unknown"===a)},$=function(e){for(var t=document.getElementsByName(e.name),a=0;t.length>a;a++)if(t[a].checked)return!0;return!1},{setup:r}});
+
+    </script>
+</head>
+<body class="ss-base-body" dir="ltr">
+
+
+
+<div class="ss-form-container"><div class="ss-header-image-container"><div class="ss-header-image-image"><div class="ss-header-image-sizer"></div></div></div>
+<div class="ss-top-of-page"><div class="ss-form-heading"><h1 class="ss-form-title" dir="ltr">Survey for Geo-expertise Perception</h1>
+<div class="ss-form-desc ss-no-ignore-whitespace" dir="ltr">Thank you for taking this survey as part of the experiment. It aims at improving scientific understanding of user behavior on online social networks.<p>The survey is composed of three parts. The first part asks for basic demographic information to ensure unbiased results. The second part is about the perception of online social networks (such as Twitter, Facebook). Your answer will help us understand the needs of geo-expertise (knowledge about shops, bars, restaurants, etc. in cities). The third part is for understanding annotators&#39; preference over the criteria on different aspects.<p>Please fill in the survey honestly. Your provided information will not be released in any form that would reveal your identity to third parties.</p></p></div>
+
+<div class="ss-required-asterisk" aria-hidden="true">* Required</div></div></div>
+<iframe name="pv-hidden-iframe-for-survey-submit" id="pv-hidden-iframe-for-survey-submit" style="display:none" onload="javascript: if (form_submitted) window.top.location='/pagerouter';"></iframe>
+<div class="ss-form"><form action="https://docs.google.com/forms/d/1DlXfIaDHsks5_0gkx26brQP_QbFblmRDNvgisvNI0XQ/formResponse?embedded=true" method="POST" id="ss-form" target="pv-hidden-iframe-for-survey-submit" onsubmit="javascript: form_submitted=true;"><ol role="list" class="ss-question-list" style="padding-left: 0">
+<div class="errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item  ss-section-header"><div class="ss-form-entry">
+<h2 class="ss-section-title">General information</h2>
+<div class="ss-section-description ss-no-ignore-whitespace"></div>
+</div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item  ss-text"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_2071166996"><div class="ss-q-title">Internal reference number
+</div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">This field is automatically filled by our system. Please do not change it</div></label>
+<input type="text" name="entry.2071166996" value="" class="ss-q-short" id="entry_2071166996" dir="auto" aria-label="Internal reference number This field is automatically filled by our system. Please do not change it " title="">
+<div class="error-message" id="645091903_errorMessage"></div>
+<div class="required-message">This is a required question</div>
+</div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item  ss-text"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_1102912225"><div class="ss-q-title">Your Email
+</div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">In case we need to contact you regarding this experiment.</div></label>
+<input type="text" name="entry.1102912225" value="" class="ss-q-short" id="entry_1102912225" dir="auto" aria-label="Your Email In case we need to contact you regarding this experiment. Please enter a valid email address" pattern="^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$" title="Please enter a valid email address">
+<div class="error-message" id="1266385428_errorMessage">Please enter a valid email address</div>
+<div class="required-message">This is a required question</div>
+</div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-radio"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_1666383304"><div class="ss-q-title">Your Age
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+
+<ul class="ss-choices" role="radiogroup" aria-label="Your Age  "><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.23754099" value="A. &lt;18" id="group_23754099_1" role="radio" class="ss-q-radio" aria-label="A. &lt;18" required="" aria-required="true"></span>
+<span class="ss-choice-label">A. &lt;18</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.23754099" value="B. 18-28" id="group_23754099_2" role="radio" class="ss-q-radio" aria-label="B. 18-28" required="" aria-required="true"></span>
+<span class="ss-choice-label">B. 18-28</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.23754099" value="C. 29-38" id="group_23754099_3" role="radio" class="ss-q-radio" aria-label="C. 29-38" required="" aria-required="true"></span>
+<span class="ss-choice-label">C. 29-38</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.23754099" value="D. 39-48" id="group_23754099_4" role="radio" class="ss-q-radio" aria-label="D. 39-48" required="" aria-required="true"></span>
+<span class="ss-choice-label">D. 39-48</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.23754099" value="E. &gt;48" id="group_23754099_5" role="radio" class="ss-q-radio" aria-label="E. &gt;48" required="" aria-required="true"></span>
+<span class="ss-choice-label">E. &gt;48</span>
+</label></li></ul>
+<div class="error-message" id="1666383304_errorMessage"></div>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-radio"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_486471999"><div class="ss-q-title">Gender
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+
+<ul class="ss-choices" role="radiogroup" aria-label="Gender  "><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.752495870" value="A. Male" id="group_752495870_1" role="radio" class="ss-q-radio" aria-label="A. Male" required="" aria-required="true"></span>
+<span class="ss-choice-label">A. Male</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.752495870" value="B. Female" id="group_752495870_2" role="radio" class="ss-q-radio" aria-label="B. Female" required="" aria-required="true"></span>
+<span class="ss-choice-label">B. Female</span>
+</label></li></ul>
+<div class="error-message" id="486471999_errorMessage"></div>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-text"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_535878052"><div class="ss-q-title">Country of Residence
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+<input type="text" name="entry.535878052" value="" class="ss-q-short" id="entry_535878052" dir="auto" aria-label="Country of Residence  " aria-required="true" required="" title="">
+<div class="error-message" id="2102148389_errorMessage"></div>
+<div class="required-message">This is a required question</div>
+</div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-text"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_33087821"><div class="ss-q-title">City of Residence
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">In the format of CITY, State</div></label>
+<input type="text" name="entry.33087821" value="" class="ss-q-short" id="entry_33087821" dir="auto" aria-label="City of Residence In the format of CITY, State " aria-required="true" required="" title="">
+<div class="error-message" id="1890936779_errorMessage"></div>
+<div class="required-message">This is a required question</div>
+</div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-select"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_704907216"><div class="ss-q-title">Occupation
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+<select name="entry.704907216" id="entry_704907216" aria-label="Occupation  " aria-required="true" required=""><option value=""></option>
+<option value="A. Management">A. Management</option> <option value="B. Business and Financial Operations">B. Business and Financial Operations</option> <option value="C. Computer and Mathematical">C. Computer and Mathematical</option> <option value="D. Architecture and Engineering">D. Architecture and Engineering</option> <option value="E. Life, Physical, and Social Science">E. Life, Physical, and Social Science</option> <option value="F. Community and Social Service">F. Community and Social Service</option> <option value="G. Legal">G. Legal</option> <option value="H. Education, Training, and Library">H. Education, Training, and Library</option> <option value="I. Arts, Design, Entertainment, Sports, and Media">I. Arts, Design, Entertainment, Sports, and Media</option> <option value="J. Healthcare Practitioners and Technical">J. Healthcare Practitioners and Technical</option> <option value="K. Healthcare Support">K. Healthcare Support</option> <option value="L. Protective Service">L. Protective Service</option> <option value="M. Food Preparation and Serving Related">M. Food Preparation and Serving Related</option> <option value="N. Building and Grounds Cleaning and Maintenance">N. Building and Grounds Cleaning and Maintenance</option> <option value="O. Personal Care and Service">O. Personal Care and Service</option> <option value="P. Sales and Related">P. Sales and Related</option> <option value="Q. Office and Administrative Support">Q. Office and Administrative Support</option> <option value="R. Farming, Fishing, and Forestry">R. Farming, Fishing, and Forestry</option> <option value="S. Construction and Extraction">S. Construction and Extraction</option> <option value="T. Installation, Maintenance, and Repair">T. Installation, Maintenance, and Repair</option> <option value="U. Production">U. Production</option> <option value="V. Transportation and Material Moving">V. Transportation and Material Moving</option></select>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-checkbox"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_1479677513"><div class="ss-q-title">Which social networks do you use regularly?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">Please use commas to separate entries in the field &quot;other&quot;.</div></label>
+
+<ul class="ss-choices ss-choices-required" role="group" aria-label="Which social networks do you use regularly? Please use commas to separate entries in the field &quot;other&quot;. "><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="A. Twitter" id="group_897752890_1" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">A. Twitter</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="B. Facebook" id="group_897752890_2" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">B. Facebook</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="C. LinkedIn" id="group_897752890_3" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">C. LinkedIn</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="D. Foursquare" id="group_897752890_4" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">D. Foursquare</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="E. Google Plus" id="group_897752890_5" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">E. Google Plus</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="F. Gowalla" id="group_897752890_6" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">F. Gowalla</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="G. Path" id="group_897752890_7" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">G. Path</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.897752890" value="__other_option__" id="group_897752890_8" role="checkbox" class="ss-q-checkbox ss-q-other-toggle" aria-required="true"></span>
+<span class="ss-choice-label">Other:</span></label>
+<span class="ss-q-other-container goog-inline-block"><input type="text" name="entry.897752890.other_option_response" value="" class="ss-q-other" id="entry_897752890_other_option_response" dir="auto" aria-label="Other"></span>
+</li></ul>
+<div class="error-message" id="1479677513_errorMessage"></div>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-radio"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_2106448516"><div class="ss-q-title">How often do you check your friends&#39; status on social networks?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">Choose the one closest to your situation.</div></label>
+
+<ul class="ss-choices" role="radiogroup" aria-label="How often do you check your friends&#39; status on social networks? Choose the one closest to your situation. "><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1405513899" value="A. Several times a day" id="group_1405513899_1" role="radio" class="ss-q-radio" aria-label="A. Several times a day" required="" aria-required="true"></span>
+<span class="ss-choice-label">A. Several times a day</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1405513899" value="B. Once a day" id="group_1405513899_2" role="radio" class="ss-q-radio" aria-label="B. Once a day" required="" aria-required="true"></span>
+<span class="ss-choice-label">B. Once a day</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1405513899" value="C. Once the other day" id="group_1405513899_3" role="radio" class="ss-q-radio" aria-label="C. Once the other day" required="" aria-required="true"></span>
+<span class="ss-choice-label">C. Once the other day</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1405513899" value="D. Once per week" id="group_1405513899_4" role="radio" class="ss-q-radio" aria-label="D. Once per week" required="" aria-required="true"></span>
+<span class="ss-choice-label">D. Once per week</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1405513899" value="E. Once per month" id="group_1405513899_5" role="radio" class="ss-q-radio" aria-label="E. Once per month" required="" aria-required="true"></span>
+<span class="ss-choice-label">E. Once per month</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1405513899" value="F. I seldom use online social networks" id="group_1405513899_6" role="radio" class="ss-q-radio" aria-label="F. I seldom use online social networks" required="" aria-required="true"></span>
+<span class="ss-choice-label">F. I seldom use online social networks</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1405513899" value="__other_option__" id="group_1405513899_7" role="radio" class="ss-q-radio ss-q-other-toggle" required="" aria-required="true"></span>
+<span class="ss-choice-label">Other:</span></label>
+<span class="ss-q-other-container goog-inline-block"><input type="text" name="entry.1405513899.other_option_response" value="" class="ss-q-other" id="entry_1405513899_other_option_response" dir="auto" aria-label="Other"></span>
+</li></ul>
+<div class="error-message" id="2106448516_errorMessage"></div>
+<div class="required-message">This is a required question</div></div></div></div> <div class="errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item  ss-section-header"><div class="ss-form-entry">
+<h2 class="ss-section-title">Experience of looking for places</h2>
+<div class="ss-section-description ss-no-ignore-whitespace">Your experience of looking for places for various occasions will help scientists learn how such tasks are usually accomplished.</div>
+</div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-radio"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_905480152"><div class="ss-q-title">How often do you share information about a location online?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+
+<ul class="ss-choices" role="radiogroup" aria-label="How often do you share information about a location online?  "><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.16477797" value="A. Not at all. (I normally do not use that feature.)" id="group_16477797_1" role="radio" class="ss-q-radio" aria-label="A. Not at all. (I normally do not use that feature.)" required="" aria-required="true"></span>
+<span class="ss-choice-label">A. Not at all. (I normally do not use that feature.)</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.16477797" value="B. Once in a while. (E.g. for special events like birthday, etc.)" id="group_16477797_2" role="radio" class="ss-q-radio" aria-label="B. Once in a while. (E.g. for special events like birthday, etc.)" required="" aria-required="true"></span>
+<span class="ss-choice-label">B. Once in a while. (E.g. for special events like birthday, etc.)</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.16477797" value="C. Regularly. (E.g. as a routine)" id="group_16477797_3" role="radio" class="ss-q-radio" aria-label="C. Regularly. (E.g. as a routine)" required="" aria-required="true"></span>
+<span class="ss-choice-label">C. Regularly. (E.g. as a routine)</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.16477797" value="D. Frequently (I love to share information about places I visited)" id="group_16477797_4" role="radio" class="ss-q-radio" aria-label="D. Frequently (I love to share information about places I visited)" required="" aria-required="true"></span>
+<span class="ss-choice-label">D. Frequently (I love to share information about places I visited)</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.16477797" value="__other_option__" id="group_16477797_5" role="radio" class="ss-q-radio ss-q-other-toggle" required="" aria-required="true"></span>
+<span class="ss-choice-label">Other:</span></label>
+<span class="ss-q-other-container goog-inline-block"><input type="text" name="entry.16477797.other_option_response" value="" class="ss-q-other" id="entry_16477797_other_option_response" dir="auto" aria-label="Other"></span>
+</li></ul>
+<div class="error-message" id="905480152_errorMessage"></div>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-radio"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_1493967229"><div class="ss-q-title">How often do you research places for specific occasions?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">Occasion like dinners, parties, vacation with friends.</div></label>
+
+<ul class="ss-choices" role="radiogroup" aria-label="How often do you research places for specific occasions? Occasion like dinners, parties, vacation with friends. "><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.420996212" value="A. Very rarely (I usually go to the same places)" id="group_420996212_1" role="radio" class="ss-q-radio" aria-label="A. Very rarely (I usually go to the same places)" required="" aria-required="true"></span>
+<span class="ss-choice-label">A. Very rarely (I usually go to the same places)</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.420996212" value="B. A few times per year (only for special events)" id="group_420996212_2" role="radio" class="ss-q-radio" aria-label="B. A few times per year (only for special events)" required="" aria-required="true"></span>
+<span class="ss-choice-label">B. A few times per year (only for special events)</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.420996212" value="C. A few times per month (when I have to)" id="group_420996212_3" role="radio" class="ss-q-radio" aria-label="C. A few times per month (when I have to)" required="" aria-required="true"></span>
+<span class="ss-choice-label">C. A few times per month (when I have to)</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.420996212" value="D. Quite frequently and I like to explore new places" id="group_420996212_4" role="radio" class="ss-q-radio" aria-label="D. Quite frequently and I like to explore new places" required="" aria-required="true"></span>
+<span class="ss-choice-label">D. Quite frequently and I like to explore new places</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.420996212" value="__other_option__" id="group_420996212_5" role="radio" class="ss-q-radio ss-q-other-toggle" required="" aria-required="true"></span>
+<span class="ss-choice-label">Other:</span></label>
+<span class="ss-q-other-container goog-inline-block"><input type="text" name="entry.420996212.other_option_response" value="" class="ss-q-other" id="entry_420996212_other_option_response" dir="auto" aria-label="Other"></span>
+</li></ul>
+<div class="error-message" id="1493967229_errorMessage"></div>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-radio"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_133689150"><div class="ss-q-title">How often do you ask your friends, family, colleagues or any other people for advice about a place to go?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">In case that you want to know whether a place is good or are there any other good places in a category (e.g., restaurants, gyms)</div></label>
+
+<ul class="ss-choices" role="radiogroup" aria-label="How often do you ask your friends, family, colleagues or any other people for advice about a place to go? In case that you want to know whether a place is good or are there any other good places in a category (e.g., restaurants, gyms) "><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1191374145" value="A. Very often." id="group_1191374145_1" role="radio" class="ss-q-radio" aria-label="A. Very often." required="" aria-required="true"></span>
+<span class="ss-choice-label">A. Very often.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1191374145" value="B. Sometimes." id="group_1191374145_2" role="radio" class="ss-q-radio" aria-label="B. Sometimes." required="" aria-required="true"></span>
+<span class="ss-choice-label">B. Sometimes.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1191374145" value="C. I usually would like to figure it out myself. (E.g. on review sites)" id="group_1191374145_3" role="radio" class="ss-q-radio" aria-label="C. I usually would like to figure it out myself. (E.g. on review sites)" required="" aria-required="true"></span>
+<span class="ss-choice-label">C. I usually would like to figure it out myself. (E.g. on review sites)</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="radio" name="entry.1191374145" value="__other_option__" id="group_1191374145_4" role="radio" class="ss-q-radio ss-q-other-toggle" required="" aria-required="true"></span>
+<span class="ss-choice-label">Other:</span></label>
+<span class="ss-q-other-container goog-inline-block"><input type="text" name="entry.1191374145.other_option_response" value="" class="ss-q-other" id="entry_1191374145_other_option_response" dir="auto" aria-label="Other"></span>
+</li></ul>
+<div class="error-message" id="133689150_errorMessage"></div>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-checkbox"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_10657627"><div class="ss-q-title">When you want to ask for help from an acquaintance, which of the following ways do you prefer?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">The acquaintance could be a family member, a friend or a colleague</div></label>
+
+<ul class="ss-choices ss-choices-required" role="group" aria-label="When you want to ask for help from an acquaintance, which of the following ways do you prefer? The acquaintance could be a family member, a friend or a colleague "><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.1804684484" value="A. Online social networks (sending tweets or messages)" id="group_1804684484_1" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">A. Online social networks (sending tweets or messages)</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.1804684484" value="B. Emails / Telephone / SMS" id="group_1804684484_2" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">B. Emails / Telephone / SMS</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.1804684484" value="C. Face to face or in person" id="group_1804684484_3" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">C. Face to face or in person</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.1804684484" value="__other_option__" id="group_1804684484_4" role="checkbox" class="ss-q-checkbox ss-q-other-toggle" aria-required="true"></span>
+<span class="ss-choice-label">Other:</span></label>
+<span class="ss-q-other-container goog-inline-block"><input type="text" name="entry.1804684484.other_option_response" value="" class="ss-q-other" id="entry_1804684484_other_option_response" dir="auto" aria-label="Other"></span>
+</li></ul>
+<div class="error-message" id="10657627_errorMessage"></div>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-checkbox"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_609036192"><div class="ss-q-title">If you need advice, but you don&#39;t know who can help, which of the following ways do you prefer?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+
+<ul class="ss-choices ss-choices-required" role="group" aria-label="If you need advice, but you don&#39;t know who can help, which of the following ways do you prefer?  "><li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.132625108" value="A. Telling friends/family/colleagues that I need help and see whether they know some place or know someone that can help." id="group_132625108_1" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">A. Telling friends/family/colleagues that I need help and see whether they know some place or know someone that can help.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.132625108" value="B. Asking the followers on Twitter or any other online social networks." id="group_132625108_2" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">B. Asking the followers on Twitter or any other online social networks.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.132625108" value="C. Writing a blog post about it and looking for good suggestions in the comments" id="group_132625108_3" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">C. Writing a blog post about it and looking for good suggestions in the comments</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.132625108" value="D. Posting a question on a forum or Q&amp;A platform." id="group_132625108_4" role="checkbox" class="ss-q-checkbox" aria-required="true"></span>
+<span class="ss-choice-label">D. Posting a question on a forum or Q&amp;A platform.</span>
+</label></li> <li class="ss-choice-item"><label><span class="ss-choice-item-control goog-inline-block"><input type="checkbox" name="entry.132625108" value="__other_option__" id="group_132625108_5" role="checkbox" class="ss-q-checkbox ss-q-other-toggle" aria-required="true"></span>
+<span class="ss-choice-label">Other:</span></label>
+<span class="ss-q-other-container goog-inline-block"><input type="text" name="entry.132625108.other_option_response" value="" class="ss-q-other" id="entry_132625108_other_option_response" dir="auto" aria-label="Other"></span>
+</li></ul>
+<div class="error-message" id="609036192_errorMessage"></div>
+<div class="required-message">This is a required question</div></div></div></div> <div class="errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item  ss-section-header"><div class="ss-form-entry">
+<h2 class="ss-section-title">Reliability of Sources</h2>
+<div class="ss-section-description ss-no-ignore-whitespace">Comparing the reliability of suggestions from different groups of people related to you.</div>
+</div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_649194106"><div class="ss-q-title">Do you trust the suggestions about where to go from your FAMILY?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">Your parents, kids, relatives, etc.</div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_385465219"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_385465219_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_385465219_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_385465219_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_385465219_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_385465219_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label="Do you trust the suggestions about where to go from your FAMILY? Your parents, kids, relatives, etc. Select a value from a range of 1,Never take advice from them, to 5,I always rely on their suggestions,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">Never take advice from them</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.385465219" value="1" id="group_385465219_1" role="radio" class="ss-q-radio" aria-label="1" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.385465219" value="2" id="group_385465219_2" role="radio" class="ss-q-radio" aria-label="2" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.385465219" value="3" id="group_385465219_3" role="radio" class="ss-q-radio" aria-label="3" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.385465219" value="4" id="group_385465219_4" role="radio" class="ss-q-radio" aria-label="4" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.385465219" value="5" id="group_385465219_5" role="radio" class="ss-q-radio" aria-label="5" required="" aria-required="true"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">I always rely on their suggestions</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_357580333"><div class="ss-q-title">Do you trust the suggestions about where to go from your FRIENDS in real life?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">Friends from your childhood, class mates, room mates, etc.</div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_1164280617"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1164280617_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1164280617_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1164280617_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1164280617_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1164280617_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label="Do you trust the suggestions about where to go from your FRIENDS in real life? Friends from your childhood, class mates, room mates, etc. Select a value from a range of 1,Never take advice from them, to 5,I always rely on their suggestions,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">Never take advice from them</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1164280617" value="1" id="group_1164280617_1" role="radio" class="ss-q-radio" aria-label="1" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1164280617" value="2" id="group_1164280617_2" role="radio" class="ss-q-radio" aria-label="2" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1164280617" value="3" id="group_1164280617_3" role="radio" class="ss-q-radio" aria-label="3" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1164280617" value="4" id="group_1164280617_4" role="radio" class="ss-q-radio" aria-label="4" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1164280617" value="5" id="group_1164280617_5" role="radio" class="ss-q-radio" aria-label="5" required="" aria-required="true"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">I always rely on their suggestions</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_92138993"><div class="ss-q-title">Do you trust the suggestions about where to go from your online FRIENDS?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">Friends on Facebook, Twitter, etc.</div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_33275758"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_33275758_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_33275758_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_33275758_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_33275758_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_33275758_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label="Do you trust the suggestions about where to go from your online FRIENDS? Friends on Facebook, Twitter, etc. Select a value from a range of 1,Never take advice from them, to 5,I always rely on their suggestions,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">Never take advice from them</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.33275758" value="1" id="group_33275758_1" role="radio" class="ss-q-radio" aria-label="1" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.33275758" value="2" id="group_33275758_2" role="radio" class="ss-q-radio" aria-label="2" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.33275758" value="3" id="group_33275758_3" role="radio" class="ss-q-radio" aria-label="3" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.33275758" value="4" id="group_33275758_4" role="radio" class="ss-q-radio" aria-label="4" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.33275758" value="5" id="group_33275758_5" role="radio" class="ss-q-radio" aria-label="5" required="" aria-required="true"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">I always rely on their suggestions</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_1951304356"><div class="ss-q-title">Do you trust the suggestions about where to go from your online COLLEAGUES?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">Co-workers, etc.</div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_1675710064"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1675710064_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1675710064_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1675710064_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1675710064_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1675710064_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label="Do you trust the suggestions about where to go from your online COLLEAGUES? Co-workers, etc. Select a value from a range of 1,Never take advice from them, to 5,I always rely on their suggestions,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">Never take advice from them</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1675710064" value="1" id="group_1675710064_1" role="radio" class="ss-q-radio" aria-label="1" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1675710064" value="2" id="group_1675710064_2" role="radio" class="ss-q-radio" aria-label="2" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1675710064" value="3" id="group_1675710064_3" role="radio" class="ss-q-radio" aria-label="3" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1675710064" value="4" id="group_1675710064_4" role="radio" class="ss-q-radio" aria-label="4" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1675710064" value="5" id="group_1675710064_5" role="radio" class="ss-q-radio" aria-label="5" required="" aria-required="true"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">I always rely on their suggestions</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_1015641836"><div class="ss-q-title">Do you trust the suggestions about where to go from online REVIEW sites?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">Trip Advisor, tourism blogs, etc.</div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_161718272"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_161718272_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_161718272_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_161718272_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_161718272_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_161718272_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label="Do you trust the suggestions about where to go from online REVIEW sites? Trip Advisor, tourism blogs, etc. Select a value from a range of 1,Never take advice from them, to 5,I always rely on their suggestions,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">Never take advice from them</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.161718272" value="1" id="group_161718272_1" role="radio" class="ss-q-radio" aria-label="1" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.161718272" value="2" id="group_161718272_2" role="radio" class="ss-q-radio" aria-label="2" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.161718272" value="3" id="group_161718272_3" role="radio" class="ss-q-radio" aria-label="3" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.161718272" value="4" id="group_161718272_4" role="radio" class="ss-q-radio" aria-label="4" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.161718272" value="5" id="group_161718272_5" role="radio" class="ss-q-radio" aria-label="5" required="" aria-required="true"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">I always rely on their suggestions</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item  ss-section-header"><div class="ss-form-entry">
+<h2 class="ss-section-title">Knowledge Regarding Cities</h2>
+<div class="ss-section-description ss-no-ignore-whitespace"></div>
+</div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_859927349"><div class="ss-q-title">How well do you think you know New York City (NY)?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_19253848"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_19253848_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_19253848_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_19253848_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_19253848_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_19253848_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label="How well do you think you know New York City (NY)?  Select a value from a range of 1,I have not been there, to 5,I am a native,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">I have not been there</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.19253848" value="1" id="group_19253848_1" role="radio" class="ss-q-radio" aria-label="1" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.19253848" value="2" id="group_19253848_2" role="radio" class="ss-q-radio" aria-label="2" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.19253848" value="3" id="group_19253848_3" role="radio" class="ss-q-radio" aria-label="3" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.19253848" value="4" id="group_19253848_4" role="radio" class="ss-q-radio" aria-label="4" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.19253848" value="5" id="group_19253848_5" role="radio" class="ss-q-radio" aria-label="5" required="" aria-required="true"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">I am a native</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_518225093"><div class="ss-q-title">How well do you think you know Chicago (IL)?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_1093469572"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1093469572_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1093469572_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1093469572_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1093469572_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1093469572_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label="How well do you think you know Chicago (IL)?  Select a value from a range of 1,I have not been there, to 5,I am a native,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">I have not been there</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1093469572" value="1" id="group_1093469572_1" role="radio" class="ss-q-radio" aria-label="1" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1093469572" value="2" id="group_1093469572_2" role="radio" class="ss-q-radio" aria-label="2" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1093469572" value="3" id="group_1093469572_3" role="radio" class="ss-q-radio" aria-label="3" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1093469572" value="4" id="group_1093469572_4" role="radio" class="ss-q-radio" aria-label="4" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1093469572" value="5" id="group_1093469572_5" role="radio" class="ss-q-radio" aria-label="5" required="" aria-required="true"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">I am a native</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_91766142"><div class="ss-q-title">How well do you think you know Los Angeles (CA)?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_2074369168"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_2074369168_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_2074369168_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_2074369168_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_2074369168_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_2074369168_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label="How well do you think you know Los Angeles (CA)?  Select a value from a range of 1,I have not been there, to 5,I am a native,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">I have not been there</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.2074369168" value="1" id="group_2074369168_1" role="radio" class="ss-q-radio" aria-label="1" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.2074369168" value="2" id="group_2074369168_2" role="radio" class="ss-q-radio" aria-label="2" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.2074369168" value="3" id="group_2074369168_3" role="radio" class="ss-q-radio" aria-label="3" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.2074369168" value="4" id="group_2074369168_4" role="radio" class="ss-q-radio" aria-label="4" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.2074369168" value="5" id="group_2074369168_5" role="radio" class="ss-q-radio" aria-label="5" required="" aria-required="true"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">I am a native</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_327210020"><div class="ss-q-title">How well do you think you know San Francisco (CA)?
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr"></div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_349754386"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_349754386_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_349754386_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_349754386_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_349754386_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_349754386_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label="How well do you think you know San Francisco (CA)?  Select a value from a range of 1,I have not been there, to 5,I am a native,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">I have not been there</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.349754386" value="1" id="group_349754386_1" role="radio" class="ss-q-radio" aria-label="1" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.349754386" value="2" id="group_349754386_2" role="radio" class="ss-q-radio" aria-label="2" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.349754386" value="3" id="group_349754386_3" role="radio" class="ss-q-radio" aria-label="3" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.349754386" value="4" id="group_349754386_4" role="radio" class="ss-q-radio" aria-label="4" required="" aria-required="true"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.349754386" value="5" id="group_349754386_5" role="radio" class="ss-q-radio" aria-label="5" required="" aria-required="true"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">I am a native</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-paragraph-text"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_158308696"><div class="ss-q-title">Name the top THREE places (or kinds of places) you are interested in but never have been to before.
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">For example, bars, night clubs, gyms. (One per line)</div></label>
+<textarea name="entry.158308696" rows="8" cols="0" class="ss-q-long" id="entry_158308696" dir="auto" aria-label="Name the top THREE places (or kinds of places) you are interested in but never have been to before. For example, bars, night clubs, gyms. (One per line) " aria-required="true" required=""></textarea>
+<div class="error-message" id="941370806_errorMessage"></div>
+<div class="required-message">This is a required question</div>
+</div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item ss-item-required ss-paragraph-text"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_1977754109"><div class="ss-q-title">Name the top THREE places in your home city that you would to show to friends visiting from out of town.
+<label for="itemView.getDomIdToLabel()" aria-label="(Required field)"></label>
+<span class="ss-required-asterisk">*</span></div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">(One per line)</div></label>
+<textarea name="entry.1977754109" rows="8" cols="0" class="ss-q-long" id="entry_1977754109" dir="auto" aria-label="Name the top THREE places in your home city that you would to show to friends visiting from out of town. (One per line) " aria-required="true" required=""></textarea>
+<div class="error-message" id="1354772208_errorMessage"></div>
+<div class="required-message">This is a required question</div>
+</div></div></div> <div class="errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item  ss-section-header"><div class="ss-form-entry">
+<h2 class="ss-section-title">Your Opinion on Geo-expertise</h2>
+<div class="ss-section-description ss-no-ignore-whitespace">Given a person and a place, which of the following criteria do you think is important for judging his/her knowledge about the place?</div>
+</div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item  ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_1427141545"><div class="ss-q-title">The total number of a user&#39;s visits at a given place (or category) should be above a certain number.
+</div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">How important is this criteria according to your intuition?</div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_1198730671"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1198730671_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1198730671_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1198730671_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1198730671_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1198730671_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label="The total number of a user&#39;s visits at a given place (or category) should be above a certain number. How important is this criteria according to your intuition? Select a value from a range of 1,Not important, to 5,Very important,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">Not important</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1198730671" value="1" id="group_1198730671_1" role="radio" class="ss-q-radio" aria-label="1"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1198730671" value="2" id="group_1198730671_2" role="radio" class="ss-q-radio" aria-label="2"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1198730671" value="3" id="group_1198730671_3" role="radio" class="ss-q-radio" aria-label="3"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1198730671" value="4" id="group_1198730671_4" role="radio" class="ss-q-radio" aria-label="4"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1198730671" value="5" id="group_1198730671_5" role="radio" class="ss-q-radio" aria-label="5"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">Very important</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item  ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_689548580"><div class="ss-q-title">The total number of places visited should be above a certain number.
+</div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">How important is this criteria according to your intuition?</div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_675967869"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_675967869_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_675967869_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_675967869_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_675967869_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_675967869_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label="The total number of places visited should be above a certain number. How important is this criteria according to your intuition? Select a value from a range of 1,Not important, to 5,Very important,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">Not important</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.675967869" value="1" id="group_675967869_1" role="radio" class="ss-q-radio" aria-label="1"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.675967869" value="2" id="group_675967869_2" role="radio" class="ss-q-radio" aria-label="2"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.675967869" value="3" id="group_675967869_3" role="radio" class="ss-q-radio" aria-label="3"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.675967869" value="4" id="group_675967869_4" role="radio" class="ss-q-radio" aria-label="4"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.675967869" value="5" id="group_675967869_5" role="radio" class="ss-q-radio" aria-label="5"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">Very important</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item  ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_1730432903"><div class="ss-q-title">There should be recent visits at a given place. Otherwise the candidate may not know much about the current status of the place.
+</div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">How important is this criteria according to your intuition?</div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_327447505"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_327447505_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_327447505_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_327447505_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_327447505_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_327447505_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label="There should be recent visits at a given place. Otherwise the candidate may not know much about the current status of the place. How important is this criteria according to your intuition? Select a value from a range of 1,Not important, to 5,Very important,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">Not important</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.327447505" value="1" id="group_327447505_1" role="radio" class="ss-q-radio" aria-label="1"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.327447505" value="2" id="group_327447505_2" role="radio" class="ss-q-radio" aria-label="2"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.327447505" value="3" id="group_327447505_3" role="radio" class="ss-q-radio" aria-label="3"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.327447505" value="4" id="group_327447505_4" role="radio" class="ss-q-radio" aria-label="4"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.327447505" value="5" id="group_327447505_5" role="radio" class="ss-q-radio" aria-label="5"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">Very important</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item  ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_156035952"><div class="ss-q-title">There should be visits at many different places in a category if a given topic is about a category of locations. Otherwise the candidate may only know things about a specific location rather than the entire category to which the location belongs.
+</div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">How important is this criteria according to your intuition?</div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_1371332199"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1371332199_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1371332199_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1371332199_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1371332199_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1371332199_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label="There should be visits at many different places in a category if a given topic is about a category of locations. Otherwise the candidate may only know things about a specific location rather than the entire category to which the location belongs. How important is this criteria according to your intuition? Select a value from a range of 1,Not important, to 5,Very important,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">Not important</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1371332199" value="1" id="group_1371332199_1" role="radio" class="ss-q-radio" aria-label="1"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1371332199" value="2" id="group_1371332199_2" role="radio" class="ss-q-radio" aria-label="2"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1371332199" value="3" id="group_1371332199_3" role="radio" class="ss-q-radio" aria-label="3"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1371332199" value="4" id="group_1371332199_4" role="radio" class="ss-q-radio" aria-label="4"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1371332199" value="5" id="group_1371332199_5" role="radio" class="ss-q-radio" aria-label="5"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">Very important</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item  ss-scale"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_1899270252"><div class="ss-q-title"> There should be check-ins at places in other cities for a given category.
+</div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">How important is this criteria according to your intuition?</div></label>
+
+<table border="0" cellpadding="5" cellspacing="0" id="entry_1966907957"><tr aria-hidden="true"><td class="ss-scalenumbers"></td>
+<td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1966907957_1">1</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1966907957_2">2</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1966907957_3">3</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1966907957_4">4</label></td> <td class="ss-scalenumbers"><label class="ss-scalenumber" for="group_1966907957_5">5</label></td>
+<td class="ss-scalenumbers"></td></tr>
+<tr role="radiogroup" aria-label=" There should be check-ins at places in other cities for a given category. How important is this criteria according to your intuition? Select a value from a range of 1,Not important, to 5,Very important,."><td class="ss-scalerow ss-leftlabel"><div aria-hidden="true" class="aria-todo">Not important</div></td>
+<td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1966907957" value="1" id="group_1966907957_1" role="radio" class="ss-q-radio" aria-label="1"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1966907957" value="2" id="group_1966907957_2" role="radio" class="ss-q-radio" aria-label="2"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1966907957" value="3" id="group_1966907957_3" role="radio" class="ss-q-radio" aria-label="3"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1966907957" value="4" id="group_1966907957_4" role="radio" class="ss-q-radio" aria-label="4"></div></td> <td class="ss-scalerow"><div class="ss-scalerow-fieldcell"><input type="radio" name="entry.1966907957" value="5" id="group_1966907957_5" role="radio" class="ss-q-radio" aria-label="5"></div></td>
+<td class="ss-scalerow ss-rightlabel" aria-hidden="true">Very important</td></tr></table>
+<div class="required-message">This is a required question</div></div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+<div dir="ltr" class="ss-item  ss-paragraph-text"><div class="ss-form-entry">
+<label class="ss-q-item-label" for="entry_157731938"><div class="ss-q-title">What other aspects/criteria do you consider when determining who to ask for advice on places to go?
+</div>
+<div class="ss-q-help ss-secondary-text" dir="ltr">(One per line)</div></label>
+<textarea name="entry.157731938" rows="8" cols="0" class="ss-q-long" id="entry_157731938" dir="auto" aria-label="What other aspects/criteria do you consider when determining who to ask for advice on places to go? (One per line) "></textarea>
+<div class="error-message" id="1789055554_errorMessage"></div>
+<div class="required-message">This is a required question</div>
+</div></div></div>
+<input type="hidden" name="draftResponse" value="[,,&quot;2379242048101514037&quot;]
+">
+<input type="hidden" name="pageHistory" value="0">
+
+
+<input type="hidden" name="fbzx" value="2379242048101514037">
+
+<div class="ss-item ss-navigate"><table id="navigation-table"><tbody><tr><td class="ss-form-entry goog-inline-block" id="navigation-buttons" dir="ltr">
+<input type="submit" name="submit" value="Submit" id="ss-submit">
+<div class="ss-password-warning ss-secondary-text">Never submit passwords through Google Forms.</div></td>
+<!-- <td id="progress&#45;container"><div id="progress&#45;bar" class="jfk&#45;progressBar&#45;nonBlocking progress&#45;bar&#45;horizontal goog&#45;inline&#45;block"></div> -->
+<!-- <div id="progress&#45;label" class="progress&#45;label">100%: You made it.</div></td></tr></tbody></table></div></ol></form></div> -->
+<div class="ss-footer"><div class="ss-attribution"></div>
+<div class="ss-legal"><div class="disclaimer-separator"></div>
+<div class="disclaimer" dir="ltr"><div class="powered-by-logo"><span class="powered-by-text">Powered by</span>
+    <a href="https://www.google.com/forms/about/?utm_source=product&amp;utm_medium=forms_logo&amp;utm_campaign=form">Google Forms</a></div>
+<div class="ss-terms"><span class="disclaimer-msg">This content is neither created nor endorsed by Google.</span>
+<br>
+<a href="https://docs.google.com/forms/d/1DlXfIaDHsks5_0gkx26brQP_QbFblmRDNvgisvNI0XQ/reportabuse?source=https://docs.google.com/forms/d/1DlXfIaDHsks5_0gkx26brQP_QbFblmRDNvgisvNI0XQ/viewform?embedded%3Dtrue">Report Abuse</a>
+-
+<a href="http://www.google.com/accounts/TOS">Terms of Service</a>
+-
+<a href="http://www.google.com/google-d-s/terms.html">Additional Terms</a></div></div></div></div>
+
+<div id="docs-aria-speakable" class="docs-a11y-ariascreenreader-speakable docs-offscreen" aria-live="assertive" role="region" aria-atomic></div></div>
+
+<script type='text/javascript' src='https://docs.google.com/static/forms/client/js/828226963-formviewer_prd.js'></script>
+<script type="text/javascript">H5F.setup(document.getElementById('ss-form'));
+      _initFormViewer("[100,\x22#5e5e5e\x22,[[[1102912225,[[4,301,[\x22^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,4}$\x22]\n,\x22Please enter a valid email address\x22]\n]\n]\n]\n]\n]\n", true);</script></body></html>

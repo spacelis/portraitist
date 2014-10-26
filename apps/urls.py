@@ -31,6 +31,7 @@ urlpatterns = patterns(
 
     # Static pages
     url(r'^terms$', TemplateView.as_view(template_name="terms.html")),
+    url(r'^survey_form$', TemplateView.as_view(template_name="survey_form.html")),
     url(r'^about$', TemplateView.as_view(template_name="about.html")),
     url(r'^instructions$',
         TemplateView.as_view(template_name="instructions.html")),
