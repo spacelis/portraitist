@@ -31,7 +31,7 @@
             </ul>
           </li>
           {# <li id="id-tag-signup-login" data-bind="visible: is_known() == false"><a onClick="$('#id-dialog-signup-login').modal('show');">Sign Up / Login</a></li> #}
-          <li><a><span class="badge" data-bind="text: progress"></span></a></li>
+          <li><a> Finished <span class="badge" data-bind="text: progress"></span></a></li>
         </ul>
       </div>
     </nav>
@@ -234,7 +234,7 @@
       return userdata.name() + "&nbsp;<b class='caret'></b>";
     });
     userdata.progress = ko.computed(function(){
-      return userdata.package_progress() + 1 + " / " + userdata.package_size();
+      return userdata.package_progress() + " / " + userdata.package_size();
     });
     $(document).ready(function () {
       userdata.session_token.valueHasMutated(); // Force update cookie as only changes will set cookie in default.
