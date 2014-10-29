@@ -24,6 +24,7 @@ from django.http import Http404
 from django.http import HttpResponse
 
 from google.appengine.ext import ndb
+from google.appengine.api.taskqueue import Task
 
 from apps.profileviewer.models import _k
 from apps.profileviewer.models import Judgement
@@ -32,6 +33,7 @@ from apps.profileviewer.models import TaskPackage
 from apps.profileviewer.util import throttle_map
 from apps.profileviewer.api import APIRegistry
 from apps.profileviewer.util import fixCompressedEntity
+from apps.profileviewer.util import listCompressedProperty
 
 
 _REG = APIRegistry()
@@ -399,23 +401,29 @@ def assert_error():
     assert False
 
 
-@_REG.api_endpoint(secured=True)
-def fix_datastore():
-    """ As resutore
-    :returns: @todo
-
-    """
-    from apps.profileviewer.util import findBrokenFields
-    from apps.profileviewer.models import TwitterAccount
-    from google.appengine.api.taskqueue import Task
-    fields = findBrokenFields(TwitterAccount)
-    for k in TwitterAccount.query().fetch(keys_only=True):
+def addTasksToFix(model):
+    fields = listCompressedProperty(model)
+    for k in model.query().fetch(keys_only=True):
         Task(params={'key': k.urlsafe(),
                      'fields': ','.join(fields),
                      '_admin_key': 'tu2013delft'},
              url='/api/data/fix_entity',
              method='GET'
              ).add('batch')
+
+
+@_REG.api_endpoint(secured=True)
+def fix_datastore():
+    """ As resutore
+    :returns: @todo
+
+    """
+    from apps.profileviewer.models import TwitterAccount
+    from apps.profileviewer.models import GeoEntity
+    from apps.profileviewer.models import ExpertiseRank
+    addTasksToFix(TwitterAccount)
+    addTasksToFix(GeoEntity)
+    addTasksToFix(ExpertiseRank)
     return {
         'action': 'fix_datastore',
         'suceeded': None,

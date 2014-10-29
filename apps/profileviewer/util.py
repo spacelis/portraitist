@@ -90,7 +90,7 @@ def b64json_decode(json_obj):
     return json.loads(base64.b64decode(json_obj))
 
 
-def findBrokenFields(model):
+def listCompressedProperty(model):
     """ Correct the restore of the data containing the compressed field.
 
     :returns: None
@@ -110,7 +110,8 @@ def findBrokenFields(model):
     # Find all fixable field of data Models
     return [n
             for n, p in model._properties.iteritems()
-            if p.__class__ == ndb.model.JsonProperty and p._compressed]
+            if (p.__class__ == ndb.model.JsonProperty or
+                p.__class__ == ndb.model.StringProperty) and p._compressed]
 
 
 def fixCompressedEntity(key, fields):
@@ -122,8 +123,8 @@ def fixCompressedEntity(key, fields):
     # apply the fixing
     ins = key.get()
     for p in fields:
-        if not isinstance(ins._values.get(p).b_val,
-                          ndb.model._CompressedValue):
+        if ins._values.get(p) and not isinstance(ins._values.get(p).b_val,
+                                                 ndb.model._CompressedValue):
             ins._values.get(p).b_val = \
                 ndb.model._CompressedValue(ins._values.get(p).b_val)
             ins.put()
