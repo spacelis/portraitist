@@ -33,7 +33,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
 
   var _COLORPALETTE = d3.scale.ordinal().range(
     [
-      0x1f77b4, 0xff7f0e, 0x2ca02c, 0xd62728, 0x9467bd, 0x8c564b, 0xe377c2, 0xbcbd22, 0x17becf, 
+      0x1f77b4, 0xff7f0e, 0x2ca02c, 0xd62728, 0x9467bd, 0x8c564b, 0xe377c2, 0xbcbd22, 0x17becf,
       0x2D34CB, 0xffbb78, 0x98df8a, 0xff9896, 0xc5b0d5, 0xc49c94, 0xf7b6d2, 0xdbdb8d, 0x9edae5
     ].map(function(value){return new d3.rgb(value >> 16, value >> 8 & 0xff, value & 0xff) + ""; })
   )
@@ -82,7 +82,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       return c.place.category.name;
     });
     var by_zcate = _fact.dimension(function(c){
-      return c.place.category.zcategory;
+      return c.place.category.zero_category_name;
     });
     var by_poi = _fact.dimension(function(c){
       c.place.valueOf = function(){
