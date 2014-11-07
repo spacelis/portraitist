@@ -93,9 +93,10 @@ import os
 import os.path
 import gzip
 import csv
+import sys
 import json
 
-csv.field_size_limit(1000000)
+csv.field_size_limit(sys.maxsize)
 
 
 def flexopen(filename):
