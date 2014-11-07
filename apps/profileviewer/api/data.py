@@ -328,7 +328,7 @@ def make_qtaskpackages():
     mapping = sorted([(at.key, at.rankings[0].get().topic_id)
                       for at in AnnotationTask.query().fetch()],
                      key=L[1])
-    for topic_id, ts in groupby(mapping, key=L[1]):
+    for _, ts in groupby(mapping, key=L[1]):
         for tkeys in partition([t[0] for t in ts], 10):
             TaskPackage(
                 # parent=DEFAULT_PARENT_KEY,
@@ -389,6 +389,8 @@ def export_taskpackages(_request):
     csvwr = csv.DictWriter(response, ['tpkey', 'confirm_code', 'package_size'])
     csvwr.writeheader()
     for tp in TaskPackage.query().fetch():
+        if len(tp.progress) == 0:
+            continue
         csvwr.writerow({'tpkey': url_template(tp.key.urlsafe()),
                         'confirm_code': tp.confirm_code,
                         'package_size': str(len(tp.tasks)),
@@ -404,13 +406,15 @@ def assert_error():
 
 def addTasksToFix(model):
     fields = listCompressedProperty(model)
-    for k in model.query().fetch(keys_only=True):
+    i = 0
+    for i, k in enumerate(model.query().fetch(keys_only=True)):
         Task(params={'key': k.urlsafe(),
                      'fields': ','.join(fields),
                      '_admin_key': 'tu2013delft'},
              url='/api/data/fix_entity',
              method='GET'
              ).add('batch')
+    return i
 
 
 @_REG.api_endpoint(secured=True)
@@ -422,13 +426,13 @@ def fix_datastore():
     from apps.profileviewer.models import TwitterAccount
     from apps.profileviewer.models import GeoEntity
     from apps.profileviewer.models import ExpertiseRank
-    addTasksToFix(TwitterAccount)
-    addTasksToFix(GeoEntity)
-    addTasksToFix(ExpertiseRank)
+    cnt = addTasksToFix(TwitterAccount)
+    cnt += addTasksToFix(GeoEntity)
+    cnt += addTasksToFix(ExpertiseRank)
     return {
         'action': 'fix_datastore',
         'suceeded': None,
-        'message': 'Check the batch queue for the status of fixing process.'
+        'message': '%s fixing tasks add to the batch queue.' % (cnt, )
     }
 
 
