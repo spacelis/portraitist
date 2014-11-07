@@ -1,6 +1,18 @@
+/* eslint-env node, amd */
 /* global $ */
+/**
+File: control.js
+Author: SpaceLis
+Email: Wen.Li@tudelft.nl
+GitHub: http://github.com/spacelis
+Description:
+    Monitoring user interaction with the page.
+*/
 
-var control = (function(){
+(function(){ // Header
+
+function _control($){
+
   var pow = Math.pow;
   var sqrt = Math.sqrt;
 
@@ -17,7 +29,7 @@ var control = (function(){
   var bar = {
     m_clicks: 3,
     m_travel: pageheight,
-    t_int: 15000,
+    t_int: 15000
   };
 
   function distance(p1, p2){
@@ -26,8 +38,8 @@ var control = (function(){
 
   $(document).click(function(e){
     state.m_clicks += 1;
-    state.trace.unshift({event: 'click',
-                         position: {'PageX': e.PageX, 'PageY': e.PageY},
+    state.trace.unshift({event: "click",
+                         position: {"PageX": e.PageX, "PageY": e.PageY},
                          timestamp: new Date() - loadtime,
                          travel: state.trace[0].travel});
   });
@@ -36,17 +48,17 @@ var control = (function(){
     var pos = {PageX: e.pageX, PageY: e.pageY};
     if(state.init){
       state.init = false;
-      state.trace.unshift({event: 'moveto',
+      state.trace.unshift({event: "moveto",
                            position: pos,
                            timestamp: timestamp,
                            travel: 0});
     } else{
       state.m_travel += distance(pos, state.prev_pos);
       state.prev_pos = pos;
-      if(distance(state.trace[0].position, pos) > percentwidth || 
+      if(distance(state.trace[0].position, pos) > percentwidth ||
          timestamp - state.trace[0].timestamp > 1000)
       {
-        state.trace.unshift({event: 'moveto',
+        state.trace.unshift({event: "moveto",
                              position: pos,
                              timestamp: timestamp,
                              travel: state.m_travel});
@@ -69,15 +81,28 @@ var control = (function(){
   }
 
   function record(e){
-    state.trace.unshift({event: 'record',
-                         position: {PageX: state.trace[0].position.PageX,
-                                    PageY: state.trace[0].position.PageY},
-                         timestamp: new Date() - loadtime,
-                         travel: state.m_travel,
-                         record: e});
+    var len = state.trace.unshift(
+      {event: "record",
+       position: {PageX: state.trace[0].position.PageX,
+                  PageY: state.trace[0].position.PageY},
+       timestamp: new Date() - loadtime,
+       travel: state.m_travel,
+       record: e}
+    );
+    if(len >= 1500){
+      state.trace.splice(1000);
+    }
   }
 
-  return {'checked': checked,
-          'getState': getState,
-          'record': record};
-}());
+  return {"checked": checked,
+          "getState": getState,
+          "record": record};
+}
+
+if(typeof define === "function" && define.amd) { // FOOTER
+  define(["$"], _control);
+} else if(typeof module === "object" && module.exports) {
+  module.exports = _control($);
+} else {
+  this.profileviewer = _control($);
+}})();
