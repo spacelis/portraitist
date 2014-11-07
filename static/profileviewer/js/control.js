@@ -104,5 +104,5 @@ if(typeof define === "function" && define.amd) { // FOOTER
 } else if(typeof module === "object" && module.exports) {
   module.exports = _control($);
 } else {
-  this.profileviewer = _control($);
+  this.control = _control($);
 }})();
