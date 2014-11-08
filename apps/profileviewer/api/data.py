@@ -332,7 +332,7 @@ def make_simple_tasks():
                 rankings=[r.key for r in grp],
                 candidate=cand.candidate).put()
     return {
-        'action': 'make_tasks',
+        'action': 'make_simple_tasks',
         'succeeded': True,
         'tasks': len(AnnotationTask.query().fetch(keys_only=True))
     }
@@ -347,7 +347,11 @@ def make_compact_tasks():
         AnnotationTask(
             rankings=[r.key for r in rankings],
             candidate=cand.candidate).put()
-    return {'make_tasks': 'succeeded'}
+    return {
+        'action': 'make_compact_tasks',
+        'succeeded': True,
+        'tasks': len(AnnotationTask.query().fetch(keys_only=True))
+    }
 
 
 @_REG.api_endpoint(secured=True)
@@ -412,7 +416,11 @@ def make_random_taskpackages():
             confirm_code=newToken('').split('-')[-1],
             assigned_at=dt(2000, 1, 1)
         ).put()
-    return {'make_taskpackages': 'succeeded'}
+    return {
+        'action': 'make_random_taskpackages',
+        'succeeded': True,
+        'taskpackages': len(TaskPackage.query().fetch(keys_only=True))
+    }
 
 
 @_REG.api_endpoint()
