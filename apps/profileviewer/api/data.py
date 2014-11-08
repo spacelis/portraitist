@@ -27,6 +27,7 @@ csv.field_size_limit(sys.maxsize)
 
 from fn import Stream
 from fn import _ as L
+from fn import F
 from fn.iters import drop
 from fn.uniform import zip_longest
 from fn.uniform import map  # pylint: disable=redefined-builtin
@@ -376,10 +377,14 @@ def make_topical_taskpackages():
 @_REG.api_endpoint(secured=True)
 def make_methodical_taskpackages():
     """ Group tasks in to packages. """
-    mapping = sorted([(at.key, at.rankings[0].get().rank_info['rank_method'])
-                      for at in AnnotationTask.query().fetch()],
-                     key=L[1])
-    for _, tasks in groupby(mapping, key=L[1]):
+    def iter_annotationtask():
+        """ iterating though pairs of task and rank_method."""
+        for atask in AnnotationTask.query().fetch():
+            for rank_key in atask.rankings:
+                for info in rank_key.get().rank_info:
+                    yield atask.key, info['rank_method']
+    pairs = sorted(iter_annotationtask(), key=L[1])
+    for _, tasks in groupby(pairs, key=L[1]):
         for tkeys in partition([t[0] for t in tasks], 10):
             TaskPackage(
                 # parent=DEFAULT_PARENT_KEY,
@@ -390,9 +395,9 @@ def make_methodical_taskpackages():
                 assigned_at=dt(2000, 1, 1)
             ).put()
     return {
-        'action': 'make_taskpackages',
+        'action': 'make_methodical_taskpackages',
         'succeeded': True,
-        'tasks': len(TaskPackage.query().fetch(keys_only=True))
+        'taskpackages': len(TaskPackage.query().fetch(keys_only=True))
     }
 
 
