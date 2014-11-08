@@ -11,9 +11,19 @@ Description:
 
 """
 
+import os
+import os.path
+import gzip
+import csv
+import sys
+import json
 from json import dumps as _j
 from datetime import datetime as dt
 from itertools import groupby
+from itertools import cycle
+from itertools import izip
+
+csv.field_size_limit(sys.maxsize)
 
 from fn import Stream
 from fn import _ as L
@@ -35,6 +45,10 @@ from apps.profileviewer.api import APIRegistry
 from apps.profileviewer.util import fixCompressedEntity
 from apps.profileviewer.util import listCompressedProperty
 
+from apps.profileviewer.models import GeoEntity
+from apps.profileviewer.models import ExpertiseRank
+from apps.profileviewer.models import TwitterAccount
+from apps.profileviewer.models import newToken
 
 _REG = APIRegistry()
 
@@ -89,16 +103,6 @@ def export_judgements(_):
 
 
 # ------- Import/Export ------
-import os
-import os.path
-import gzip
-import csv
-import sys
-import json
-
-csv.field_size_limit(sys.maxsize)
-
-
 def flexopen(filename):
     """ Open file with according opener.
 
@@ -145,9 +149,6 @@ def import_entities(filename, loader, pool=20):
     return {'import': 'succeeded'}
 
 
-from apps.profileviewer.models import TwitterAccount
-
-
 @_REG.api_endpoint(secured=True)
 def import_candidates(filename):
     """ Import candidates from file.
@@ -163,9 +164,6 @@ def import_candidates(filename):
             screen_name=r['screen_name'],
             checkins=json.loads(r['checkins'])).put()
     return import_entities(filename, loader)
-
-
-from apps.profileviewer.models import ExpertiseRank
 
 
 @_REG.api_endpoint(secured=True)
@@ -193,7 +191,6 @@ def import_rankings(filename):
 @_REG.api_endpoint(secured=True)
 def rankings_statistics():
     """ Return a statistics for rankings. """
-    from itertools import groupby
     ranklists = set()
     rankpoints = set()
     num = 0
@@ -226,9 +223,6 @@ def reset_progress():
     return {'reset_progress': 'succeeded!'}
 
 
-from apps.profileviewer.models import GeoEntity
-
-
 @_REG.api_endpoint(secured=True)
 def import_geoentities(filename):
     """ Import geo-entities from file.
@@ -237,6 +231,7 @@ def import_geoentities(filename):
     :returns: @todo
 
     """
+
     def loader(r):
         """ Loader for Twitter accounts and checkins. """
         d = json.loads(r['info'])
@@ -285,9 +280,6 @@ def partition(it, size=10, margin=None):
     the elements from it.
 
     """
-    from itertools import cycle
-    from itertools import groupby
-    from itertools import izip
 
     margin = margin if margin else int(1.5 * size)
     assert margin < 2 * size, \
@@ -313,7 +305,7 @@ def make_qtasks():
     candidates = ExpertiseRank.listCandidates()
     for c in candidates:
         rankings = ExpertiseRank.getForCandidate(c.candidate)
-        for k, g in groupby(sorted(rankings, key=L.topic_id),
+        for _, g in groupby(sorted(rankings, key=L.topic_id),
                             key=L.topic_id):
             AnnotationTask(
                 rankings=[r.key for r in g],
@@ -324,7 +316,6 @@ def make_qtasks():
 @_REG.api_endpoint(secured=True)
 def make_qtaskpackages():
     """ Group tasks in to packages. """
-    from apps.profileviewer.models import newToken
     mapping = sorted([(at.key, at.rankings[0].get().topic_id)
                       for at in AnnotationTask.query().fetch()],
                      key=L[1])
@@ -344,7 +335,6 @@ def make_qtaskpackages():
 @_REG.api_endpoint(secured=True)
 def make_taskpackages():
     """ Group tasks in to packages. """
-    from apps.profileviewer.models import newToken
     for ts in partition(AnnotationTask.query().fetch(), 10):
         tkeys = [t.key for t in ts]
         TaskPackage(
@@ -379,7 +369,6 @@ def export_taskpackages(_request):
     :returns: @todo
 
     """
-    import csv
     url_template = lambda tpid: _request.build_absolute_uri(
         '/pagerouter?action=taskpackage&tpid=%s' % (tpid,))
     response = HttpResponse(content_type='text/plain')
@@ -423,9 +412,6 @@ def fix_datastore():
     :returns: @todo
 
     """
-    from apps.profileviewer.models import TwitterAccount
-    from apps.profileviewer.models import GeoEntity
-    from apps.profileviewer.models import ExpertiseRank
     cnt = addTasksToFix(TwitterAccount)
     cnt += addTasksToFix(GeoEntity)
     cnt += addTasksToFix(ExpertiseRank)
