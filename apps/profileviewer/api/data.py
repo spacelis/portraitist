@@ -368,9 +368,9 @@ def make_topical_taskpackages():
                 assigned_at=dt(2000, 1, 1)
             ).put()
     return {
-        'action': 'make_taskpackages',
+        'action': 'make_topical_taskpackages',
         'succeeded': True,
-        'tasks': len(TaskPackage.query().fetch(keys_only=True))
+        'task_packages': len(TaskPackage.query().fetch(keys_only=True))
     }
 
 
