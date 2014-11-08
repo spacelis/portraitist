@@ -75,7 +75,7 @@
           <div class="btn-toolbar btn-float-right">
             <div class="btn-group">
               {% for f in filters %}
-              <button type="button" class="btn btn-default btn-xs" onClick="profileviewer.focusTopic('{{ f.name }}', '{{ f.level }}')" title="{{ f.description }}">
+              <button type="button" class="btn btn-default btn-xs" onClick="profileviewer.focusTopic('{{ f.name | escapejs }}', '{{ f.level }}')" title="{{ f.description }}">
                 <span class="glyphicon glyphicon-search"></span> {{ f.name }}
               </button>
               {% endfor %}
@@ -213,7 +213,7 @@
           return;
         }
         // check the monitored task performance
-        else if(!control.checked()){
+        else if(false && !control.checked()){
           $("#id-dialog-verify-judgement").modal("show");
           $(".modal-backdrop.fade.in").css({opacity: 1, background: "#900"});
           control.record('submit_too_soon');
