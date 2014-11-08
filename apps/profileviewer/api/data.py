@@ -146,7 +146,12 @@ def import_entities(filename, loader, pool=20):
             throttle_map(csv.DictReader(fin), async_loader, pool)
     except IOError:
         raise Http404
-    return {'import': 'succeeded'}
+    return {
+        'action': 'import',
+        'type': loader.func_doc,
+        'succeeded': True,
+        'imported': 0
+    }
 
 
 @_REG.api_endpoint(secured=True)
@@ -210,16 +215,26 @@ def rankings_statistics():
 @_REG.api_endpoint(secured=True, disabled=True)
 def clear_rankings():
     """ Delete all rankings from data store. """
-    ndb.delete_multi([r.key for r in ExpertiseRank.query().fetch()])
-    return {'clear_rankings': 'succeeded!'}
+    rs = [r.key for r in ExpertiseRank.query().fetch()]
+    ndb.delete_multi(rs)
+    return {
+        'action': 'clear_rankings',
+        'suceeded': True,
+        'deleted': len(rs)
+    }
 
 
 @_REG.api_endpoint(secured=True, disabled=True)
 def reset_progress():
     """ Reset taskpackage progress. """
-    for tp in TaskPackage.query.fetch():
+    tps = TaskPackage.query.fetch()
+    for tp in tps:
         tp.progress = list(tp.tasks)
-    return {'reset_progress': 'succeeded!'}
+    return {
+        'action': 'reset_progress',
+        'suceeded': True,
+        'taskpackages': len(tps)
+    }
 
 
 @_REG.api_endpoint(secured=True)
@@ -244,16 +259,16 @@ def import_geoentities(filename):
     return import_entities(filename, loader)
 
 
-@_REG.api_endpoint(secured=True)
-def make_tasks():
-    """ Make tasks based on candidates. """
-    candidates = ExpertiseRank.listCandidates()
-    for c in candidates:
-        rankings = ExpertiseRank.getForCandidate(c.candidate)
-        AnnotationTask(
-            rankings=[r.key for r in rankings],
-            candidate=c.candidate).put()
-    return {'make_tasks': 'succeeded'}
+# @_REG.api_endpoint(secured=True)
+# def make_tasks():
+#     """ Make tasks based on candidates. """
+#     candidates = ExpertiseRank.listCandidates()
+#     for c in candidates:
+#         rankings = ExpertiseRank.getForCandidate(c.candidate)
+#         AnnotationTask(
+#             rankings=[r.key for r in rankings],
+#             candidate=c.candidate).put()
+#     return {'make_tasks': 'succeeded'}
 
 
 @_REG.api_endpoint()
@@ -261,7 +276,23 @@ def clear_tasks():
     """ Remove all tasks. """
     ts = [t.key for t in AnnotationTask.query().fetch()]
     ndb.delete_multi(ts)
-    return {'clear_tasks': 'succeeded'}
+    return {
+        'action': 'clear_tasks',
+        'succeeded': True,
+        'deleted': len(ts)
+    }
+
+
+@_REG.api_endpoint()
+def clear_taskpackages():
+    """ Remove all tasks. """
+    ts = [t.key for t in TaskPackage.query().fetch()]
+    ndb.delete_multi(ts)
+    return {
+        'action': 'clear_taskpackages',
+        'succeeded': True,
+        'deleted': len(ts)
+    }
 
 
 def partition(it, size=10, margin=None):
@@ -299,7 +330,7 @@ def partition(it, size=10, margin=None):
 
 
 @_REG.api_endpoint(secured=True)
-def make_qtasks():
+def make_tasks():
     """ Make tasks based on candidates. """
     candidates = ExpertiseRank.listCandidates()
     for c in candidates:
@@ -313,7 +344,7 @@ def make_qtasks():
 
 
 @_REG.api_endpoint(secured=True)
-def make_qtaskpackages():
+def make_topical_taskpackages():
     """ Group tasks in to packages. """
     mapping = sorted([(at.key, at.rankings[0].get().topic_id)
                       for at in AnnotationTask.query().fetch()],
@@ -332,7 +363,26 @@ def make_qtaskpackages():
 
 
 @_REG.api_endpoint(secured=True)
-def make_taskpackages():
+def make_methodical_taskpackages():
+    """ Group tasks in to packages. """
+    mapping = sorted([(at.key, at.rankings[0].get().rank_info['rank_method'])
+                      for at in AnnotationTask.query().fetch()],
+                     key=L[1])
+    for _, ts in groupby(mapping, key=L[1]):
+        for tkeys in partition([t[0] for t in ts], 10):
+            TaskPackage(
+                # parent=DEFAULT_PARENT_KEY,
+                tasks=tkeys,
+                progress=tkeys,
+                done_by=list(),
+                confirm_code=newToken('').split('-')[-1],
+                assigned_at=dt(2000, 1, 1)
+            ).put()
+    return {'make_taskpackages': 'succeeded'}
+
+
+@_REG.api_endpoint(secured=True)
+def make_random_taskpackages():
     """ Group tasks in to packages. """
     for ts in partition(AnnotationTask.query().fetch(), 10):
         tkeys = [t.key for t in ts]
