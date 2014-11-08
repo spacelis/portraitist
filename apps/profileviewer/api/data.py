@@ -324,14 +324,13 @@ def partition(iterator, size=10, margin=None):
 def make_simple_tasks():
     """ Make tasks based on candidates. """
     candidates = ExpertiseRank.listCandidates()
-    # pylint: disable=invalid-name
-    for c in candidates:
-        rankings = ExpertiseRank.getForCandidate(c.candidate)
-        for _, g in groupby(sorted(rankings, key=L.topic_id),
-                            key=L.topic_id):
+    for cand in candidates:
+        rankings = ExpertiseRank.getForCandidate(cand.candidate)
+        for _, grp in groupby(sorted(rankings, key=L.topic_id),
+                              key=L.topic_id):
             AnnotationTask(
-                rankings=[r.key for r in g],
-                candidate=c.candidate).put()
+                rankings=[r.key for r in grp],
+                candidate=cand.candidate).put()
     return {
         'action': 'make_tasks',
         'succeeded': True,
@@ -343,11 +342,11 @@ def make_simple_tasks():
 def make_compact_tasks():
     """ Make tasks based on candidates. """
     candidates = ExpertiseRank.listCandidates()
-    for c in candidates:
-        rankings = ExpertiseRank.getForCandidate(c.candidate)
+    for cand in candidates:
+        rankings = ExpertiseRank.getForCandidate(cand.candidate)
         AnnotationTask(
             rankings=[r.key for r in rankings],
-            candidate=c.candidate).put()
+            candidate=cand.candidate).put()
     return {'make_tasks': 'succeeded'}
 
 
