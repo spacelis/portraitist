@@ -262,18 +262,6 @@ def import_geoentities(filename):
     return import_entities(filename, loader)
 
 
-# @_REG.api_endpoint(secured=True)
-# def make_tasks():
-#     """ Make tasks based on candidates. """
-#     candidates = ExpertiseRank.listCandidates()
-#     for c in candidates:
-#         rankings = ExpertiseRank.getForCandidate(c.candidate)
-#         AnnotationTask(
-#             rankings=[r.key for r in rankings],
-#             candidate=c.candidate).put()
-#     return {'make_tasks': 'succeeded'}
-
-
 @_REG.api_endpoint()
 def clear_tasks():
     """ Remove all tasks. """
@@ -333,7 +321,7 @@ def partition(iterator, size=10, margin=None):
 
 
 @_REG.api_endpoint(secured=True)
-def make_tasks():
+def make_simple_tasks():
     """ Make tasks based on candidates. """
     candidates = ExpertiseRank.listCandidates()
     # pylint: disable=invalid-name
@@ -349,6 +337,18 @@ def make_tasks():
         'succeeded': True,
         'tasks': len(AnnotationTask.query().fetch(keys_only=True))
     }
+
+
+@_REG.api_endpoint(secured=True)
+def make_compact_tasks():
+    """ Make tasks based on candidates. """
+    candidates = ExpertiseRank.listCandidates()
+    for c in candidates:
+        rankings = ExpertiseRank.getForCandidate(c.candidate)
+        AnnotationTask(
+            rankings=[r.key for r in rankings],
+            candidate=c.candidate).put()
+    return {'make_tasks': 'succeeded'}
 
 
 @_REG.api_endpoint(secured=True)
