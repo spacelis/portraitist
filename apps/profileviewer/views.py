@@ -292,8 +292,8 @@ def annotation_view(request, task_key):
     ts = [r.topic.get() for r in rs]
     ex2title = lambda ex: '\n'.join(
         ['Example Inquiry:'] + [q + '?' for q in ex.split('? ')])[:-1]
-    rk2title = lambda rk: "%s, %s: %s" % \
-        (rk['rank_method', 'profile_type', 'rank'])
+    rk2title = lambda rk: '\n'.join(
+        ["%(rank_method)s, %(profile_type)s: %(rank)s" % r for r in rk])
     topics = {r.topic_id: {
         'topic_id': r.topic_id,
         'topic_type': t.level,
