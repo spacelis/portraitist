@@ -27,7 +27,6 @@ csv.field_size_limit(sys.maxsize)
 
 from fn import Stream
 from fn import _ as L
-from fn import F
 from fn.iters import drop
 from fn.uniform import zip_longest
 from fn.uniform import map  # pylint: disable=redefined-builtin
@@ -41,8 +40,8 @@ from apps.profileviewer.models import _k
 from apps.profileviewer.models import Judgement
 from apps.profileviewer.models import AnnotationTask
 from apps.profileviewer.models import TaskPackage
-from apps.profileviewer.util import throttle_map
 from apps.profileviewer.api import APIRegistry
+from apps.profileviewer.util import throttle_map
 from apps.profileviewer.util import fixCompressedEntity
 from apps.profileviewer.util import listCompressedProperty
 
@@ -180,15 +179,16 @@ def import_rankings(filename):
 
     """
     def loader(rec):
-        """ Loader for Twitter accounts and checkins. """
+        """ Loader for Rankings. """
         ExpertiseRank(
             # parent=DEFAULT_PARENT_KEY,
             topic_id=rec['topic_id'],
             topic=GeoEntity.getByTFId(rec['associate_id']).key,
             region=rec['region'],
             candidate=TwitterAccount.getByScreenName(rec['candidate']).key,
-            rank=int(rec['rank']),
-            rank_info=json.loads(rec['rank_info'])).put()
+            rank_info={'rank_method': rec['rank_method'],
+                       'profile_type': rec['profile_type'],
+                       'rank': rec['rank']}).put()
     return import_entities(filename, loader)
 
 
@@ -250,7 +250,7 @@ def import_geoentities(filename):
     """
 
     def loader(rec):
-        """ Loader for Twitter accounts and checkins. """
+        """ Loader for Location info. """
         info = json.loads(rec['info'])
         GeoEntity(
             tfid=info['id'],
@@ -381,8 +381,7 @@ def make_methodical_taskpackages():
         """ iterating though pairs of task and rank_method."""
         for atask in AnnotationTask.query().fetch():
             for rank_key in atask.rankings:
-                for info in rank_key.get().rank_info:
-                    yield atask.key, info['rank_method']
+                yield atask.key, rank_key.get().rank_info['rank_method']
     pairs = sorted(iter_annotationtask(), key=L[1])
     for _, tasks in groupby(pairs, key=L[1]):
         for tkeys in partition([t[0] for t in tasks], 10):
