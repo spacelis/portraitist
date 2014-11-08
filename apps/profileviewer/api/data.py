@@ -183,8 +183,7 @@ def import_rankings(filename):
             region=r['region'],
             candidate=TwitterAccount.getByScreenName(r['candidate']).key,
             rank=int(r['rank']),
-            rank_info={'profile': r['profile_type'],
-                       'method': r['rank_method']},).put()
+            rank_info=json.loads(r['rank_info'])).put()
     return import_entities(filename, loader)
 
 

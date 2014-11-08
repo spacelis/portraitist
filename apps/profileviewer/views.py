@@ -286,16 +286,20 @@ def annotation_view(request, task_key):
     user = get_user(request)
     if user.task_package is None and not settings.DEBUG:
         raise Http404
+    show_rk = request_property(request, 'show_rk', False)
     task = _k(task_key, 'AnnotationTask').get()
     rs = [r.get() for r in task.rankings]
     ts = [r.topic.get() for r in rs]
+    ex2title = lambda ex: '\n'.join(
+        ['Example Inquiry:'] + [q + '?' for q in ex.split('? ')])[:-1]
+    rk2title = lambda rk: "%s, %s: %s" % \
+        (rk['rank_method', 'profile_type', 'rank'])
     topics = {r.topic_id: {
         'topic_id': r.topic_id,
         'topic_type': t.level,
         'topic': t.name,
         'region': r.region,
-        'example': '\n'.join(['Example Inquiry:'] +
-                             [q + '?' for q in t.example.split('? ')])[:-1],
+        'title': ex2title(t.example) if not show_rk else rk2title(r.rank_info)
     } for t, r in zip(ts, rs)}
 
     # make filters out of topics
