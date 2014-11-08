@@ -16,15 +16,17 @@
           <div class="list-group-item">
             <div class="row">
               <div class="col-sm-8">
-                <abbr title="{{ t.title }}">
-                  {% if t.topic_type == 'POI' %}
-                  <a href="http://www.google.com/search?q={{ t.topic }}+{{ t.region }}" target="_blank">
+                {% if t.topic_type == 'POI' %} the place called
+                  <abbr title="{{ t.title }}">
+                    <a href="http://www.google.com/search?q={{ t.topic }}+{{ t.region }}" target="_blank">
+                      <b>{{ t.topic }}</b>
+                    </a>
+                  </abbr> in <b>{{ t.region }}</b>?
+                {% else %} the places in the category of
+                  <abbr title="{{ t.title }}">
                     <b>{{ t.topic }}</b>
-                  </a>
-                  {% else %}
-                    <b>{{ t.topic }}</b>
-                  {% endif %}
-                </abbr> in <b>{{ t.region }}</b>?
+                  </abbr> in <b>{{ t.region }}</b>?
+                {% endif %}
               </div>
               <div class="col-sm-4" align="right">
                 <div class="btn-group btn-group-xs btn-judgement" data-toggle="buttons">
