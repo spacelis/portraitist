@@ -36,13 +36,15 @@ def throttle_map(it, callback, size=20):
     :size: The max number of concurrent in-process futures.
     """
     l = list()
-    for r in it:
+    i = 0
+    for i, r in enumerate(it):
         if len(l) < size:
             l.append(callback(r))
         else:
             f = ndb.Future.wait_any(l)
             l.remove(f)
             l.append(callback(r))
+    return i
 
 
 def get_user(request):

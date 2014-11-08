@@ -142,14 +142,14 @@ def import_entities(filename, loader, pool=20):
 
     try:
         with flexopen(path) as fin:
-            throttle_map(csv.DictReader(fin), async_loader, pool)
+            cnt = throttle_map(csv.DictReader(fin), async_loader, pool)
     except IOError:
         raise Http404
     return {
         'action': 'import',
         'type': loader.func_doc,
         'succeeded': True,
-        'imported': 0  # FIXME: put in the correct num
+        'imported': cnt
     }
 
 
