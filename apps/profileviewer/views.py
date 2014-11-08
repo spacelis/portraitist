@@ -12,10 +12,14 @@ Description:
 """
 
 import json
+from copy import copy
 from decorator import decorator
 from collections import namedtuple
 from itertools import groupby
-from fn import _ as X
+from fn import _ as L
+from fn import op
+from fn.iters import map
+from fn import F
 
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
@@ -114,7 +118,7 @@ def pagerouter(request):
 
     try:
         task_key = user.task_package.get().nextTaskKey()
-        return redirect('/task/%s' %
+        return redirect('/task/%s?show_rk=1' %
                         (task_key.urlsafe(),))
     except TaskPackage.NoMoreTask as e:
         return redirect('/confirm_code/' + e.cf_code)
@@ -234,13 +238,13 @@ class FilterSetMaker(object):
                 g.next().pid,
                 'p',
                 FilterSetMaker.getPoiDescription(
-                    set(reduce((X + X),
+                    set(reduce((L + L),
                                [[('in', p.cate), ('in', p.zcate)] for p in g],
                                []))
                 )
             )
-            for poi, g in groupby(sorted(self.relationship, key=X.poi),
-                                  key=X.poi)
+            for poi, g in groupby(sorted(self.relationship, key=L.poi),
+                                  key=L.poi)
             if poi
         ] + [
             FilterSetMaker.Filter(
@@ -248,13 +252,13 @@ class FilterSetMaker(object):
                 None,
                 'c',
                 FilterSetMaker.getCateDescription(
-                    set(reduce((X + X),
+                    set(reduce((L + L),
                                [[('has', p.poi), ('in', p.zcate)] for p in g],
                                []))
                 )
             )
-            for cate, g in groupby(sorted(self.relationship, key=X.cate),
-                                   key=X.cate)
+            for cate, g in groupby(sorted(self.relationship, key=L.cate),
+                                   key=L.cate)
             if cate
         ] + [
             FilterSetMaker.Filter(
@@ -262,13 +266,13 @@ class FilterSetMaker(object):
                 None,
                 'z',
                 FilterSetMaker.getZCateDescription(
-                    set(reduce((X + X),
+                    set(reduce((L + L),
                                [[('has', p.poi), ('has', p.cate)] for p in g],
                                []))
                 )
             )
-            for zcate, g in groupby(sorted(self.relationship, key=X.zcate),
-                                    key=X.zcate)
+            for zcate, g in groupby(sorted(self.relationship, key=L.zcate),
+                                    key=L.zcate)
             if zcate
         ]
         # print '\n'.join([str(r) for r in rel])
@@ -290,21 +294,35 @@ def annotation_view(request, task_key):
     task = _k(task_key, 'AnnotationTask').get()
     rs = [r.get() for r in task.rankings]
     ts = [r.topic.get() for r in rs]
-    ex2title = lambda ex: '\n'.join(
-        ['Example Inquiry:'] + [q + '?' for q in ex.split('? ')])[:-1]
-    rk2title = lambda rk: '\n'.join(
-        ["%(rank_method)s, %(profile_type)s: %(rank)s" % r for r in rk])
-    topics = {r.topic_id: {
-        'topic_id': r.topic_id,
-        'topic_type': t.level,
-        'topic': t.name,
-        'region': r.region,
-        'title': ex2title(t.example) if not show_rk else rk2title(r.rank_info)
-    } for t, r in zip(ts, rs)}
+    if not show_rk:
+        title = lambda ts, _: '\n'.join(
+            ['Example Inquiry:'] +
+            [q + '?'
+             for q in ts[0].ex.split('? ')])[:-1]
+    else:
+        title = lambda _, rs: '\n'.join(
+            ["%(rank_method)s, %(profile_type)s: %(rank)s" % r.rank_info
+             for r in rs])
+
+    def mk_topic(ts, rs):
+        return {'topic_id': rs[0].topic_id,
+                'topic_type': ts[0].level,
+                'topic': ts[0].name,
+                'region': rs[0].region,
+                'title': title(ts, rs)}
+
+    red = op.foldl(lambda x, y: dict(x.items() + y.items()), {})
+    topics = red(map(
+        F() >> (lambda item: (item[0], list(item[1]))) >>
+        (lambda item: {item[0]: mk_topic(*zip(*item[1]))}),
+        groupby(
+            sorted(
+                zip(ts, rs), key=L[1].topic_id),
+            key=L[1].topic_id)))
 
     # make filters out of topics
     fsm = FilterSetMaker()
-    for _, g in groupby(ts, key=X.name):
+    for _, g in groupby(ts, key=L.name):
         fsm.addTopic(g.next())
     fs = fsm.getFilterSet()
     fs_injson = json.dumps([

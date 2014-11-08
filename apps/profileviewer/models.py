@@ -389,7 +389,6 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
 
         """
         ts = dt.utcnow()
-
         fs = [
             Judgement(
                 judge=judge.key,
@@ -413,7 +412,6 @@ class ExpertiseRank(EncodableModel):  # pylint: disable=R0903,W0223
     topic = ndb.model.KeyProperty(indexed=True, kind=GeoEntity)
     region = ndb.model.StringProperty(indexed=True)
     candidate = ndb.model.KeyProperty(indexed=True, kind=TwitterAccount)
-    rank = ndb.model.IntegerProperty(indexed=False)
     rank_info = ndb.model.JsonProperty(indexed=False, compressed=True)
     # e.g., methods, profile
 
