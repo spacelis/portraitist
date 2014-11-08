@@ -29,7 +29,7 @@ from fn import Stream
 from fn import _ as L
 from fn.iters import drop
 from fn.uniform import zip_longest
-from fn.uniform import map
+from fn.uniform import map  # pylint: disable=redefined-builtin
 from django.http import Http404
 from django.http import HttpResponse
 
@@ -73,12 +73,11 @@ def checkins(candidate):
 
     """
     try:
-        c = _k(candidate)
-        assert c.kind() == 'TwitterAccount'
-        return c.get().checkins
+        ckey = _k(candidate)
+        assert ckey.kind() == 'TwitterAccount'
+        return ckey.get().checkins
     except AssertionError:
-        return {'error': 'Please specify a valid key to'
-                'a twiter account.'}
+        return {'error': 'Please specify a valid key toa twiter account.'}
 
 
 @_REG.api_endpoint(secured=True, tojson=False)
@@ -92,11 +91,11 @@ def export_judgements(_):
         """ An iterator over all judgements """
         for j in Judgement.query().fetch():
             yield _j({
-                k: v.urlsafe()
-                if isinstance(
-                    Judgement._properties[k],  # pylint: disable=W0212
-                    ndb.model.KeyProperty)
-                else v
+                k: (v.urlsafe()
+                    if isinstance(
+                        Judgement._properties[k],  # pylint: disable=W0212
+                        ndb.model.KeyProperty)
+                    else v)
                 for k, v in j.to_dict()
             }) + '\n'
     return HttpResponse(iter_judgement(), mimetype='application/json')
@@ -137,9 +136,9 @@ def import_entities(filename, loader, pool=20):
     path = os.path.join('apps/data', filename)
 
     @ndb.tasklet
-    def async_loader(r):
+    def async_loader(rec):
         """ Async loader. """
-        ndb.Return(loader(r))
+        ndb.Return(loader(rec))
 
     try:
         with flexopen(path) as fin:
@@ -150,7 +149,7 @@ def import_entities(filename, loader, pool=20):
         'action': 'import',
         'type': loader.func_doc,
         'succeeded': True,
-        'imported': 0
+        'imported': 0  # FIXME: put in the correct num
     }
 
 
@@ -162,12 +161,12 @@ def import_candidates(filename):
     :returns: @todo
 
     """
-    def loader(r):
+    def loader(rec):
         """ Loader for Twitter accounts and checkins. """
         TwitterAccount(
             # parent=DEFAULT_PARENT_KEY,
-            screen_name=r['screen_name'],
-            checkins=json.loads(r['checkins'])).put()
+            screen_name=rec['screen_name'],
+            checkins=json.loads(rec['checkins'])).put()
     return import_entities(filename, loader)
 
 
@@ -179,16 +178,16 @@ def import_rankings(filename):
     :returns: @todo
 
     """
-    def loader(r):
+    def loader(rec):
         """ Loader for Twitter accounts and checkins. """
         ExpertiseRank(
             # parent=DEFAULT_PARENT_KEY,
-            topic_id=r['topic_id'],
-            topic=GeoEntity.getByTFId(r['associate_id']).key,
-            region=r['region'],
-            candidate=TwitterAccount.getByScreenName(r['candidate']).key,
-            rank=int(r['rank']),
-            rank_info=json.loads(r['rank_info'])).put()
+            topic_id=rec['topic_id'],
+            topic=GeoEntity.getByTFId(rec['associate_id']).key,
+            region=rec['region'],
+            candidate=TwitterAccount.getByScreenName(rec['candidate']).key,
+            rank=int(rec['rank']),
+            rank_info=json.loads(rec['rank_info'])).put()
     return import_entities(filename, loader)
 
 
@@ -198,6 +197,7 @@ def rankings_statistics():
     ranklists = set()
     rankpoints = set()
     num = 0
+    # pylint: disable=invalid-name
     for r in ExpertiseRank.query().fetch():
         ranklists.add((r.topic_id, r.region))
         rankpoints.add((r.topic_id, r.region, r.candidate))
@@ -215,6 +215,7 @@ def rankings_statistics():
 @_REG.api_endpoint(secured=True, disabled=True)
 def clear_rankings():
     """ Delete all rankings from data store. """
+    # pylint: disable=invalid-name
     rs = [r.key for r in ExpertiseRank.query().fetch()]
     ndb.delete_multi(rs)
     return {
@@ -227,9 +228,10 @@ def clear_rankings():
 @_REG.api_endpoint(secured=True, disabled=True)
 def reset_progress():
     """ Reset taskpackage progress. """
+    # pylint: disable=invalid-name
     tps = TaskPackage.query.fetch()
-    for tp in tps:
-        tp.progress = list(tp.tasks)
+    for taskpackage in tps:
+        taskpackage.progress = list(taskpackage.tasks)
     return {
         'action': 'reset_progress',
         'suceeded': True,
@@ -246,16 +248,16 @@ def import_geoentities(filename):
 
     """
 
-    def loader(r):
+    def loader(rec):
         """ Loader for Twitter accounts and checkins. """
-        d = json.loads(r['info'])
+        info = json.loads(rec['info'])
         GeoEntity(
-            tfid=d['id'],
-            name=d['name'],
-            level=r['level'],
-            info=json.loads(r['info']),
-            example=r['example'],
-            url=r['url']).put()
+            tfid=info['id'],
+            name=info['name'],
+            level=rec['level'],
+            info=json.loads(rec['info']),
+            example=rec['example'],
+            url=rec['url']).put()
     return import_entities(filename, loader)
 
 
@@ -274,40 +276,40 @@ def import_geoentities(filename):
 @_REG.api_endpoint()
 def clear_tasks():
     """ Remove all tasks. """
-    ts = [t.key for t in AnnotationTask.query().fetch()]
-    ndb.delete_multi(ts)
+    tasks = [t.key for t in AnnotationTask.query().fetch()]
+    ndb.delete_multi(tasks)
     return {
         'action': 'clear_tasks',
         'succeeded': True,
-        'deleted': len(ts)
+        'deleted': len(tasks)
     }
 
 
 @_REG.api_endpoint()
 def clear_taskpackages():
     """ Remove all tasks. """
-    ts = [t.key for t in TaskPackage.query().fetch()]
-    ndb.delete_multi(ts)
+    tasks = [t.key for t in TaskPackage.query().fetch()]
+    ndb.delete_multi(tasks)
     return {
         'action': 'clear_taskpackages',
         'succeeded': True,
-        'deleted': len(ts)
+        'deleted': len(tasks)
     }
 
 
-def partition(it, size=10, margin=None):
-    """ Partitioning it into groups of elements in given size.
+def partition(iterator, size=10, margin=None):
+    """ Partitioning iterator into groups of elements in given size.
 
     The margin is for the last group of elements.
     If there are less than margin number of elements, they will be
     grouped together. E.g., the last group may contain 15, 14, 13
     elements if margin is 15.
 
-    :it: An iterator through some elements.
+    :iterator: An iterator through some elements.
     :size: The maximum size of a group.
     :margin: If the rest of elements
     :yields: a group containing at most the given size of
-    the elements from it.
+    the elements from iterator.
 
     """
 
@@ -319,7 +321,7 @@ def partition(it, size=10, margin=None):
         (lambda x: [i[1] for i in x]),
         map(L[1],
             Stream() <<
-            groupby(izip(cycle([0] * size + [1] * size), it),
+            groupby(izip(cycle([0] * size + [1] * size), iterator),
                     key=L[0])))
     for nex, cur in zip_longest(drop(1, grps), grps):
         if nex and len(cur + nex) <= margin:
@@ -333,6 +335,7 @@ def partition(it, size=10, margin=None):
 def make_tasks():
     """ Make tasks based on candidates. """
     candidates = ExpertiseRank.listCandidates()
+    # pylint: disable=invalid-name
     for c in candidates:
         rankings = ExpertiseRank.getForCandidate(c.candidate)
         for _, g in groupby(sorted(rankings, key=L.topic_id),
@@ -340,7 +343,11 @@ def make_tasks():
             AnnotationTask(
                 rankings=[r.key for r in g],
                 candidate=c.candidate).put()
-    return {'make_tasks': 'succeeded'}
+    return {
+        'action': 'make_tasks',
+        'succeeded': True,
+        'tasks': len(AnnotationTask.query().fetch(keys_only=True))
+    }
 
 
 @_REG.api_endpoint(secured=True)
@@ -349,8 +356,8 @@ def make_topical_taskpackages():
     mapping = sorted([(at.key, at.rankings[0].get().topic_id)
                       for at in AnnotationTask.query().fetch()],
                      key=L[1])
-    for _, ts in groupby(mapping, key=L[1]):
-        for tkeys in partition([t[0] for t in ts], 10):
+    for _, tasks in groupby(mapping, key=L[1]):
+        for tkeys in partition([t[0] for t in tasks], 10):
             TaskPackage(
                 # parent=DEFAULT_PARENT_KEY,
                 tasks=tkeys,
@@ -359,7 +366,11 @@ def make_topical_taskpackages():
                 confirm_code=newToken('').split('-')[-1],
                 assigned_at=dt(2000, 1, 1)
             ).put()
-    return {'make_taskpackages': 'succeeded'}
+    return {
+        'action': 'make_taskpackages',
+        'succeeded': True,
+        'tasks': len(TaskPackage.query().fetch(keys_only=True))
+    }
 
 
 @_REG.api_endpoint(secured=True)
@@ -368,8 +379,8 @@ def make_methodical_taskpackages():
     mapping = sorted([(at.key, at.rankings[0].get().rank_info['rank_method'])
                       for at in AnnotationTask.query().fetch()],
                      key=L[1])
-    for _, ts in groupby(mapping, key=L[1]):
-        for tkeys in partition([t[0] for t in ts], 10):
+    for _, tasks in groupby(mapping, key=L[1]):
+        for tkeys in partition([t[0] for t in tasks], 10):
             TaskPackage(
                 # parent=DEFAULT_PARENT_KEY,
                 tasks=tkeys,
@@ -378,14 +389,18 @@ def make_methodical_taskpackages():
                 confirm_code=newToken('').split('-')[-1],
                 assigned_at=dt(2000, 1, 1)
             ).put()
-    return {'make_taskpackages': 'succeeded'}
+    return {
+        'action': 'make_taskpackages',
+        'succeeded': True,
+        'tasks': len(TaskPackage.query().fetch(keys_only=True))
+    }
 
 
 @_REG.api_endpoint(secured=True)
 def make_random_taskpackages():
     """ Group tasks in to packages. """
-    for ts in partition(AnnotationTask.query().fetch(), 10):
-        tkeys = [t.key for t in ts]
+    for tasks in partition(AnnotationTask.query().fetch(), 10):
+        tkeys = [t.key for t in tasks]
         TaskPackage(
             # parent=DEFAULT_PARENT_KEY,
             tasks=tkeys,
@@ -405,8 +420,8 @@ def assign_taskpackage(_user):
     :returns: @todo
 
     """
-    tp = TaskPackage.fetch_unassigned(1)[0]
-    _user.assign(tp)
+    taskpackage = TaskPackage.fetch_unassigned(1)[0]
+    _user.assign(taskpackage)
     return {'action': 'assign_taskpackage',
             'succeeded': True,
             'redirect': '/pagerouter'}
@@ -426,13 +441,12 @@ def export_taskpackages(_request):
 
     csvwr = csv.DictWriter(response, ['tpkey', 'confirm_code', 'package_size'])
     csvwr.writeheader()
-    for tp in TaskPackage.query().fetch():
-        if len(tp.progress) == 0:
+    for taskpackage in TaskPackage.query().fetch():
+        if len(taskpackage.progress) == 0:
             continue
-        csvwr.writerow({'tpkey': url_template(tp.key.urlsafe()),
-                        'confirm_code': tp.confirm_code,
-                        'package_size': str(len(tp.tasks)),
-                        })
+        csvwr.writerow({'tpkey': url_template(taskpackage.key.urlsafe()),
+                        'confirm_code': taskpackage.confirm_code,
+                        'package_size': str(len(taskpackage.tasks))})
     return response
 
 
@@ -442,7 +456,14 @@ def assert_error():
     assert False
 
 
-def addTasksToFix(model):
+# Fix compression wrapping for the restored data
+
+
+def add_fixing_task(model):
+    """ Add a fixing task to GAE queue so that the server will call the tasks
+        at the defined schedule rate.
+
+    """
     fields = listCompressedProperty(model)
     i = 0
     for i, k in enumerate(model.query().fetch(keys_only=True)):
@@ -450,8 +471,7 @@ def addTasksToFix(model):
                      'fields': ','.join(fields),
                      '_admin_key': 'tu2013delft'},
              url='/api/data/fix_entity',
-             method='GET'
-             ).add('batch')
+             method='GET').add('batch')
     return i
 
 
@@ -461,9 +481,9 @@ def fix_datastore():
     :returns: @todo
 
     """
-    cnt = addTasksToFix(TwitterAccount)
-    cnt += addTasksToFix(GeoEntity)
-    cnt += addTasksToFix(ExpertiseRank)
+    cnt = add_fixing_task(TwitterAccount)
+    cnt += add_fixing_task(GeoEntity)
+    cnt += add_fixing_task(ExpertiseRank)
     return {
         'action': 'fix_datastore',
         'suceeded': None,
