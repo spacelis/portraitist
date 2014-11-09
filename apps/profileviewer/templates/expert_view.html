@@ -80,9 +80,14 @@
                 <span class="glyphicon glyphicon-search"></span> {{ f.name }}
               </button>
               {% endfor %}
+              {% for t in topics %}
+              <button type="button" class="btn btn-default btn-xs" onClick="profileviewer.focusTopic('{{ t.region }}', 'r')" title="{{ f.description }}">
+                <span class="glyphicon glyphicon-search"></span> {{ t.region }}
+              </button>
+              {% endfor %}
             </div>
             <div class="btn-group">
-              <button type="button" class="btn btn-default btn-xs" onClick="profileviewer.unfocusAll()" title="Remove all filters currently applied." >
+              <button type="button" class="btn btn-default btn-xs" onClick="profileviewer.unfocus()" title="Remove all filters currently applied." >
                 <span class="glyphicon glyphicon-repeat"></span> Reset
               </button>
             </div>

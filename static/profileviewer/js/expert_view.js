@@ -36,7 +36,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       0x1f77b4, 0xff7f0e, 0x2ca02c, 0xd62728, 0x9467bd, 0x8c564b, 0xe377c2, 0xbcbd22, 0x17becf,
       0x2D34CB, 0xffbb78, 0x98df8a, 0xff9896, 0xc5b0d5, 0xc49c94, 0xf7b6d2, 0xdbdb8d, 0x9edae5
     ].map(function(value){return new d3.rgb(value >> 16, value >> 8 & 0xff, value & 0xff) + ""; })
-  )
+  );
 
   function _updateMap (poi_groups){
     var pois = poi_groups.top(30);
@@ -116,9 +116,9 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
           return excludes.some(function(x){
             return x === g.key.valueOf();
           }) && !topRows.some(function(x){
-            return x.key.valueOf() === g.key.valueOf()
+            return x.key.valueOf() === g.key.valueOf();
           });});
-        rows.forEach(function(d){topRows.push(d)});
+        rows.forEach(function(d){topRows.push(d);});
         // Fixes D3 transitions on "Others" slice of pie
         if(typeof(topRows[0].key) === "object"){
           _chart.othersLabel({valueOf: function(){return "Others";}});
@@ -133,6 +133,15 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
         .map(function(f){return f.pid || f.name;});
     }
 
+    function updateSpotlight(_chart){
+        if(_chart.hasFilter()){
+          $(_chart.anchor()).parent().parent().addClass("chart-container-focus");
+        }
+        else {
+          $(_chart.anchor()).parent().parent().removeClass("chart-container-focus");
+        }
+    }
+
     var w = $("#chart-zcate-pie").width();
     var zcate_chart = dc.pieChart("#chart-zcate-pie")
       .width(w) // (optional) define chart width, :default = 200
@@ -143,14 +152,15 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       .innerRadius(w / 200 * 40)
       .dimension(by_zcate) // set dimension
       .group(checkins_by_zcate) // set group
-      .on("filtered", function(){
-        _updateMap(checkins_by_poi);
-      })
       .title(function (obj){
         return obj.data.key + ":  " + obj.data.value + " check-in(s)";
       })
       .renderTitle(true);
     patchGrouper(zcate_chart, levelFilters("z"));
+    zcate_chart.on("filtered", function(){
+      _updateMap(checkins_by_poi);
+      updateSpotlight(zcate_chart);
+    });
 
     w = $("#chart-cate-pie").width();
     var cate_chart = dc.pieChart("#chart-cate-pie")
@@ -163,14 +173,15 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       .dimension(by_category) // set dimension
       .group(checkins_by_category) // set group
       .slicesCap(10)
-      .on("filtered", function(){
-        _updateMap(checkins_by_poi);
-      })
       .title(function (obj){
         return obj.data.key + ":  " + obj.data.value + " check-in(s)";
       })
       .renderTitle(true);
     patchGrouper(cate_chart, levelFilters("c"));
+    cate_chart.on("filtered", function(){
+      _updateMap(checkins_by_poi);
+      updateSpotlight(cate_chart);
+    });
 
     w = $("#chart-region-pie").width();
     var region_chart = dc.pieChart("#chart-region-pie")
@@ -183,13 +194,14 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       .dimension(by_region) // set dimension
       .group(checkins_by_region) // set group
       .slicesCap(10)
-      .on("filtered", function(){
-        _updateMap(checkins_by_poi);
-      })
       .title(function (obj){
         return obj.data.key + ":  " + obj.data.value + " check-in(s)";
       })
       .renderTitle(true);
+    region_chart.on("filtered", function(){
+      _updateMap(checkins_by_poi);
+      updateSpotlight(region_chart);
+    });
 
     w = $("#chart-poi-pie").width();
     var poi_chart = dc.pieChart("#chart-poi-pie")
@@ -220,16 +232,17 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
         }
       })
       .slicesCap(10)
-      .on("filtered", function(chart, filter){
-        if (chart.hasFilter(filter)){
-          _updateMap({top: function(){ return [{key: filter}]; }});
-        }
-        else{
-          _updateMap(checkins_by_poi);
-        }
-      })
       .renderTitle(true);
     patchGrouper(poi_chart, levelFilters("p"));
+    poi_chart.on("filtered", function(chart, filter){
+      if (chart.hasFilter(filter)){
+        _updateMap({top: function(){ return [{key: filter}]; }});
+      }
+      else{
+        _updateMap(checkins_by_poi);
+      }
+      updateSpotlight(poi_chart);
+    });
 
     w = $("#chart-timeline").width();
     var timeline_chart = dc.barChart("#chart-timeline")
@@ -251,11 +264,12 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       .renderVerticalGridLines(true)
       .brushOn(true)
       .title(function(d) { return "Value: " + d.value; })
-      .on("filtered", function(){
-        _updateMap(checkins_by_poi);
-      })
       .renderTitle(true);
     timeline_chart.yAxis().tickValues([0, 5, 10, 15,20]);
+    timeline_chart.on("filtered", function(){
+      _updateMap(checkins_by_poi);
+      updateSpotlight(timeline_chart);
+    });
 
     dc.renderAll();
     renderMap(checkins_by_poi);
@@ -290,31 +304,33 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
 
   function _focus(topic, chart){
     chart.filter(topic);
-    $(chart.anchor()).parent().parent().addClass("chart-container-focus");
   }
 
-  function unfocusAll(){
-    $(".chart-container-focus").removeClass("chart-container-focus");
-    dc.filterAll();
+  function unfocus(charts){
+    if (charts) {
+      charts.forEach(function(c){c.filterAll();});
+    }
+    else {
+      dc.filterAll();
+    }
     dc.redrawAll();
   }
 
   function focusTopic(topic, chartType){
-    unfocusAll();
 
     if(chartType === "p"){
-      var p;
       for(var i in _allpois){
         if(topic === _allpois[i].key.name){
-          p = _allpois[i].key;
+          topic = _allpois[i].key;
           break;
         }
       }
-      _focus(p, _chartTypeMap[chartType]);
     }
-    else{
-      _focus(topic, _chartTypeMap[chartType]);
+
+    if(["p", "z", "c"].indexOf(chartType) >= 0){
+      unfocus([_chartTypeMap.p, _chartTypeMap.c, _chartTypeMap.z]);
     }
+    _focus(topic, _chartTypeMap[chartType]);
 
     dc.redrawAll();
   }
@@ -322,7 +338,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
   return {
     initCharts: initCharts,
     focusTopic: focusTopic,
-    unfocusAll: unfocusAll
+    unfocus: unfocus
   };
 }
 
