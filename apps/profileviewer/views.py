@@ -298,7 +298,7 @@ def annotation_view(request, task_key):
         title = lambda ts, _: '\n'.join(
             ['Example Inquiry:'] +
             [q + '?'
-             for q in ts[0].ex.split('? ')])[:-1]
+             for q in ts[0].example.split('? ')])[:-1]
     else:
         title = lambda _, rs: '\n'.join(
             ["{0}, {1}: {2}".format(r.rank_method, r.rank_info['profile_type'], r.rank_info['rank'])
