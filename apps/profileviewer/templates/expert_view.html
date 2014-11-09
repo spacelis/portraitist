@@ -2,18 +2,24 @@
 {% block content %}
 <div class='container'>
   <div id="judgement-panel" class="panel panel-default" style="z-index: 100">
-    <div class="panel-heading">
-      <b>
-        Based on the information provided below, how much does the profile's owner know about
-      </b>
-    </div>
-    <div class="panel-body">
-      <form id="pv-judgement-form" action="/submit_annotation" method="post" accept-charset="utf-8" role="form">
+      <div class="panel-heading">
+        <div class="row">
+          <b class="col-sm-9">
+            Based on the information provided below, how much does the profile's owner know about
+          </b>
+          <div class="col-sm-3">
+            <button onClick="javascript:$('#pv-judgement-form').submit()" class="btn btn-success btn-xs btn-float-right"><span class="glyphicon glyphicon-play"></span> Submit</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <form id="pv-judgement-form" action="/submit_annotation" method="post" accept-charset="utf-8" role="form">
         <input type="hidden" name="pv-task-key" value="{{ task_key }}" id="judgement-candidate">
+        <input type="hidden" name="pv-annotation-traceback" value="" id="id-input-traceback">
         {% csrf_token %}
-        <div class="list-group">
+        {# <div class="list-group"> #}
           {% for t in topics %}
-          <div class="list-group-item">
+          {# <div class="list-group-item"> #}
             <div class="row">
               <div class="col-sm-8">
                 {% if t.topic_type == 'POI' %} the place called
@@ -53,25 +59,20 @@
               <div class="col-sm-1" align="right">
               </div>
             </div>
-          </div>
+          {# </div> #}
           {% endfor %}
-        </div>
-        <div class="row">
-          <div class="col-sm-12">
-            <button type="submit" class="btn btn-primary btn-xs btn-float-right">Submit &amp; Continue</button>
-            <input type="hidden" name="pv-annotation-traceback" value="" id="id-input-traceback">
-          </div>
-        </div>
-      </form>
-
-    </div>
+        {# </div> #}
+        </form>
+      </div>
   </div>
 
   <div class="panel panel-default">
     <div class="panel-heading">
       <div class="row">
-        <div class="col-sm-12">
+        <div class="col-sm-2">
           <b>Statistics</b>
+        </div>
+        <div class="col-sm-10">
           <div class="btn-toolbar btn-float-right">
             <div class="btn-group">
               {% for f in filters %}
@@ -92,6 +93,18 @@
       </div>
     </div>
     <div class="panel-body">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="panel panel-info">
+            <div class="panel-heading chart-label" title="This chart shows the number of check-ins per week."> 
+              Check-ins per week (filtered)
+            </div>
+            <div class="panel-body">
+              <div id="chart-timeline"> </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="row">
         <div class="col-sm-3">
           <div class="panel panel-info">
@@ -130,18 +143,6 @@
             </div>
             <div class="panel-footer chart-label" title="This chart shows the number of check-ins that were made at each of 4 cities."> 
               Regions 
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-sm-12">
-          <div class="panel panel-info">
-            <div class="panel-heading chart-label" title="This chart shows the number of check-ins per week."> 
-              Check-ins per week (filtered)
-            </div>
-            <div class="panel-body">
-              <div id="chart-timeline"> </div>
             </div>
           </div>
         </div>

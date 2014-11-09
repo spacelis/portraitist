@@ -21,7 +21,7 @@
         <a href="/instructions" class="navbar-brand">GeoExpert Judgment System</a>
       </div>
       <div class="collapse navbar-collapse navbar-ex1-collapse">
-        <ul class="nav navbar-nav navbar-right">
+        <ul class="nav navbar-nav navbar-left">
           <li id="id-tag-user-email" data-bind="visible: is_known" class="dropdown">
           <a data-bind="html: _namebtn" class="dropdown-toggle" data-toggle="dropdown"></a>
             <ul class="dropdown-menu">
@@ -31,7 +31,15 @@
             </ul>
           </li>
           {# <li id="id-tag-signup-login" data-bind="visible: is_known() == false"><a onClick="$('#id-dialog-signup-login').modal('show');">Sign Up / Login</a></li> #}
-          <li><a> Finished <span class="badge" data-bind="text: progress"></span></a></li>
+        </ul>
+        <ul class="nav navbar-nav" sytle="float: None;">
+          <li><a><span class="badge" data-bind="text: progress"></span> FINISHED</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <p class="navbar-text">
+            <img src="/static/profileviewer/images/dmirlogo.svg" title="Thanks for Raynor Vliegendhart's work on the vectorized logo." height="24px">
+            © DMIR (MMC) • TU Delft • 2014
+          </p>
         </ul>
       </div>
     </nav>
@@ -149,8 +157,6 @@
         <span id="not-until-bottom" class="glyphicon glyphicon-chevron-down"></span>
       </div>
       <div class="col-lg-4" align="right">
-        <img src="/static/profileviewer/images/dmirlogo.svg" title="Thanks for Raynor Vliegendhart's work on the vectorized logo." height="24px">
-        © DMIR • TU Delft • 2014</div>
       </div>
     </div>
 

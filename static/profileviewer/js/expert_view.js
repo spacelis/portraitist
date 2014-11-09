@@ -234,7 +234,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
     w = $("#chart-timeline").width();
     var timeline_chart = dc.barChart("#chart-timeline")
       .width(w) // (optional) define chart width, :default = 200
-      .height(120) // (optional) define chart height, :default = 200
+      .height(100) // (optional) define chart height, :default = 200
       .transitionDuration(500) // (optional) define chart transition duration, :default = 500
       .dimension(by_week) // set dimension
       .group(checkins_by_week) // set group
@@ -242,6 +242,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       .x(d3.time.scale().domain([new Date(2009, 0, 1), new Date(2013, 7, 0)]))
       .round(d3.time.week.round)
       .xUnits(d3.time.weeks)
+      .renderVerticalGridLines(false)
       .elasticY(false)
       .y(d3.scale.linear().domain([0, 20]))
       .centerBar(true)
@@ -254,6 +255,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
         _updateMap(checkins_by_poi);
       })
       .renderTitle(true);
+    timeline_chart.yAxis().tickValues([0, 5, 10, 15,20]);
 
     dc.renderAll();
     renderMap(checkins_by_poi);
