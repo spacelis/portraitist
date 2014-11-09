@@ -393,10 +393,12 @@ def make_methodical_taskpackages():
         """ iterating though pairs of task and rank_method."""
         for atask in AnnotationTask.query().fetch():
             for rank_key in atask.rankings:
-                yield atask.key, rank_key.get().rank_info['rank_method']
-    pairs = sorted(iter_annotationtask(), key=L[1])
+                rank = rank_key.get()
+                if rank.rank_info['profile_type'] == 'rankCheckinProfile':
+                    yield atask.key, rank.rank_method, rank.topic_id
+    pairs = sorted(iter_annotationtask(), key=lambda x: (x[1], x[2]))
     cnt = 0
-    for _, tasks in groupby(pairs, key=L[1]):
+    for _, tasks in groupby(pairs, key=lambda x: (x[1], x[2])):
         for tkeys in partition([t[0] for t in tasks], 10):
             TaskPackage(
                 # parent=DEFAULT_PARENT_KEY,
