@@ -301,7 +301,7 @@ def annotation_view(request, task_key):
              for q in ts[0].ex.split('? ')])[:-1]
     else:
         title = lambda _, rs: '\n'.join(
-            ["%(rank_method)s, %(profile_type)s: %(rank)s" % r.rank_info
+            ["{0}, {1}: {2}".format(r.rank_method, r.rank_info['profile_type'], r.rank_info['rank'])
              for r in rs])
 
     def mk_topic(ts, rs):

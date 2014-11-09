@@ -412,6 +412,7 @@ class ExpertiseRank(EncodableModel):  # pylint: disable=R0903,W0223
     topic = ndb.model.KeyProperty(indexed=True, kind=GeoEntity)
     region = ndb.model.StringProperty(indexed=True)
     candidate = ndb.model.KeyProperty(indexed=True, kind=TwitterAccount)
+    rank_method = ndb.model.StringProperty(indexed=True)
     rank_info = ndb.model.JsonProperty(indexed=False, compressed=True)
     # e.g., methods, profile
 
@@ -431,9 +432,14 @@ class ExpertiseRank(EncodableModel):  # pylint: disable=R0903,W0223
             ExpertiseRank.candidate == k_twitter_account).fetch()
 
     @staticmethod
-    def listCandidates():
+    def listCandidates(rank_method=None, topic_id=None):
         """ Return a list of distinct candidates. """
-        return ExpertiseRank.query(projection=['candidate'], distinct=True)
+        qry = ExpertiseRank.query(projection=['candidate'], distinct=True)
+        if rank_method:
+            qry = qry.filter(ExpertiseRank.rank_method == rank_method)
+        if topic_id:
+            qry = qry.filter(ExpertiseRank.topic_id == topic_id)
+        return qry
 
 
 class AnnotationTask(ndb.Model):  # pylint: disable=R0903

@@ -186,8 +186,8 @@ def import_rankings(filename):
             topic=GeoEntity.getByTFId(rec['associate_id']).key,
             region=rec['region'],
             candidate=TwitterAccount.getByScreenName(rec['candidate']).key,
-            rank_info={'rank_method': rec['rank_method'],
-                       'profile_type': rec['profile_type'],
+            rank_method=rec['rank_method'],
+            rank_info={'profile_type': rec['profile_type'],
                        'rank': rec['rank']}).put()
     return import_entities(filename, loader)
 
@@ -213,11 +213,11 @@ def rankings_statistics():
     }
 
 
-@_REG.api_endpoint(secured=True, disabled=True)
+@_REG.api_endpoint(secured=True)
 def clear_rankings():
     """ Delete all rankings from data store. """
     # pylint: disable=invalid-name
-    rs = [r.key for r in ExpertiseRank.query().fetch()]
+    rs = ExpertiseRank.query().fetch(keys_only=True)
     ndb.delete_multi(rs)
     return {
         'action': 'clear_rankings',
@@ -265,7 +265,7 @@ def import_geoentities(filename):
 @_REG.api_endpoint()
 def clear_tasks():
     """ Remove all tasks. """
-    tasks = [t.key for t in AnnotationTask.query().fetch()]
+    tasks = AnnotationTask.query().fetch(keys_only=True)
     ndb.delete_multi(tasks)
     return {
         'action': 'clear_tasks',
@@ -277,7 +277,7 @@ def clear_tasks():
 @_REG.api_endpoint()
 def clear_taskpackages():
     """ Remove all tasks. """
-    tasks = [t.key for t in TaskPackage.query().fetch()]
+    tasks = TaskPackage.query().fetch(keys_only=True)
     ndb.delete_multi(tasks)
     return {
         'action': 'clear_taskpackages',
@@ -321,9 +321,10 @@ def partition(iterator, size=10, margin=None):
 
 
 @_REG.api_endpoint(secured=True)
-def make_simple_tasks():
+def make_simple_tasks(rank_method, topic_id):
     """ Make tasks based on candidates. """
-    candidates = ExpertiseRank.listCandidates()
+    candidates = ExpertiseRank.listCandidates(rank_method, topic_id)
+    cnt = 0
     for cand in candidates:
         rankings = ExpertiseRank.getForCandidate(cand.candidate)
         for _, grp in groupby(sorted(rankings, key=L.topic_id),
@@ -331,10 +332,12 @@ def make_simple_tasks():
             AnnotationTask(
                 rankings=[r.key for r in grp],
                 candidate=cand.candidate).put()
+            cnt += 1
     return {
         'action': 'make_simple_tasks',
         'succeeded': True,
-        'tasks': len(AnnotationTask.query().fetch(keys_only=True))
+        'tasks': len(AnnotationTask.query().fetch(keys_only=True)),
+        'num': cnt
     }
 
 
@@ -342,15 +345,18 @@ def make_simple_tasks():
 def make_compact_tasks():
     """ Make tasks based on candidates. """
     candidates = ExpertiseRank.listCandidates()
+    cnt = 0
     for cand in candidates:
         rankings = ExpertiseRank.getForCandidate(cand.candidate)
         AnnotationTask(
             rankings=[r.key for r in rankings],
             candidate=cand.candidate).put()
+        cnt += 1
     return {
         'action': 'make_compact_tasks',
         'succeeded': True,
-        'tasks': len(AnnotationTask.query().fetch(keys_only=True))
+        'tasks': len(AnnotationTask.query().fetch(keys_only=True)),
+        'num': cnt
     }
 
 
@@ -360,6 +366,7 @@ def make_topical_taskpackages():
     mapping = sorted([(at.key, at.rankings[0].get().topic_id)
                       for at in AnnotationTask.query().fetch()],
                      key=L[1])
+    cnt = 0
     for _, tasks in groupby(mapping, key=L[1]):
         for tkeys in partition([t[0] for t in tasks], 10):
             TaskPackage(
@@ -370,10 +377,12 @@ def make_topical_taskpackages():
                 confirm_code=newToken('').split('-')[-1],
                 assigned_at=dt(2000, 1, 1)
             ).put()
+            cnt += 1
     return {
         'action': 'make_topical_taskpackages',
         'succeeded': True,
-        'task_packages': len(TaskPackage.query().fetch(keys_only=True))
+        'task_packages': len(TaskPackage.query().fetch(keys_only=True)),
+        'num': cnt
     }
 
 
@@ -386,6 +395,7 @@ def make_methodical_taskpackages():
             for rank_key in atask.rankings:
                 yield atask.key, rank_key.get().rank_info['rank_method']
     pairs = sorted(iter_annotationtask(), key=L[1])
+    cnt = 0
     for _, tasks in groupby(pairs, key=L[1]):
         for tkeys in partition([t[0] for t in tasks], 10):
             TaskPackage(
@@ -396,16 +406,19 @@ def make_methodical_taskpackages():
                 confirm_code=newToken('').split('-')[-1],
                 assigned_at=dt(2000, 1, 1)
             ).put()
+            cnt += 1
     return {
         'action': 'make_methodical_taskpackages',
         'succeeded': True,
-        'taskpackages': len(TaskPackage.query().fetch(keys_only=True))
+        'taskpackages': len(TaskPackage.query().fetch(keys_only=True)),
+        'num': cnt
     }
 
 
 @_REG.api_endpoint(secured=True)
 def make_random_taskpackages():
     """ Group tasks in to packages. """
+    cnt = 0
     for tasks in partition(AnnotationTask.query().fetch(), 10):
         tkeys = [t.key for t in tasks]
         TaskPackage(
@@ -416,10 +429,12 @@ def make_random_taskpackages():
             confirm_code=newToken('').split('-')[-1],
             assigned_at=dt(2000, 1, 1)
         ).put()
+        cnt += 1
     return {
         'action': 'make_random_taskpackages',
         'succeeded': True,
-        'taskpackages': len(TaskPackage.query().fetch(keys_only=True))
+        'taskpackages': len(TaskPackage.query().fetch(keys_only=True)),
+        'num': cnt
     }
 
 
