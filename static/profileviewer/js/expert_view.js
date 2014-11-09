@@ -47,9 +47,9 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       _map.addMarker({
         lat: poi.lat,
         lng: poi.lng,
-        title: poi.name + " (" + pois[i].value + " check-ins)\n" + poi.category.name + ", " + poi.category.zcategory,
+        title: poi.name + " (" + pois[i].value + " check-ins)\n" + poi.category.name + ", " + poi.category.zero_category_name,
         infoWindow: {
-          content: "<b>" + poi.name + "</b> (" + pois[i].value + " check-ins)<br>" + poi.category.name + ", " + poi.category.zcategory
+          content: "<b>" + poi.name + "</b> (" + pois[i].value + " check-ins)<br>" + poi.category.name + ", " + poi.category.zero_category_name
         },
         icon: "/static/profileviewer/images/map_icons/" + poi.category.id + "_black.png"
       });
