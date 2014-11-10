@@ -651,7 +651,7 @@ class User(EncodableModel):
         self.last_seen = dt.utcnow()
         memcache.set(key=self.session_token,  # pylint: disable=E1101
                      value=self,
-                     time=1800)
+                     time=7200)
         if not soft:
             self.put()
         return self
