@@ -188,7 +188,8 @@ def import_rankings(filename):
             candidate=TwitterAccount.getByScreenName(rec['candidate']).key,
             rank_method=rec['rank_method'],
             rank_info={'profile_type': rec['profile_type'],
-                       'rank': rec['rank']}).put()
+                       'rank': rec['rank'],
+                       'score': rec['score']}).put()
     return import_entities(filename, loader)
 
 

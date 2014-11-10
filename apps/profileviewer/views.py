@@ -118,7 +118,7 @@ def pagerouter(request):
 
     try:
         task_key = user.task_package.get().nextTaskKey()
-        return redirect('/task/%s?show_rk=1' %
+        return redirect('/task/%s?show_rk=1' %  # FIXME should be remove when release
                         (task_key.urlsafe(),))
     except TaskPackage.NoMoreTask as e:
         return redirect('/confirm_code/' + e.cf_code)
@@ -275,7 +275,6 @@ class FilterSetMaker(object):
                                     key=L.zcate)
             if zcate
         ]
-        # print '\n'.join([str(r) for r in rel])
         return rel
 
 
@@ -301,7 +300,8 @@ def annotation_view(request, task_key):
              for q in ts[0].example.split('? ')])[:-1]
     else:
         title = lambda _, rs: '\n'.join(
-            ["{0}, {1}: {2}".format(r.rank_method, r.rank_info['profile_type'], r.rank_info['rank'])
+            [rs[0].candidate.get().screen_name] +
+            ['{0}, {1[profile_type]}: {1[rank]} ({1[score]:.6})'.format(r.rank_method, r.rank_info)
              for r in rs])
 
     def mk_topic(ts, rs):

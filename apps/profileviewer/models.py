@@ -414,7 +414,7 @@ class ExpertiseRank(EncodableModel):  # pylint: disable=R0903,W0223
     candidate = ndb.model.KeyProperty(indexed=True, kind=TwitterAccount)
     rank_method = ndb.model.StringProperty(indexed=True)
     rank_info = ndb.model.JsonProperty(indexed=False, compressed=True)
-    # e.g., methods, profile
+    # e.g., methods, profile, score
 
     class ExpertNotExists(Http404):
         """ Exception when the expert queried does not exist"""
