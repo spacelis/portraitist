@@ -384,16 +384,18 @@ def submit_annotation(request):
     try:
         task_key = request.POST.get('pv-task-key', None)
         task = _k(task_key, 'AnnotationTask').get()
+
+        scores = get_scores(request)
+        ipaddr, user_agent = get_client(request)
+        tb = get_traceback(request)
+        Judgement.add(user, task, scores, ipaddr, user_agent, tb)
+
+        user.accomplish(task)
+
     except TypeError:
-        raise Http404
-
-    scores = get_scores(request)
-    ipaddr, user_agent = get_client(request)
-    tb = get_traceback(request)
-    Judgement.add(user, task, scores, ipaddr, user_agent, tb)
-
-    user.accomplish(task)
-
+        return HttpResponseNotFound('<h1> 404 </h1>')
+    except AssertionError:
+        return HttpResponseForbidden('<h1> Session Ended </h1><p> Try re-open the original link.</p>')
     return redirect('/pagerouter')
 
 
