@@ -28,6 +28,8 @@ function _control($){
     m_travel: 0,
     viewportwidth: viewportwidth,
     viewportheight: viewportheight,
+    pageheight: pageheight,
+    pagewidth: pagewidth,
     prev_pos: {PageX: 0, PageY: 0},
     init: true,
     trace: []
