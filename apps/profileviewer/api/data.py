@@ -462,18 +462,26 @@ def export_taskpackages(_request):
     :returns: @todo
 
     """
+    from collections import Counter
     url_template = lambda tpid: _request.build_absolute_uri(
         '/pagerouter?action=taskpackage&tpid=%s' % (tpid,))
     response = HttpResponse(content_type='text/plain')
     response['Content-Disposition'] = \
         'inline; filename="tpkeys-confirmation.csv"'
 
-    csvwr = csv.DictWriter(response, ['tpkey', 'confirm_code', 'package_size'])
+    def major_ranking(tasks):
+        """ Find the major rank_method in the tasks """
+        return Counter([r.get().rank_method
+                        for t in tasks
+                        for r in t.get().rankings]).most_common(1)[0]
+
+    csvwr = csv.DictWriter(response, ['tpkey', 'confirm_code', 'package_size', 'rank_method'])
     csvwr.writeheader()
     for taskpackage in TaskPackage.query().fetch():
         if len(taskpackage.progress) == 0:
             continue
         csvwr.writerow({'tpkey': url_template(taskpackage.key.urlsafe()),
+                        'rank_method': major_ranking(taskpackage.tasks),
                         'confirm_code': taskpackage.confirm_code,
                         'package_size': str(len(taskpackage.tasks))})
     return response
