@@ -91,7 +91,7 @@ function _control($){
     return (mouseState() && physicalState());
   }
   function getState(){
-    return state.trace;  // FIXME this may be unsafe, should be cloned.
+    return $.extend(true, {}, state);
   }
 
   function record(e){
