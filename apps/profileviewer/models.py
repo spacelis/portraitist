@@ -513,7 +513,7 @@ class TaskPackage(ndb.Model):
         :returns: None.
 
         """
-        assert task.key == self.progress[0], 'Not assigned: ' + task
+        assert task.key == self.progress[0], 'Not assigned: ' + task.key.urlsafe()
         del self.progress[0]
         self.put()
 
