@@ -337,7 +337,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
     dc.redrawAll();
   }
 
-  function filteredCheckins(k){
+  function filteredRecentCheckins(k){
     return _created_at.top(k);
   }
 
@@ -345,7 +345,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
     initCharts: initCharts,
     focusTopic: focusTopic,
     unfocus: unfocus,
-    filteredCheckins: filteredCheckins
+    filteredRecentCheckins: filteredRecentCheckins
   };
 }
 
