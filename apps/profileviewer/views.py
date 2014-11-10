@@ -12,21 +12,20 @@ Description:
 """
 
 import json
-from copy import copy
 from decorator import decorator
 from collections import namedtuple
 from itertools import groupby
 from fn import _ as L
-from fn import op
-from fn.iters import map
 from fn import F
+from fn import op
+from fn.iters import map  # pylint: disable=redefined-builtin
 
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
-from django.http import Http404
-from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseNotFound
+from django.http import HttpResponseForbidden
 from django.conf import settings
 
 from apps.profileviewer.models import _k
@@ -43,6 +42,13 @@ from apps.profileviewer.util import get_client
 
 
 COOKIE_LIFE = 90 * 24 * 3600
+HTTP404 = HttpResponseNotFound(
+    '''
+    <h1> Bad Request </h1>
+    <p> Please use the provided link to access the system.
+    Your session may be interrupted and you may enter the orginal link on CrowdFlower to continue. </p>
+    '''
+)
 
 
 def vdebug(x):
@@ -64,7 +70,7 @@ def login_required(view, *args, **kwargs):
     if user.key:
         view(*args, **kwargs)
     else:
-        raise PermissionDenied
+        return HttpResponseForbidden('<h1>403</h1>')
 
 
 def user_context(request):
@@ -122,7 +128,7 @@ def pagerouter(request):
                         (task_key.urlsafe(),))
     except TaskPackage.NoMoreTask as e:
         return redirect('/confirm_code/' + e.cf_code)
-    raise Http404
+    return HTTP404
 
 
 def confirm_code_view(_, value):
@@ -288,7 +294,7 @@ def annotation_view(request, task_key):
     """
     user = get_user(request)
     if user.task_package is None and not settings.DEBUG:
-        raise Http404
+        return HTTP404
     show_rk = request_property(request, 'show_rk', False)
     task = _k(task_key, 'AnnotationTask').get()
     rs = [r.get() for r in task.rankings]
@@ -305,6 +311,7 @@ def annotation_view(request, task_key):
              for r in rs])
 
     def mk_topic(ts, rs):
+        """ Prepare topics for the view """
         return {'topic_id': rs[0].topic_id,
                 'topic_type': ts[0].level,
                 'topic': ts[0].name,
@@ -343,7 +350,7 @@ def annotation_view(request, task_key):
         context_instance=RequestContext(request))
 
 
-# FIXME need to be refactored since models changed
+# TODO need to be refactored since models changed
 # def judgement_review(_, judge_id):
 #     """ Showing all judgement from a judge and see the quality
 #
@@ -378,7 +385,7 @@ def submit_annotation(request):
     """
     user = get_user(request)
     if user.isDead():
-        raise PermissionDenied
+        return HTTP404
     user.touch()
 
     try:
@@ -393,9 +400,7 @@ def submit_annotation(request):
         user.accomplish(task)
 
     except TypeError:
-        return HttpResponseNotFound('<h1> 404 </h1>')
-    except AssertionError:
-        return HttpResponseForbidden('<h1> Session Ended </h1><p> Try re-open the original link.</p>')
+        return HTTP404
     return redirect('/pagerouter')
 
 
