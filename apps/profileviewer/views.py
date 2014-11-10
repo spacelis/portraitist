@@ -24,8 +24,8 @@ from django.shortcuts import render_to_response
 from django.shortcuts import redirect
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
-from django.http import HttpResponseNotFound
 from django.http import HttpResponseForbidden
+from django.http import Http404
 from django.conf import settings
 
 from apps.profileviewer.models import _k
@@ -42,13 +42,6 @@ from apps.profileviewer.util import get_client
 
 
 COOKIE_LIFE = 90 * 24 * 3600
-HTTP404 = HttpResponseNotFound(
-    '''
-    <h1> Bad Request </h1>
-    <p> Please use the provided link to access the system.
-    Your session may be interrupted and you may enter the orginal link on CrowdFlower to continue. </p>
-    '''
-)
 
 
 def vdebug(x):
@@ -60,6 +53,43 @@ def vdebug(x):
     """
     print(x)
     return x
+
+
+def assert_error(request):
+    """TODO: Docstring for assert_error.
+
+    :request: TODO
+    :returns: TODO
+
+    """
+    assert False
+
+
+def error500(request):
+    """ Show a 505 error page
+
+    :request: TODO
+    :returns: TODO
+
+    """
+    from google.appengine.api import mail
+    from datetime import datetime
+    user = get_user(request)
+    ip, ua = get_client(request)
+    subject = '[Geoexpertise] A server error occured'
+    body = """
+    Time: {3}
+    User: {0.session_token}
+    IP: {1}, {2}
+    Tasks: {0.finished_tasks}
+    Now on Taskpackage: {0.task_package!s}
+    """.format(user, ip, ua, user, datetime.utcnow())
+
+    mail.send_mail(sender="Wen Li <spacelis@gmail.com>",
+                   to="Wen Li <spacelis@gmail.com>",
+                   subject=("[Geoexpertise] An error 500 occurred"),
+                   body=body)
+    raise Http404
 
 
 @decorator
@@ -128,7 +158,7 @@ def pagerouter(request):
                         (task_key.urlsafe(),))
     except TaskPackage.NoMoreTask as e:
         return redirect('/confirm_code/' + e.cf_code)
-    return HTTP404
+    raise Http404
 
 
 def confirm_code_view(_, value):
@@ -294,7 +324,7 @@ def annotation_view(request, task_key):
     """
     user = get_user(request)
     if user.task_package is None and not settings.DEBUG:
-        return HTTP404
+        raise Http404
     show_rk = request_property(request, 'show_rk', False)
     task = _k(task_key, 'AnnotationTask').get()
     rs = [r.get() for r in task.rankings]
@@ -385,7 +415,7 @@ def submit_annotation(request):
     """
     user = get_user(request)
     if user.isDead():
-        return HTTP404
+        raise Http404
     user.touch()
 
     try:
@@ -400,7 +430,7 @@ def submit_annotation(request):
         user.accomplish(task)
 
     except TypeError:
-        return HTTP404
+        raise Http404
     return redirect('/pagerouter')
 
 
