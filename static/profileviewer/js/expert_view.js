@@ -14,6 +14,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
     //maxWidth: 300
   //});
   var _data;
+  var _created_at;
 
   //var time_parser = d3.time.format.utc("%a %b %d %H:%M:%S +0000 %Y").parse;
   var time_parser = function(d){return new Date(d);};
@@ -99,6 +100,7 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
       }
       return "Other";
     });
+    _created_at = _fact.dimension(function(c){return c.created_at;}); // for checkin exporting
 
     var checkins_by_week = by_week.group().reduceCount();
     var checkins_by_category = by_category.group().reduceCount();
@@ -335,10 +337,15 @@ function _profileviewer(d3, crossfilter, dc, GMaps, $){
     dc.redrawAll();
   }
 
+  function filteredCheckins(k){
+    return _created_at.top(k);
+  }
+
   return {
     initCharts: initCharts,
     focusTopic: focusTopic,
-    unfocus: unfocus
+    unfocus: unfocus,
+    filteredCheckins: filteredCheckins
   };
 }
 
