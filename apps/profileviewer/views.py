@@ -21,6 +21,7 @@ from fn import op
 from fn.iters import map  # pylint: disable=redefined-builtin
 
 from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.shortcuts import redirect
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_protect
@@ -55,7 +56,7 @@ def vdebug(x):
     return x
 
 
-def assertfalse(request):
+def assertfalse(_):
     """TODO: Docstring for assert_error.
 
     :request: TODO
@@ -64,6 +65,15 @@ def assertfalse(request):
     """
     assert False
 
+
+def error404(request):
+    """ Show a 505 error page
+
+    :request: TODO
+    :returns: TODO
+
+    """
+    return render(request, 'error.html', status=404)
 
 def error500(request):
     """ Show a 505 error page
@@ -91,7 +101,7 @@ def error500(request):
     msg.subject = '[Geoexpertise] An error 500 occurred'
     msg.body = body
     msg.send()
-    return render_to_response('404.html')
+    return render(request, 'error.html', status=500)
 
 
 @decorator

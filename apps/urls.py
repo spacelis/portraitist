@@ -39,3 +39,4 @@ urlpatterns = patterns(
 )
 
 handler500 = 'apps.profileviewer.views.error500'
+handler404 = 'apps.profileviewer.views.error404'
