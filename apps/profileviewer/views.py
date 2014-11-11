@@ -55,7 +55,7 @@ def vdebug(x):
     return x
 
 
-def assert_error(request):
+def assertfalse(request):
     """TODO: Docstring for assert_error.
 
     :request: TODO
@@ -82,9 +82,11 @@ def error500(request):
     IP: {1}, {2}
     Tasks: {0.finished_tasks}
     Now on Taskpackage: {0.task_package!s}
-    """.format(user, ip, ua, user, datetime.utcnow())
 
-    # FIXME fail silently
+    User obj: {0}
+    """.format(user, ip, ua, datetime.utcnow())
+    print body
+
     msg = mail.EmailMessage(sender='spacelis@gmail.com', to='spacelis@gmail.com')
     msg.subject = '[Geoexpertise] An error 500 occurred'
     msg.body = body

@@ -35,7 +35,7 @@ urlpatterns = patterns(
     url(r'^about$', TemplateView.as_view(template_name="about.html")),
     url(r'^instructions$',
         TemplateView.as_view(template_name="instructions.html")),
-    url(r'assertfalse$', 'apps.profileviewer.views.assert_error')
+    url(r'^assertfalse$', 'apps.profileviewer.views.assertfalse')
 )
 
 handler500 = 'apps.profileviewer.views.error500'
