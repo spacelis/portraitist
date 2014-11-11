@@ -219,7 +219,7 @@
           return;
         }
         // check the monitored task performance
-        else if(false && !control.checked()){
+        else if(!control.checked()){
           $("#id-dialog-verify-judgement").modal("show");
           $(".modal-backdrop.fade.in").css({opacity: 1, background: "#900"});
           control.record('submit_too_soon');
