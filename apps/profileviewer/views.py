@@ -76,7 +76,6 @@ def error500(request):
     from datetime import datetime
     user = get_user(request)
     ip, ua = get_client(request)
-    subject = '[Geoexpertise] A server error occured'
     body = """
     Time: {3}
     User: {0.session_token}
@@ -85,10 +84,11 @@ def error500(request):
     Now on Taskpackage: {0.task_package!s}
     """.format(user, ip, ua, user, datetime.utcnow())
 
-    mail.send_mail(sender="Wen Li <spacelis@gmail.com>",
-                   to="Wen Li <spacelis@gmail.com>",
-                   subject=("[Geoexpertise] An error 500 occurred"),
-                   body=body)
+    # FIXME fail silently
+    msg = mail.EmailMessage(sender='spacelis@gmail.com', to='spacelis@gmail.com')
+    msg.subject = '[Geoexpertise] An error 500 occurred'
+    msg.body = body
+    msg.send()
     raise Http404
 
 
