@@ -91,7 +91,7 @@ def error500(request):
     msg.subject = '[Geoexpertise] An error 500 occurred'
     msg.body = body
     msg.send()
-    raise Http404
+    return render_to_response('404.html')
 
 
 @decorator
