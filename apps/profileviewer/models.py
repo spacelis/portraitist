@@ -196,7 +196,7 @@ class TwitterAccount(ndb.Model):  # pylint: disable=R0903,R0921
             access_token_secret=access_token_secret,
             screen_name=screen_name
         )
-        # FIXME retrieve information for this account.
+        # TODO retrieve information for this account.
         t.put()
         return t
 

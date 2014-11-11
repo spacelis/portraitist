@@ -70,7 +70,7 @@ def process_pois(tkey):
     for s in ta.checkins:
         poi_id = s['place']['id']
         if GeoEntity.contains(tfid=poi_id):
-            return  # FIXME should copy those from Geoentities to checkins
+            return  # TODO should copy those from Geoentities to checkins
         update_poi_category(s['place'])
     ta.put()
 

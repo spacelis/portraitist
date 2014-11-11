@@ -166,7 +166,7 @@ def pagerouter(request):
 
     try:
         task_key = user.task_package.get().nextTaskKey()
-        return redirect('/task/%s?show_rk=1' %  # FIXME should be remove when release
+        return redirect('/task/%s' %
                         (task_key.urlsafe(),))
     except TaskPackage.NoMoreTask as e:
         return redirect('/confirm_code/' + e.cf_code)

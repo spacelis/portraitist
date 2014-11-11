@@ -10,9 +10,3 @@ Description:
 
 
 """
-
-from django import forms
-
-
-class UploadFileForm(forms.Form):
-    # FIXME stopped here
