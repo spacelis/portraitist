@@ -456,8 +456,29 @@ def assign_taskpackage(_user):
             'redirect': '/pagerouter'}
 
 
+def export_as_csv(records):
+    """ Export the records in csv
+
+    :records: A list of records in dict objects
+    :returns: A http response
+
+    """
+    response = HttpResponse(content_type='text/plain')
+
+    iterrec = iter(records)
+    try:
+        rec = iterrec.next()
+        csvwr = csv.DictWriter(response, rec.keys())
+        csvwr.writeheader()
+        csvwr.writerow(rec)
+        csvwr.writerows(iterrec)
+    except StopIteration:
+        pass
+    return response
+
+
 @_REG.api_endpoint(secured=True, tojson=False)
-def export_taskpackages(_request):
+def export_taskpackages(_request, fmt):
     """ Return a list of URLs to those taskpackages.
     :returns: @todo
 
@@ -465,9 +486,6 @@ def export_taskpackages(_request):
     from collections import Counter
     url_template = lambda tpid: _request.build_absolute_uri(
         '/pagerouter?action=taskpackage&tpid=%s' % (tpid,))
-    response = HttpResponse(content_type='text/plain')
-    response['Content-Disposition'] = \
-        'inline; filename="tpkeys-confirmation.csv"'
 
     def major_ranking(tasks):
         """ Find the major rank_method in the tasks """
@@ -475,15 +493,21 @@ def export_taskpackages(_request):
                         for t in tasks
                         for r in t.get().rankings]).most_common(1)[0]
 
-    csvwr = csv.DictWriter(response, ['tpkey', 'confirm_code', 'package_size', 'rank_method'])
-    csvwr.writeheader()
-    for taskpackage in TaskPackage.query().fetch():
-        if len(taskpackage.progress) == 0:
-            continue
-        csvwr.writerow({'tpkey': url_template(taskpackage.key.urlsafe()),
-                        'rank_method': major_ranking(taskpackage.tasks),
-                        'confirm_code': taskpackage.confirm_code,
-                        'package_size': str(len(taskpackage.tasks))})
+    def iter_taskpackage():
+        """ Iterating though task packages """
+        for taskpackage in TaskPackage.query().fetch():
+            if len(taskpackage.progress) == 0:
+                continue
+            yield {'tpkey': url_template(taskpackage.key.urlsafe()),
+                   'rank_method': major_ranking(taskpackage.tasks),
+                   'confirm_code': taskpackage.confirm_code,
+                   'package_size': str(len(taskpackage.tasks))}
+
+    if fmt == 'json':
+        response = HttpResponse(content_type='application/json')
+        json.dump(list(iter_taskpackage()), response)
+    else:
+        response = export_as_csv(iter_taskpackage())
     return response
 
 
