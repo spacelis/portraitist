@@ -132,7 +132,7 @@ def fixCompressedEntity(key, fields):
             ins.put()
 
 
-Focus = namedtuple('Focus', ['name', 'value', 'chart'], verbose=True)
+Focus = namedtuple('Focus', ['name', 'value', 'chart'], verbose=False)
 
 
 def get_client(request):
