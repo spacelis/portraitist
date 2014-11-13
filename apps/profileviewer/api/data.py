@@ -227,17 +227,76 @@ def clear_rankings():
     }
 
 
-@_REG.api_endpoint(secured=True, disabled=True)
-def reset_progress():
+@_REG.api_endpoint(secured=True)
+def reset(level):
+    """ Reset for welcoming new judgements
+        Users and Judgements will be cleared
+        Taskpackages progress will be reset
+    """
+    # reset levels
+    ANNOTATION = 'annotation'
+    TASKS = 'tasks'
+    ALL = 'ALL'
+
+    def remove(kind):
+        """ Remove all entities in a model """
+        return Task(params={'_admin_key': 'tu2013delft',
+                            'kind': kind}).add('batch')
+
+    # Resetting
+    if level == [ANNOTATION, TASKS, ALL]:
+        remove('User')
+        remove('Judgement')
+        for tp in TaskPackage.query().fetch(keys_only=True):
+            Task(params={'key': tp,
+                         '_admin_key': 'tu2013delft'},
+                 url='/api/data/reset_progress',
+                 method='GET').add('batch')
+    if level in [TASKS, ALL]:
+        remove('TaskPackage')
+        remove('AnnotationTask')
+
+    if level == ALL:
+        remove('TwitterAccount')
+        remove('GeoEntity')
+        remove('ExpertiseRank')
+
+    return {
+        'action': 'reset',
+        'level': level,
+        'succeeded': True
+    }
+
+
+@_REG.api_endpoint(secured=True)
+def reset_progress(tpkey):
     """ Reset taskpackage progress. """
     # pylint: disable=invalid-name
-    tps = TaskPackage.query.fetch()
-    for taskpackage in tps:
-        taskpackage.progress = list(taskpackage.tasks)
+    tp = ndb.Key(urlsafe=tpkey).get()
+    tp.progress = list(tp.tasks)
     return {
-        'action': 'reset_progress',
+        'action': 'reset_taskpackage',
         'suceeded': True,
-        'taskpackages': len(tps)
+        'tasks': len(tp.tasks),
+        'ready': len(tp.progress)
+    }
+
+
+@_REG.api_endpoint(secured=True)
+def clear_entities(kind):
+    """ Remove all entities from the given model
+
+    :kind: The name of the model (str)
+    :returns: TODO
+
+    """
+    model = __import__('apps.profileviewer.models.' + kind)
+    ins = model.query().fetch(keys_only=True)
+    ndb.delete_multi(ins)
+    return {
+        'action': 'clear_entities',
+        'kind': kind,
+        'num': len(ins)
     }
 
 
