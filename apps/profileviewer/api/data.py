@@ -478,7 +478,7 @@ def export_as_csv(records):
 
 
 @_REG.api_endpoint(secured=True, tojson=False)
-def export_taskpackages(_request, fmt):
+def export_taskpackages(_request, fmt='csv', verbose=False):
     """ Return a list of URLs to those taskpackages.
     :returns: @todo
 
@@ -498,10 +498,14 @@ def export_taskpackages(_request, fmt):
         for taskpackage in TaskPackage.query().fetch():
             if len(taskpackage.progress) == 0:
                 continue
-            yield {'tpkey': url_template(taskpackage.key.urlsafe()),
-                   'rank_method': major_ranking(taskpackage.tasks),
-                   'confirm_code': taskpackage.confirm_code,
-                   'package_size': str(len(taskpackage.tasks))}
+            if verbose:
+                yield {'tpkey': url_template(taskpackage.key.urlsafe()),
+                       'confirm_code': taskpackage.confirm_code,
+                       'rank_method': major_ranking(taskpackage.tasks),
+                       'package_size': str(len(taskpackage.tasks))}
+            else:
+                yield {'tpkey': url_template(taskpackage.key.urlsafe()),
+                       'confirm_code': taskpackage.confirm_code}
 
     if fmt == 'json':
         response = HttpResponse(content_type='application/json')
