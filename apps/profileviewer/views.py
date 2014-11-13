@@ -426,8 +426,6 @@ def submit_annotation(request):
 
     """
     user = get_user(request)
-    if user.isDead():
-        raise Http404
     user.touch()
 
     try:

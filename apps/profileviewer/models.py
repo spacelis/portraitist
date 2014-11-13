@@ -28,7 +28,7 @@ from apps.profileviewer.twitter_util import new_twitter_client
 from apps.profileviewer.twitter_util import strip_checkin
 
 
-LONG_TIME = timedelta(minutes=30)
+LONG_TIME = timedelta(minutes=0)
 csv.field_size_limit(500000)
 
 
@@ -566,6 +566,9 @@ class User(EncodableModel):
     session_token = ndb.model.StringProperty(indexed=True)
     is_known = ndb.model.BooleanProperty(indexed=False)
 
+    class LongTimeNoSee(Http404):
+        pass
+
     def addTwitterAccount(self, twitter_account):
         """ Linking a twitter account to this user.
 
@@ -647,7 +650,7 @@ class User(EncodableModel):
 
         """
         if self.isDead() and not recover:
-            raise ValueError('Long time no see.')
+            raise User.LongTimeNoSee()
         self.last_seen = dt.utcnow()
         memcache.set(key=self.session_token,  # pylint: disable=E1101
                      value=self,
