@@ -463,7 +463,8 @@ def export_as_csv(records):
     :returns: A http response
 
     """
-    response = HttpResponse(content_type='text/plain')
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="exported_taskpackages.csv"'
 
     iterrec = iter(records)
     try:
@@ -499,16 +500,19 @@ def export_taskpackages(_request, fmt='csv', verbose=False):
             if len(taskpackage.progress) == 0:
                 continue
             if verbose:
-                yield {'tpkey': url_template(taskpackage.key.urlsafe()),
+                yield {'tpkey': taskpackage.key.urlsafe(),
+                       'url': url_template(taskpackage.key.urlsafe()),
                        'confirm_code': taskpackage.confirm_code,
                        'rank_method': major_ranking(taskpackage.tasks),
                        'package_size': str(len(taskpackage.tasks))}
             else:
-                yield {'tpkey': url_template(taskpackage.key.urlsafe()),
+                yield {'tpkey': taskpackage.key.urlsafe(),
+                       'url': url_template(taskpackage.key.urlsafe()),
                        'confirm_code': taskpackage.confirm_code}
 
     if fmt == 'json':
         response = HttpResponse(content_type='application/json')
+        response['Content-Disposition'] = 'attachment; filename="exported_taskpackages.json"'
         json.dump(list(iter_taskpackage()), response)
     else:
         response = export_as_csv(iter_taskpackage())
