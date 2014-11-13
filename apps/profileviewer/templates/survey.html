@@ -5,6 +5,7 @@
     $('#embedded-google-form').load(function() {
           this.style.height = this.contentWindow.document.body.offsetHeight + 'px';
     });
+    $.cookie('no_survey', 1, {expires: 30});
   })();
 </script>
 {% endblock %}
@@ -20,7 +21,7 @@
     <div class="col-12-sm">
       <iframe id="embedded-google-form" 
               {# src="https://docs.google.com/forms/d/1DlXfIaDHsks5_0gkx26brQP_QbFblmRDNvgisvNI0XQ/viewform?entry.2071166996={{ judge_id }}&entry.1102912225={{ judge_email }}&embedded=true"  #}
-              src="survey_form" 
+              src="/survey_form" 
               width="100%" 
               height="100%" 
               frameborder="0" 
