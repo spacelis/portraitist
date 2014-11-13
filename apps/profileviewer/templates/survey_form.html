@@ -65,26 +65,32 @@ var form_submitted = false;
 <div class="ss-form-desc ss-no-ignore-whitespace" dir="ltr">Thank you for taking this survey as part of the experiment. It aims at improving scientific understanding of user behavior on online social networks.<p>The survey is composed of three parts. The first part asks for basic demographic information to ensure unbiased results. The second part is about the perception of online social networks (such as Twitter, Facebook). Your answer will help us understand the needs of geo-expertise (knowledge about shops, bars, restaurants, etc. in cities). The third part is for understanding annotators&#39; preference over the criteria on different aspects.<p>Please fill in the survey honestly. Your provided information will not be released in any form that would reveal your identity to third parties.</p></p></div>
 
 <div class="ss-required-asterisk" aria-hidden="true">* Required</div></div></div>
+
 <iframe name="pv-hidden-iframe-for-survey-submit" id="pv-hidden-iframe-for-survey-submit" style="display:none" onload="javascript: if (form_submitted) window.top.location='/pagerouter';"></iframe>
+
 <div class="ss-form"><form action="https://docs.google.com/forms/d/1DlXfIaDHsks5_0gkx26brQP_QbFblmRDNvgisvNI0XQ/formResponse?embedded=true" method="POST" id="ss-form" target="pv-hidden-iframe-for-survey-submit" onsubmit="javascript: form_submitted=true;"><ol role="list" class="ss-question-list" style="padding-left: 0">
 <div class="errorbox-good" role="listitem">
 <div dir="ltr" class="ss-item  ss-section-header"><div class="ss-form-entry">
 <h2 class="ss-section-title">General information</h2>
 <div class="ss-section-description ss-no-ignore-whitespace"></div>
-</div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
-<div dir="ltr" class="ss-item  ss-text"><div class="ss-form-entry">
-<label class="ss-q-item-label" for="entry_2071166996"><div class="ss-q-title">Internal reference number
-</div>
-<div class="ss-q-help ss-secondary-text" dir="ltr">This field is automatically filled by our system. Please do not change it</div></label>
-<input type="text" name="entry.2071166996" value="" class="ss-q-short" id="entry_2071166996" dir="auto" aria-label="Internal reference number This field is automatically filled by our system. Please do not change it " title="">
-<div class="error-message" id="645091903_errorMessage"></div>
-<div class="required-message">This is a required question</div>
-</div></div></div> <div class="ss-form-question errorbox-good" role="listitem">
+</div></div></div> 
+
+<!-- <div class="ss&#45;form&#45;question errorbox&#45;good" role="listitem"> -->
+<!-- <div dir="ltr" class="ss&#45;item  ss&#45;text"><div class="ss&#45;form&#45;entry"> -->
+<!-- <label class="ss&#45;q&#45;item&#45;label" for="entry_2071166996"><div class="ss&#45;q&#45;title">Internal reference number -->
+<!-- </div> -->
+<!-- <div class="ss&#45;q&#45;help ss&#45;secondary&#45;text" dir="ltr">This field is automatically filled by our system. Please do not change it</div></label> -->
+<input type="hidden" name="entry.2071166996" value="{{ judge_id }}" class="ss-q-short" id="entry_2071166996" dir="auto" aria-label="Internal reference number This field is automatically filled by our system. Please do not change it " title="">
+<!-- <div class="error&#45;message" id="645091903_errorMessage"></div> -->
+<!-- <div class="required&#45;message">This is a required question</div> -->
+<!-- </div></div></div>  -->
+
+<div class="ss-form-question errorbox-good" role="listitem">
 <div dir="ltr" class="ss-item  ss-text"><div class="ss-form-entry">
 <label class="ss-q-item-label" for="entry_1102912225"><div class="ss-q-title">Your Email
 </div>
 <div class="ss-q-help ss-secondary-text" dir="ltr">In case we need to contact you regarding this experiment.</div></label>
-<input type="text" name="entry.1102912225" value="" class="ss-q-short" id="entry_1102912225" dir="auto" aria-label="Your Email In case we need to contact you regarding this experiment. Please enter a valid email address" pattern="^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$" title="Please enter a valid email address">
+<input type="text" name="entry.1102912225" value="{{ judge_email }}" class="ss-q-short" id="entry_1102912225" dir="auto" aria-label="Your Email In case we need to contact you regarding this experiment. Please enter a valid email address" pattern="^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$" title="Please enter a valid email address">
 <div class="error-message" id="1266385428_errorMessage">Please enter a valid email address</div>
 <div class="required-message">This is a required question</div>
 </div></div></div> <div class="ss-form-question errorbox-good" role="listitem">

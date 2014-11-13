@@ -185,7 +185,7 @@ def confirm_code_view(_, value):
     return r
 
 
-def survey(request):
+def survey_form(request):
     """ Showing a survey to judges.
 
     :request: @todo
@@ -194,14 +194,14 @@ def survey(request):
     """
     user = get_user(request).touch()
     if user.email_account is None:
-        return render_to_response('survey.html',
+        return render_to_response('survey_form.html',
                                   {'judge_email': '',
                                    'judge_id': user.key.urlsafe(),
                                    'user': user.js_encode()})
     ea = user.email_account.get()
-    return render_to_response('survey.html', {'judge_email': ea.email,
-                                              'judge_id': user.key.urlsafe(),
-                                              'user': user.js_encode()})
+    return render_to_response('survey_form.html', {'judge_email': ea.email,
+                                                   'judge_id': user.key.urlsafe(),
+                                                   'user': user.js_encode()})
 
 
 class FilterSetMaker(object):

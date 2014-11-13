@@ -19,7 +19,7 @@ urlpatterns = patterns(
     url(r'^confirm_code/(.*)$', 'apps.profileviewer.views.confirm_code_view'),
     url(r'^task/(.*)$', 'apps.profileviewer.views.annotation_view'),
     url(r'^submit_annotation$', 'apps.profileviewer.views.submit_annotation'),
-    url(r'^survey$', 'apps.profileviewer.views.survey'),
+    url(r'^survey_form$', 'apps.profileviewer.views.survey_form'),
 
     # Data endpoint
     url(r'^api/user/([a-zA-Z_]+).*$',
@@ -30,11 +30,10 @@ urlpatterns = patterns(
         'apps.profileviewer.api.taskworker.call_endpoint'),
 
     # Static pages
+    url(r'^survey$', TemplateView.as_view(template_name="survey.html")),
     url(r'^terms$', TemplateView.as_view(template_name="terms.html")),
-    url(r'^survey_form$', TemplateView.as_view(template_name="survey_form.html")),
     url(r'^about$', TemplateView.as_view(template_name="about.html")),
-    url(r'^instructions$',
-        TemplateView.as_view(template_name="instructions.html")),
+    url(r'^instructions$', TemplateView.as_view(template_name="instructions.html")),
     url(r'^assertfalse$', 'apps.profileviewer.views.assertfalse')
 )
 
