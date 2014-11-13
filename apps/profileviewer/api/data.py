@@ -547,8 +547,8 @@ def fix_datastore():
     cnt += add_fixing_task(ExpertiseRank)
     return {
         'action': 'fix_datastore',
-        'suceeded': None,
-        'message': '%s fixing tasks add to the batch queue.' % (cnt, )
+        'suceeded': 'Unknown',
+        'message': '%s fixing tasks added to the batch queue.' % (cnt, )
     }
 
 
