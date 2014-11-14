@@ -91,7 +91,10 @@ def export_judgements(_):
         """ An iterator over all judgements """
         for j in Judgement.query().fetch():
             yield _j(j.as_viewdict()) + '\n'
-    return HttpResponse(iter_judgement(), mimetype='application/json')
+    rep = HttpResponse(iter_judgement(), mimetype='application/json')
+    rep['Content-Disposition'] = 'attachment; filename="judgements.csv"'
+    return rep
+
 
 
 # ------- Import/Export ------
