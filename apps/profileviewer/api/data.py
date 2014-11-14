@@ -205,6 +205,18 @@ def task_stats():
 
 
 @_REG.api_endpoint(secured=True)
+def model_stats():
+    """ Return a statistics for tasks. """
+    return {
+        'AnnotationTask': len(AnnotationTask.query().fetch(keys_only=True)),
+        'GeoEntity': len(GeoEntity.query().fetch(keys_only=True)),
+        'TwitterAccount': len(TwitterAccount.query().fetch(keys_only=True)),
+        'TaskPackage': len(TaskPackage.query().fetch(keys_only=True)),
+        'ExpertiseRank': len(ExpertiseRank.query().fetch(keys_only=True))
+    }
+
+
+@_REG.api_endpoint(secured=True)
 def judgement_stats():
     """ Return a statistics for tasks. """
     judgement = Judgement.query()
