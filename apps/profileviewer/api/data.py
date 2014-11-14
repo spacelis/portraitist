@@ -190,23 +190,29 @@ def import_rankings(filename):
 
 
 @_REG.api_endpoint(secured=True)
-def rankings_statistics():
-    """ Return a statistics for rankings. """
-    ranklists = set()
-    rankpoints = set()
-    num = 0
-    # pylint: disable=invalid-name
-    for r in ExpertiseRank.query().fetch():
-        ranklists.add((r.topic_id, r.region))
-        rankpoints.add((r.topic_id, r.region, r.candidate))
-        num += 1
+def task_stats():
+    """ Return a statistics for tasks. """
+    tasks = AnnotationTask.query()
+    stats = [(t.key.urlsafe(), r.get().topic_id, t.candidate.urlsafe())
+             for t in tasks.fetch()
+             for r in t.rankings]
     return {
-        'ranklists': len(ranklists),
-        'rankpoints': len(rankpoints),
-        'regions': {k: len(list(g))
-                    for k, g in groupby(sorted(ranklists, key=L[1]),
-                                        key=L[1])},
-        'total': num
+        'tasks': len(set(t[0] for t in stats)),
+        'topics': len(set([t[1] for t in stats])),
+        'candidates': len(set([t[2] for t in stats])),
+        'rankings': len(stats)
+    }
+
+
+@_REG.api_endpoint(secured=True)
+def judgement_stats():
+    """ Return a statistics for tasks. """
+    judgement = Judgement.query()
+    stats = judgement.map(lambda x: (x.topic_id, x.candidate.urlsafe()))
+    return {
+        'judgement': len(stats),
+        'topics': len(set([t[0] for t in stats])),
+        'candidates': len(set([t[1] for t in stats])),
     }
 
 
