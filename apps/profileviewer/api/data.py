@@ -92,7 +92,7 @@ def export_judgements(_):
         for j in Judgement.query().fetch():
             yield _j(j.as_viewdict()) + '\n'
     rep = HttpResponse(iter_judgement(), mimetype='application/json')
-    rep['Content-Disposition'] = 'attachment; filename="judgements.csv"'
+    rep['Content-Disposition'] = 'attachment; filename="judgements.ljson"'
     return rep
 
 
