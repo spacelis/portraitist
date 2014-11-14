@@ -28,7 +28,7 @@ from apps.profileviewer.twitter_util import new_twitter_client
 from apps.profileviewer.twitter_util import strip_checkin
 
 
-LONG_TIME = timedelta(minutes=0)
+LONG_TIME = timedelta(days=30)
 csv.field_size_limit(500000)
 
 
