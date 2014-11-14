@@ -403,6 +403,22 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
         ]
         ndb.Future.wait_all(fs)
 
+    def as_viewdict(self):
+        """ Return the dict representation of the object.
+        :returns: TODO
+
+        """
+        return {
+            'judge': self.judge.urlsafe(),
+            'candidate': self.candidate.get().screen_name,
+            'topic_id': self.topic_id,
+            'score': self.score,
+            'created_at': self.created_at.isoformat(),
+            'ipaddr': self.ipaddr,
+            'user_agent': self.user_agent,
+            'traceback': self.traceback
+        }
+
 
 class ExpertiseRank(EncodableModel):  # pylint: disable=R0903,W0223
 

@@ -90,14 +90,7 @@ def export_judgements(_):
     def iter_judgement():
         """ An iterator over all judgements """
         for j in Judgement.query().fetch():
-            yield _j({
-                k: (v.urlsafe()
-                    if isinstance(
-                        Judgement._properties[k],  # pylint: disable=W0212
-                        ndb.model.KeyProperty)
-                    else v)
-                for k, v in j.to_dict()
-            }) + '\n'
+            yield _j(j.as_viewdict()) + '\n'
     return HttpResponse(iter_judgement(), mimetype='application/json')
 
 
