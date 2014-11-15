@@ -229,19 +229,6 @@ def judgement_stats():
 
 
 @_REG.api_endpoint(secured=True)
-def clear_rankings():
-    """ Delete all rankings from data store. """
-    # pylint: disable=invalid-name
-    rs = ExpertiseRank.query().fetch(keys_only=True)
-    ndb.delete_multi(rs)
-    return {
-        'action': 'clear_rankings',
-        'suceeded': True,
-        'deleted': len(rs)
-    }
-
-
-@_REG.api_endpoint(secured=True)
 def reset(level):
     """ Reset for welcoming new judgements
         Users and Judgements will be cleared
@@ -255,7 +242,10 @@ def reset(level):
     def remove(kind):
         """ Remove all entities in a model """
         return Task(params={'_admin_key': 'tu2013delft',
-                            'kind': kind}).add('batch')
+                            'kind': kind},
+                    url='/api/data/clear_entities',
+                    method='GET'
+        ).add('batch')
 
     # Resetting
     if level == [ANNOTATION, TASKS, ALL]:
@@ -304,8 +294,8 @@ def clear_entities(kind):
     :returns: TODO
 
     """
-    model = __import__('apps.profileviewer.models.' + kind)
-    ins = model.query().fetch(keys_only=True)
+    import apps.profileviewer.models as models
+    ins = getattr(models, kind).query().fetch(keys_only=True)
     ndb.delete_multi(ins)
     return {
         'action': 'clear_entities',
@@ -334,30 +324,6 @@ def import_geoentities(filename):
             example=rec['example'],
             url=rec['url']).put()
     return import_entities(filename, loader)
-
-
-@_REG.api_endpoint()
-def clear_tasks():
-    """ Remove all tasks. """
-    tasks = AnnotationTask.query().fetch(keys_only=True)
-    ndb.delete_multi(tasks)
-    return {
-        'action': 'clear_tasks',
-        'succeeded': True,
-        'deleted': len(tasks)
-    }
-
-
-@_REG.api_endpoint()
-def clear_taskpackages():
-    """ Remove all tasks. """
-    tasks = TaskPackage.query().fetch(keys_only=True)
-    ndb.delete_multi(tasks)
-    return {
-        'action': 'clear_taskpackages',
-        'succeeded': True,
-        'deleted': len(tasks)
-    }
 
 
 def partition(iterator, size=10, margin=None):
@@ -512,6 +478,19 @@ def make_random_taskpackages():
         'taskpackages': len(TaskPackage.query().fetch(keys_only=True)),
         'num': cnt
     }
+
+@_REG.api_endpoint()
+def AxdFKxbczxW(cf_code):
+    """ Verify confirmation code.
+
+    :cf_code: TODO
+    :returns: TODO
+
+    """
+    try:
+        return len(TaskPackage.query(TaskPackage.confirm_code == cf_code).fetch()[0].progress) == 0
+    except:
+        return False
 
 
 @_REG.api_endpoint()

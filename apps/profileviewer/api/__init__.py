@@ -106,6 +106,8 @@ class APIRegistry(object):
             resp = HttpResponse(json.dumps(ret), mimetype="application/json")
         else:
             resp = ret
+        resp['Access-Control-Allow-Origin'] = '*'
+        resp['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept'
         if '_user' in endpoint.spec.args:
             return set_user(resp, kwargs['_user'])
         return resp

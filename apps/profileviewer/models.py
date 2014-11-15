@@ -482,7 +482,7 @@ class TaskPackage(ndb.Model):
     tasks = ndb.model.KeyProperty(repeated=True, kind=AnnotationTask)
     progress = ndb.model.KeyProperty(repeated=True, kind=AnnotationTask)
     done_by = ndb.model.KeyProperty(indexed=True, repeated=True, kind='User')
-    confirm_code = ndb.model.StringProperty()
+    confirm_code = ndb.model.StringProperty(indexed=True)
     assigned_at = ndb.model.DateTimeProperty(indexed=True)
 
     class TaskPackageNotExists(Http404):
