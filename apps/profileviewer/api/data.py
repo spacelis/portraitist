@@ -18,6 +18,7 @@ import csv
 import sys
 import json
 from datetime import datetime as dt
+from datetime import timedelta
 from itertools import groupby
 from itertools import cycle
 from itertools import izip
@@ -33,7 +34,8 @@ from django.http import Http404
 from django.http import HttpResponse
 
 from google.appengine.ext import ndb
-from google.appengine.api.taskqueue import Task
+import google.appengine.api.taskqueue as tq
+import google.appengine.api.memcache as mc
 from google.appengine.datastore.datastore_query import Cursor
 
 from apps.profileviewer.models import _k
@@ -99,6 +101,32 @@ def export_judgements(curkey):
         'more': more
     }
 
+
+@_REG.api_endpoint(secured=True)
+def assign_taskpackage():
+    """ Return a taskpackage unassigned. """
+    idx = mc.decr('geo-expertise-task-left')
+    if idx < 0:
+        tq.Task(params={'_admin_key': APIRegistry.ADMIN_KEY},
+                url='/api/data/refill_taskpool',
+                method='GET'
+               ).add('batch')
+        raise TaskPackage.NoMoreTaskPackage()
+    return mc.get('geo-expertise-task-pool')[idx]
+
+
+@_REG.api_endpoint(secured=True)
+def refill_taskpool():
+    """ Refill the taskpool with non-recently touched tasks.
+    :returns: TODO
+
+    """
+    tps = TaskPackage\
+        .query(TaskPackage.assigned_at < dt.now() - timedelta(minutes=30))\
+        .order(TaskPackage.assigned_at)\
+        .fetch(keys_only=True)
+    if len(tps) > 0:
+        mc.cas_multi({'geo-expertise-task-pool': tps, 'geo-expertise-task-left': len(tps)})
 
 
 # ------- Import/Export ------
@@ -246,19 +274,19 @@ def reset(level):
 
     def remove(kind):
         """ Remove all entities in a model """
-        return Task(params={'_admin_key': APIRegistry.ADMIN_KEY,
-                            'kind': kind},
-                    url='/api/data/clear_entities',
-                    method='GET'
-                   ).add('batch')
+        return tq.Task(params={'_admin_key': APIRegistry.ADMIN_KEY,
+                               'kind': kind},
+                       url='/api/data/clear_entities',
+                       method='GET'
+                      ).add('batch')
 
     # Resetting
     if level in [PROGRESS, ANNOTATION, TASKS, ALL]:
         for tp in TaskPackage.query().fetch(keys_only=True):
-            Task(params={'key': tp,
-                         '_admin_key': APIRegistry.ADMIN_KEY},
-                 url='/api/data/reset_progress',
-                 method='GET').add('batch')
+            tq.Task(params={'key': tp,
+                            '_admin_key': APIRegistry.ADMIN_KEY},
+                    url='/api/data/reset_progress',
+                    method='GET').add('batch')
     if level in [ANNOTATION, TASKS, ALL]:
         remove('User')
         remove('Judgement')
@@ -600,11 +628,11 @@ def add_fixing_task(model):
     fields = listCompressedProperty(model)
     i = 0
     for i, k in enumerate(model.query().fetch(keys_only=True)):
-        Task(params={'key': k.urlsafe(),
-                     'fields': ','.join(fields),
-                     '_admin_key': APIRegistry.ADMIN_KEY},
-             url='/api/data/fix_entity',
-             method='GET').add('batch')
+        tq.Task(params={'key': k.urlsafe(),
+                        'fields': ','.join(fields),
+                        '_admin_key': APIRegistry.ADMIN_KEY},
+                url='/api/data/fix_entity',
+                method='GET').add('batch')
     return i
 
 
