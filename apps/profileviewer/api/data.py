@@ -283,6 +283,8 @@ def reset_progress(tpkey):
     # pylint: disable=invalid-name
     tp = ndb.Key(urlsafe=tpkey).get()
     tp.progress = list(tp.tasks)
+    tp.assigned_at = dt.strptime("2000-01-01", "%Y-%m-%d")
+    tp.put()
     return {
         'action': 'reset_taskpackage',
         'suceeded': True,
