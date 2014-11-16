@@ -35,6 +35,7 @@ from django.http import HttpResponse
 
 from google.appengine.ext import ndb
 from google.appengine.api.taskqueue import Task
+from google.appengine.datastore.datastore_query import Cursor
 
 from apps.profileviewer.models import _k
 from apps.profileviewer.models import Judgement
@@ -80,20 +81,24 @@ def checkins(candidate):
         return {'error': 'Please specify a valid key toa twiter account.'}
 
 
-@_REG.api_endpoint(secured=True, tojson=False)
-def export_judgements(_):
+@_REG.api_endpoint(secured=True)
+def export_judgements(curkey):
     """ Export all judgements as json object per line.
 
     :returns: An iterator going over lines of json objects
 
     """
-    def iter_judgement():
-        """ An iterator over all judgements """
-        for j in Judgement.query().fetch():
-            yield _j(j.as_viewdict()) + '\n'
-    rep = HttpResponse(iter_judgement(), mimetype='application/json')
-    rep['Content-Disposition'] = 'attachment; filename="judgements.ljson"'
-    return rep
+    if curkey:
+        cur = Cursor(urlsafe=curkey)
+    else:
+        cur = None
+    jdgs, next_cur, more = Judgement.query().fetch_page(50, start_cursor=cur)
+    data = [_j(j.as_viewdict()) for j in jdgs]
+    return {
+        'next': '/api/data/export_judgements?curkey=' + next_cur.urlsafe(),
+        'data': data,
+        'more': more
+    }
 
 
 
