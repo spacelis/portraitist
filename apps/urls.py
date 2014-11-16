@@ -12,7 +12,7 @@ urlpatterns = patterns(
     '',
     url(r'^favicon\.ico$', RedirectView.as_view(
         url='/static/profileviewer/images/socialmining.ico')),
-    url(r'^$', RedirectView.as_view(url='/instructions')),
+    url(r'^$', RedirectView.as_view(url='/pagerouter')),
     url(r'^assertfalse$', 'apps.profileviewer.views.assertfalse'),
 
     # Task related pages

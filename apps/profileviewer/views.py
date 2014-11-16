@@ -168,8 +168,9 @@ def pagerouter(request):
         task_key = user.task_package.get().nextTaskKey()
         return redirect('/task/%s' %
                         (task_key.urlsafe(),))
-    except TaskPackage.NoMoreTask as e:
-        return redirect('/confirm_code/' + e.cf_code)
+    except (AttributeError, TaskPackage.NoMoreTask):
+        tpkey = TaskPackage.fetch_coldest()
+        return redirect('/pagerouter?action=taskpackage&tpid=' + tpkey.urlsafe())
     raise Http404
 
 

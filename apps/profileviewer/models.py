@@ -497,6 +497,10 @@ class TaskPackage(ndb.Model):
             super(TaskPackage.NoMoreTask, self).__init__()
             self.cf_code = cf_code
 
+    class NoMoreTaskPackage(Exception):
+        """ If there is no more tasks to assign"""
+        pass
+
     @staticmethod
     def getTaskPackage(safekey):
         """ Get a reference to the task package by urlsafe key.
@@ -548,15 +552,24 @@ class TaskPackage(ndb.Model):
         self.progress = self.tasks
         self.put()
 
+    @ndb.transactional
     @staticmethod
-    def fetch_unassigned(num=1):
+    def assign_coldest():
         """ Fetch a number of taskpackage having not been assigned for long.
 
         :num: The number of task_package to return.
         :returns: @todo
 
         """
-        return TaskPackage.query().order(TaskPackage.assigned_at).fetch(num)
+        tps = TaskPackage\
+            .query(TaskPackage.assigned_at < dt.now() - timedelta(minutes=30))\
+            .order(TaskPackage.assigned_at)\
+            .fetch(1, keys_only=True)
+        if len(tps) == 0:
+            raise TaskPackage.NoMoreTaskPackage
+        else:
+            tps[0].touch()
+            return tps[0]
 
     def touch(self):
         """ Update the time of the taskpackage being assigned.

@@ -501,21 +501,6 @@ def AxdFKxbczxW(cf_code):
     return False
 
 
-@_REG.api_endpoint()
-def assign_taskpackage(_user):
-    """ Assign a new task package to the user.
-
-    :_user: The user/session object.
-    :returns: @todo
-
-    """
-    taskpackage = TaskPackage.fetch_unassigned(1)[0]
-    _user.assign(taskpackage)
-    return {'action': 'assign_taskpackage',
-            'succeeded': True,
-            'redirect': '/pagerouter'}
-
-
 def export_as_csv(records):
     """ Export the records in csv
 
