@@ -239,6 +239,7 @@ def reset(level):
         Taskpackages progress will be reset
     """
     # reset levels
+    PROGRESS = 'progress'
     ANNOTATION = 'annotation'
     TASKS = 'tasks'
     ALL = 'ALL'
@@ -252,18 +253,18 @@ def reset(level):
                    ).add('batch')
 
     # Resetting
-    if level == [ANNOTATION, TASKS, ALL]:
-        remove('User')
-        remove('Judgement')
+    if level in [PROGRESS, ANNOTATION, TASKS, ALL]:
         for tp in TaskPackage.query().fetch(keys_only=True):
             Task(params={'key': tp,
                          '_admin_key': APIRegistry.ADMIN_KEY},
                  url='/api/data/reset_progress',
                  method='GET').add('batch')
+    if level in [ANNOTATION, TASKS, ALL]:
+        remove('User')
+        remove('Judgement')
     if level in [TASKS, ALL]:
         remove('TaskPackage')
         remove('AnnotationTask')
-
     if level == ALL:
         remove('TwitterAccount')
         remove('GeoEntity')
