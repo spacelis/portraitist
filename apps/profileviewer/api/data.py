@@ -250,7 +250,7 @@ def reset(level):
                             'kind': kind},
                     url='/api/data/clear_entities',
                     method='GET'
-        ).add('batch')
+                   ).add('batch')
 
     # Resetting
     if level == [ANNOTATION, TASKS, ALL]:
@@ -494,8 +494,9 @@ def AxdFKxbczxW(cf_code):
     """
     try:
         return len(TaskPackage.query(TaskPackage.confirm_code == cf_code).fetch()[0].progress) == 0
-    except:
-        return False
+    except:  # pylint: disable=bare-except
+        pass
+    return False
 
 
 @_REG.api_endpoint()
