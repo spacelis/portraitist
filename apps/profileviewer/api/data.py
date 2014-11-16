@@ -255,7 +255,7 @@ def reset(level):
     # Resetting
     if level in [PROGRESS, ANNOTATION, TASKS, ALL]:
         for tp in TaskPackage.query().fetch(keys_only=True):
-            Task(params={'key': tp,
+            Task(params={'tpkey': tp.urlsafe(),
                          '_admin_key': APIRegistry.ADMIN_KEY},
                  url='/api/data/reset_progress',
                  method='GET').add('batch')
