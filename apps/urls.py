@@ -13,6 +13,7 @@ urlpatterns = patterns(
     url(r'^favicon\.ico$', RedirectView.as_view(
         url='/static/profileviewer/images/socialmining.ico')),
     url(r'^$', RedirectView.as_view(url='/instructions')),
+    url(r'^assertfalse$', 'apps.profileviewer.views.assertfalse'),
 
     # Task related pages
     url(r'^pagerouter$', 'apps.profileviewer.views.pagerouter'),
@@ -34,7 +35,7 @@ urlpatterns = patterns(
     url(r'^terms$', TemplateView.as_view(template_name="terms.html")),
     url(r'^about$', TemplateView.as_view(template_name="about.html")),
     url(r'^instructions$', TemplateView.as_view(template_name="instructions.html")),
-    url(r'^assertfalse$', 'apps.profileviewer.views.assertfalse')
+    url(r'^export_judgements$', TemplateView.as_view(template_name="export_judgements.html")),
 )
 
 handler500 = 'apps.profileviewer.views.error500'

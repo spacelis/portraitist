@@ -92,10 +92,10 @@ def export_judgements(curkey):
         cur = Cursor(urlsafe=curkey)
     else:
         cur = None
-    jdgs, next_cur, more = Judgement.query().fetch_page(50, start_cursor=cur)
-    data = [_j(j.as_viewdict()) for j in jdgs]
+    jdgs, next_cur, more = Judgement.query().fetch_page(10, start_cursor=cur)
+    data = [j.as_viewdict() for j in jdgs]
     return {
-        'next': '/api/data/export_judgements?curkey=' + next_cur.urlsafe(),
+        'next': APIRegistry.sign('/api/data/export_judgements?curkey=' + next_cur.urlsafe()),
         'data': data,
         'more': more
     }
@@ -246,7 +246,7 @@ def reset(level):
 
     def remove(kind):
         """ Remove all entities in a model """
-        return Task(params={'_admin_key': 'tu2013delft',
+        return Task(params={'_admin_key': APIRegistry.ADMIN_KEY,
                             'kind': kind},
                     url='/api/data/clear_entities',
                     method='GET'
@@ -258,7 +258,7 @@ def reset(level):
         remove('Judgement')
         for tp in TaskPackage.query().fetch(keys_only=True):
             Task(params={'key': tp,
-                         '_admin_key': 'tu2013delft'},
+                         '_admin_key': APIRegistry.ADMIN_KEY},
                  url='/api/data/reset_progress',
                  method='GET').add('batch')
     if level in [TASKS, ALL]:
@@ -596,7 +596,7 @@ def add_fixing_task(model):
     for i, k in enumerate(model.query().fetch(keys_only=True)):
         Task(params={'key': k.urlsafe(),
                      'fields': ','.join(fields),
-                     '_admin_key': 'tu2013delft'},
+                     '_admin_key': APIRegistry.ADMIN_KEY},
              url='/api/data/fix_entity',
              method='GET').add('batch')
     return i
