@@ -17,7 +17,6 @@ import gzip
 import csv
 import sys
 import json
-from json import dumps as _j
 from datetime import datetime as dt
 from itertools import groupby
 from itertools import cycle
@@ -536,17 +535,23 @@ def export_as_csv(records):
     return response
 
 
-@_REG.api_endpoint()
-def tasks(_request):
+@_REG.api_endpoint(secured=True, tojson=False)
+def tasksearch(_request, timespan):
     """TODO: Docstring for tasks.
     :returns: TODO
 
     """
-    from datetime import datetime
-    late = datetime.strptime('2014-11-15', '%Y-%m-%d')
-    url_template = lambda tid: _request.build_absolute_uri('/task/%s&review=1' % (tid,))
-    return [url_template(tp.key.urlsafe())
-            for tp in TaskPackage.query(TaskPackage.assigned_at > late).fetch()]
+    start, end = [dt.strptime(x, '%Y-%m-%dT%H:%M:%S') for x in timespan.split(',')]
+    url_template = lambda tid: _request.build_absolute_uri('/task/%s?review=1' % (tid,))
+    resp = HttpResponse()
+    resp.write('<html><body><ol>')
+    for tp in TaskPackage.query(TaskPackage.assigned_at > start, TaskPackage.assigned_at < end).fetch():
+        for t in tp.tasks:
+            resp.write('<li><a href="{0}">{1.topic_id}</a></li>'
+                       .format(url_template(t.urlsafe()),
+                               t.get().rankings[0].get()))
+    resp.write('</ol></body></html>')
+    return resp
 
 
 @_REG.api_endpoint(secured=True, tojson=False)
