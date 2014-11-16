@@ -552,25 +552,6 @@ class TaskPackage(ndb.Model):
         self.progress = self.tasks
         self.put()
 
-    @ndb.transactional
-    @staticmethod
-    def assign_coldest():
-        """ Fetch a number of taskpackage having not been assigned for long.
-
-        :num: The number of task_package to return.
-        :returns: @todo
-
-        """
-        tps = TaskPackage\
-            .query(TaskPackage.assigned_at < dt.now() - timedelta(minutes=30))\
-            .order(TaskPackage.assigned_at)\
-            .fetch(1, keys_only=True)
-        if len(tps) == 0:
-            raise TaskPackage.NoMoreTaskPackage
-        else:
-            tps[0].touch()
-            return tps[0]
-
     def touch(self):
         """ Update the time of the taskpackage being assigned.
 
@@ -597,6 +578,7 @@ class User(EncodableModel):
     is_known = ndb.model.BooleanProperty(indexed=False)
 
     class LongTimeNoSee(Http404):
+        """ Error representing lost of connection for a long while. """
         pass
 
     def addTwitterAccount(self, twitter_account):
@@ -658,14 +640,14 @@ class User(EncodableModel):
         self.session_token = newToken('session')
         self.touch()
 
-    def assign(self, task_package):
+    def assign(self, tpkey):
         """ Assign a task package for this session.
 
         :task_package: TaskPackage object as ndb.Model
         :returns: self
 
         """
-        self.task_package = task_package.touch().key
+        self.task_package = ndb.Key(urlsafe=tpkey, kind='TaskPackage').get().touch().key
         self.touch()
         return self
 

@@ -40,6 +40,7 @@ from apps.profileviewer.util import get_scores
 from apps.profileviewer.util import get_traceback
 from apps.profileviewer.util import get_user
 from apps.profileviewer.util import get_client
+from apps.profileviewer.api.data import assign_taskpackage
 
 
 COOKIE_LIFE = 90 * 24 * 3600
@@ -142,7 +143,7 @@ def taskpackage(request):
     """
     user = get_user(request)
     tp_key = _k(request_property(request, 'tpid'), 'TaskPackage')
-    user.assign(tp_key.get())
+    user.assign(tp_key)
     r = redirect('/pagerouter')
     r.set_cookie('session_token', user.session_token)
     return r
@@ -169,8 +170,7 @@ def pagerouter(request):
         return redirect('/task/%s' %
                         (task_key.urlsafe(),))
     except (AttributeError, TaskPackage.NoMoreTask):
-        tpkey = TaskPackage.fetch_coldest()
-        return redirect('/pagerouter?action=taskpackage&tpid=' + tpkey.urlsafe())
+        return redirect('/pagerouter?action=taskpackage&tpid=' + assign_taskpackage())
     raise Http404
 
 
