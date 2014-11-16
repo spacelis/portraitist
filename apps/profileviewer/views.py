@@ -378,6 +378,17 @@ def annotation_view(request, task_key):
         {'name': f.name, 'level': f.level, 'pid': f.pid} for f in fs
     ])
 
+    # prepare for review
+    if request_property(request, 'review', False):
+        judgements = [j
+                      for t in topics.values()
+                      for j in Judgement.query(Judgement.topic_id == t['topic_id'],
+                                               Judgement.candidate == rs[0].candidate).fetch(1)]
+        topic_judgements = json.dumps({j.topic_id: j.score for j in judgements})
+    else:
+        topic_judgements = 'null'
+
+
     return render_to_response(
         'expert_view.html',
         {
@@ -387,34 +398,9 @@ def annotation_view(request, task_key):
             'task_key': task_key,
             'filters': fs,
             'filters_json': fs_injson,
-            'topic_judgement': 'null'
+            'topic_judgement': topic_judgements
         },
         context_instance=RequestContext(request))
-
-
-# TODO need to be refactored since models changed
-# def judgement_review(_, judge_id):
-#     """ Showing all judgement from a judge and see the quality
-#
-#     :request: @todo
-#     :returns: @todo
-#
-#     """
-#     judge = Judge.getJudgeById(judge_id)
-#     judges = [{
-#         'this': j.judge_id == judge_id,
-#         'jid': j.judge_id,
-#         'page': idx
-#     } for idx, j in enumerate(Judge.query().order(Judge.judge_id).fetch())]
-#     return render_to_response(
-#         'judgement_review.html',
-#         {'judgements': judgement_for_review(judge.judgements),
-#          'email': judge.email,
-#          'name': judge.nickname,
-#          'judge_id': judge_id,
-#          'judges': judges
-#          }
-#     )
 
 
 @csrf_protect
