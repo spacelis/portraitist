@@ -409,6 +409,7 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
 
         """
         return {
+            'jkey': self.key.urlsafe(),
             'judge': self.judge.urlsafe(),
             'candidate': self.candidate.get().screen_name,
             'topic_id': self.topic_id,
