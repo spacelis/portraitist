@@ -40,6 +40,8 @@ class APIRegistry(object):
         '_request': lambda req: req
     }
 
+    ADMIN_KEY = 'tu2013delft'
+
     def __init__(self):
         self._ENDPOINTS = dict()
 
@@ -76,8 +78,21 @@ class APIRegistry(object):
         :returns: @todo
 
         """
-        if request_property(req, '_admin_key') != 'tu2013delft':
+        if request_property(req, '_admin_key') != APIRegistry.ADMIN_KEY:
             raise PermissionDenied
+
+    @staticmethod
+    def sign(url):
+        """ Sign the url for securely access
+
+        :url: TODO
+        :returns: TODO
+
+        """
+        if '?' in url:
+            return url + '&_admin_key=' + APIRegistry.ADMIN_KEY
+        else:
+            return url + '?_admin_key=' + APIRegistry.ADMIN_KEY
 
     def call_endpoint(self, request, name):
         """Call endpoint by name.
