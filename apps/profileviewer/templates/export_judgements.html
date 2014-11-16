@@ -6,24 +6,19 @@
 </head>
 <body>
   <div id="load-place-holder">
-    Loading...
-  </div>
-  <div id="result" style="display: none;">
-    <a href="#"> Click Here</a>
+    Loading
   </div>
 </body>
 
 <script src="/static/profileviewer/js/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="/static/profileviewer/js/FileSaver.min.js" type="text/javascript" charset="utf-8"></script>
 <script src="/static/profileviewer/js/queue.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" charset="utf-8">
 queue.request('/api/data/export_judgements?_admin_key=tu2013delft', [], function(data){
-    $('#result > a').attr("href",
-      "data:application/octet-stream;charset=utf-8;download='judgements.json';base64,"
-      + btoa(JSON.stringify(data)));
-    $('#result').show();
-    $('#load-place-holder').hide();
+    var blob = new Blob([JSON.stringify(data)], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, "judgement.json");
   }, function(){
-    $('#load-place-holder').append("<span>.</span>");
+    $("#load-place-holder").append("<span>.</span>");
   }
 );
 </script>
