@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Server Busy</title>
+  <meta charset="utf-8" />
+</head>
+<body>
+  <h1> The Server is not responding currently. </h1>
+  <p> It will retry in a few seconde. </p>
+  <p> If nothing happens, please refresh the page. </p>
+</body>
+<script type="text/javascript" charset="utf-8">
+(function(){
+  redirectTime = "5000";
+  redirectURL = "{{ redirect }}";
+  setTimeout("location.href = redirectURL;",redirectTime);
+}())
+</script>
+</html>
