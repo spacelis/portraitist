@@ -170,9 +170,11 @@ def pagerouter(request):
         return redirect('/task/%s' %
                         (task_key.urlsafe(),))
     except (AttributeError, TaskPackage.NoMoreTask):
-        tpkey = assign_taskpackage()
-        print 'tpkey', tpkey
-        return redirect('/pagerouter?action=taskpackage&tpid=' + tpkey)
+        try:
+            tpkey = assign_taskpackage()
+            return redirect('/pagerouter?action=taskpackage&tpid=' + tpkey)
+        except TaskPackage.NoMoreTaskPackage:
+            return render_to_response('server_busy.html', {'redirect': '/'})
     raise Http404
 
 
