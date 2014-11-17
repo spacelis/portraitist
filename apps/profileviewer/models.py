@@ -374,6 +374,7 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
     created_at = ndb.model.DateTimeProperty(indexed=False)
     ipaddr = ndb.model.StringProperty(indexed=False)
     user_agent = ndb.model.StringProperty(indexed=False)
+    task = ndb.model.KeyProperty(indexed=True, kind='AnnotationTask')
     traceback = ndb.model.StringProperty(indexed=False, compressed=True)
 
     @staticmethod
@@ -398,6 +399,7 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
                 created_at=ts,
                 ipaddr=ipaddr,
                 user_agent=user_agent,
+                task=task.key,
                 traceback=tb).put_async()
             for t, s in scores.items()
         ]
