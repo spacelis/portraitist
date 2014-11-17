@@ -22,13 +22,13 @@
           {# <div class="list-group-item"> #}
             <div class="row">
               <div class="col-sm-8">
-                {% if t.topic_type == 'POI' %} the place called
+                {% if t.topic_type == 'POI' %} the <abbr title="This topic may be related to a few check-ins from user, as it is about the exact place."><b>place</b></abbr> called
                   <abbr title="{{ t.title }}">
                     <a href="http://www.google.com/search?q={{ t.topic }}+{{ t.region }}" target="_blank">
                       <b>{{ t.topic }}</b>
                     </a>
                   </abbr> in <b>{{ t.region }}</b>?
-                {% else %} the places in the category of
+                {% else %} the places in the <abbr title="This topic may be related handreds of check-ins, as it is about many places of the same type."><b>category</b></abbr> of
                   <abbr title="{{ t.title }}">
                     <b>{{ t.topic }}</b>
                   </abbr> in <b>{{ t.region }}</b>?
