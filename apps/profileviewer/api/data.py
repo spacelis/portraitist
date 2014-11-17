@@ -39,15 +39,16 @@ import google.appengine.api.taskqueue as tq
 import google.appengine.api.memcache as mc
 from google.appengine.datastore.datastore_query import Cursor
 
-from apps.profileviewer.models import _k
-from apps.profileviewer.models import Judgement
-from apps.profileviewer.models import AnnotationTask
-from apps.profileviewer.models import TaskPackage
 from apps.profileviewer.api import APIRegistry
 from apps.profileviewer.util import throttle_map
 from apps.profileviewer.util import fixCompressedEntity
 from apps.profileviewer.util import listCompressedProperty
 
+from apps.profileviewer.models import _k
+from apps.profileviewer.models import Judgement
+from apps.profileviewer.models import User
+from apps.profileviewer.models import AnnotationTask
+from apps.profileviewer.models import TaskPackage
 from apps.profileviewer.models import GeoEntity
 from apps.profileviewer.models import ExpertiseRank
 from apps.profileviewer.models import TwitterAccount
@@ -252,7 +253,9 @@ def model_stats():
         'GeoEntity': len(GeoEntity.query().fetch(keys_only=True)),
         'TwitterAccount': len(TwitterAccount.query().fetch(keys_only=True)),
         'TaskPackage': len(TaskPackage.query().fetch(keys_only=True)),
-        'ExpertiseRank': len(ExpertiseRank.query().fetch(keys_only=True))
+        'ExpertiseRank': len(ExpertiseRank.query().fetch(keys_only=True)),
+        'Judgement': len(Judgement.query().fetch(keys_only=True)),
+        'User': len(User.query().fetch(keys_only=True))
     }
 
 
