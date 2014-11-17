@@ -36,6 +36,7 @@ urlpatterns = patterns(
     url(r'^about$', TemplateView.as_view(template_name="about.html")),
     url(r'^instructions$', TemplateView.as_view(template_name="instructions.html")),
     url(r'^export_judgements$', TemplateView.as_view(template_name="export_judgements.html")),
+    url(r'^continue_or_stop$', TemplateView.as_view(template_name='continue_or_stop.html')),
 )
 
 handler500 = 'apps.profileviewer.views.error500'

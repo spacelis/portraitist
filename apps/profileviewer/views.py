@@ -169,7 +169,9 @@ def pagerouter(request):
         task_key = user.task_package.get().nextTaskKey()
         return redirect('/task/%s' %
                         (task_key.urlsafe(),))
-    except (AttributeError, TaskPackage.NoMoreTask):
+    except TaskPackage.NoMoreTask:
+        return redirect('/continue_or_stop')
+    except AttributeError:
         try:
             tpkey = assign_taskpackage()
             return redirect('/pagerouter?action=taskpackage&tpid=' + tpkey)
