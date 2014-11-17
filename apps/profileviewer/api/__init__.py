@@ -117,10 +117,12 @@ class APIRegistry(object):
         except KeyError:
             raise Http404
         ret = endpoint.func(**kwargs)  # pylint: disable=W0142
-        if endpoint.tojson:
+        if isinstance(ret, HttpResponse):
+            resp = ret
+        elif endpoint.tojson:
             resp = HttpResponse(json.dumps(ret), mimetype="application/json")
         else:
-            resp = ret
+            resp = HttpResponse(ret)
         resp['Access-Control-Allow-Origin'] = '*'
         resp['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept'
         if '_user' in endpoint.spec.args:
