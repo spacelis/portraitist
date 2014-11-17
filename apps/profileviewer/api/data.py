@@ -32,6 +32,7 @@ from fn.uniform import zip_longest
 from fn.uniform import map  # pylint: disable=redefined-builtin
 from django.http import Http404
 from django.http import HttpResponse
+from django.shortcuts import redirect
 
 from google.appengine.ext import ndb
 import google.appengine.api.taskqueue as tq
@@ -110,7 +111,7 @@ def assign_taskpackage():
         tq.Task(params={'_admin_key': APIRegistry.ADMIN_KEY},
                 url='/api/data/refill_taskpool',
                 method='GET'
-               ).add('batch')
+               ).add()
         raise TaskPackage.NoMoreTaskPackage()
     return mc.get('geo-expertise-task-pool')[idx]
 
@@ -121,12 +122,19 @@ def refill_taskpool():
     :returns: TODO
 
     """
-    tps = TaskPackage\
+    tps = [k.urlsafe() for k in TaskPackage\
         .query(TaskPackage.assigned_at < dt.now() - timedelta(minutes=30))\
-        .order(TaskPackage.assigned_at)\
-        .fetch(keys_only=True)
+        .order(-TaskPackage.assigned_at)\
+        .fetch(keys_only=True)]
     if len(tps) > 0:
-        mc.cas_multi({'geo-expertise-task-pool': tps, 'geo-expertise-task-left': len(tps)})
+        print 'tps:', len(tps)
+        mapping = {'geo-expertise-task-pool': tps, 'geo-expertise-task-left': len(tps)}
+        assert len(mc.set_multi(mapping)) == 0
+        return {
+            'action': 'refill_taskpool',
+            'succeeded': True,
+            'num': len(tps)
+        }
 
 
 # ------- Import/Export ------

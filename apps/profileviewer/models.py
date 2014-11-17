@@ -647,7 +647,8 @@ class User(EncodableModel):
         :returns: self
 
         """
-        self.task_package = ndb.Key(urlsafe=tpkey, kind='TaskPackage').get().touch().key
+        tpkey.get().touch()
+        self.task_package = tpkey
         self.touch()
         return self
 
