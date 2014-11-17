@@ -1,0 +1,25 @@
+{% extends "frame.html" %}
+{% block extra_header %}
+{% endblock %}
+{% block content %}
+<div class="container">
+  <form role="form" method="POST" action="/general_survey">
+    {% csrf_token %}
+    <div class="jumbotron">
+      <div class="container">
+        <div class="row">
+          <div class="col-4-sm">
+            <p> You finished a task! <br>
+            <small class='text-muted'> You may continue to another task. </small></p>
+            <center>
+              <a class="btn btn-success btn-lg" href='/pagerouter?action=request_taskpackage'>
+                Continue <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+              </a>
+            </center>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
