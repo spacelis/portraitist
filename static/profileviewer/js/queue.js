@@ -25,7 +25,7 @@ function _queue($){
           request(ret.next, acc.concat(ret.data), finalize, progress);
         }
         else {
-          finalize(acc);
+          finalize(acc.concat(ret.data));
         }
       }).fail(function(){
         throw "Failed at " + url;
