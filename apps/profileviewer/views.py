@@ -149,6 +149,20 @@ def taskpackage(request):
     return r
 
 
+def request_taskpackage(request):
+    """ Request a taskpackage for annotating.
+
+    :request: TODO
+    :returns: TODO
+
+    """
+    try:
+        tpkey = assign_taskpackage()
+        return redirect('/pagerouter?action=taskpackage&tpid=' + tpkey)
+    except TaskPackage.NoMoreTaskPackage:
+        return render_to_response('server_busy.html', {'redirect': '/'})
+
+
 def pagerouter(request):
     """ Routing tasks by tasks.
 
@@ -160,6 +174,8 @@ def pagerouter(request):
 
     if request_property(request, 'action') == 'taskpackage':
         return taskpackage(request)
+    if request_property(request, 'action') == 'request_taskpackage':
+        return request_taskpackage(request)
     elif request_property(request, 'no_instruction') != '1':
         return redirect('/instructions')
     elif request_property(request, 'no_survey') != '1':
@@ -172,11 +188,7 @@ def pagerouter(request):
     except TaskPackage.NoMoreTask:
         return redirect('/continue_or_stop')
     except AttributeError:
-        try:
-            tpkey = assign_taskpackage()
-            return redirect('/pagerouter?action=taskpackage&tpid=' + tpkey)
-        except TaskPackage.NoMoreTaskPackage:
-            return render_to_response('server_busy.html', {'redirect': '/'})
+        return request_taskpackage(request)
     raise Http404
 
 
