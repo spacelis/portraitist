@@ -659,7 +659,8 @@ def fix_datastore():
     return {
         'action': 'fix_datastore',
         'suceeded': 'Unknown',
-        'message': '%s fixing tasks added to the batch queue.' % (cnt, )
+        'num': cnt,
+        'message': 'The Fixing tasks added to the batch queue.'
     }
 
 
