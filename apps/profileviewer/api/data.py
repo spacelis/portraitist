@@ -107,14 +107,16 @@ def export_judgements(curkey):
 @_REG.api_endpoint(secured=True)
 def assign_taskpackage():
     """ Return a taskpackage unassigned. """
-    idx = mc.decr('geo-expertise-task-left')
-    if idx < 0:
+    try:
+        idx = mc.decr('geo-expertise-task-left')
+        assert idx >= 0
+        return mc.get('geo-expertise-task-pool')[idx]
+    except (AssertionError, TypeError):
         tq.Task(params={'_admin_key': APIRegistry.ADMIN_KEY},
                 url='/api/data/refill_taskpool',
                 method='GET'
                ).add()
         raise TaskPackage.NoMoreTaskPackage()
-    return mc.get('geo-expertise-task-pool')[idx]
 
 
 @_REG.api_endpoint(secured=True)
