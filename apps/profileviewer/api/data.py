@@ -36,7 +36,7 @@ from django.shortcuts import redirect
 
 from google.appengine.ext import ndb
 import google.appengine.api.taskqueue as tq
-import google.appengine.api.memcache as mc
+import google.appengine.api.memcache as memcache
 from google.appengine.datastore.datastore_query import Cursor
 
 from apps.profileviewer.api import APIRegistry
@@ -108,10 +108,12 @@ def export_judgements(curkey):
 def assign_taskpackage():
     """ Return a taskpackage unassigned. """
     try:
-        idx = mc.decr('geo-expertise-task-left')
-        assert idx >= 0
-        return mc.get('geo-expertise-task-pool')[idx]
-    except (AssertionError, TypeError):
+        mc = memcache.Client()
+        pool = mc.gets('geo-expertise-tp-pool')
+        tp = pool.pop()
+        mc.cas('geo-expertise-tp-pool', pool, time=360000)
+        return tp
+    except (IndexError, AttributeError):
         tq.Task(params={'_admin_key': APIRegistry.ADMIN_KEY},
                 url='/api/data/refill_taskpool',
                 method='GET'
@@ -126,13 +128,12 @@ def refill_taskpool():
 
     """
     tps = [k.urlsafe() for k in TaskPackage\
-        .query(TaskPackage.assigned_at < dt.now() - timedelta(minutes=30))\
+        .query()\
         .order(-TaskPackage.assigned_at)\
         .fetch(keys_only=True)]
     if len(tps) > 0:
-        print 'tps:', len(tps)
-        mapping = {'geo-expertise-task-pool': tps, 'geo-expertise-task-left': len(tps)}
-        assert len(mc.set_multi(mapping)) == 0
+        print 'Refilled with taskpackage:', len(tps)
+        assert memcache.set('geo-expertise-tp-pool', tps)
         return {
             'action': 'refill_taskpool',
             'succeeded': True,
