@@ -110,9 +110,13 @@ def assign_taskpackage():
     try:
         mc = memcache.Client()
         pool = mc.gets('geo-expertise-tp-pool')
-        tp = pool.pop()
+        tpkey = pool.pop()
+        tp = _k(tpkey, 'TaskPackage').get()
+        if len(tp.progress) == 0:
+            tp.progress = tp.tasks
+            tp.put()
         mc.cas('geo-expertise-tp-pool', pool, time=360000)
-        return tp
+        return tpkey
     except (IndexError, AttributeError):
         tq.Task(params={'_admin_key': APIRegistry.ADMIN_KEY},
                 url='/api/data/refill_taskpool',

@@ -163,7 +163,7 @@ def request_taskpackage(request):
             tp.progress = tp.tasks
         return redirect('/pagerouter?action=taskpackage&tpid=' + tpkey)
     except TaskPackage.NoMoreTaskPackage:
-        return render_to_response('server_busy.html', {'redirect': '/'})
+        return render_to_response('server_busy.html', {'redirect': '/pagerouter?action=request_taskpackage'})
 
 
 def pagerouter(request):
