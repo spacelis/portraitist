@@ -110,7 +110,7 @@ def assign_taskpackage():
     try:
         mc = memcache.Client()
         pool = mc.gets('geo-expertise-tp-pool')
-        tpkey = pool.pop()
+        tpkey = pool.pop(0)
         tp = _k(tpkey, 'TaskPackage').get()
         if len(tp.progress) == 0:
             tp.progress = tp.tasks
@@ -131,10 +131,8 @@ def refill_taskpool():
     :returns: TODO
 
     """
-    tps = [k.urlsafe() for k in TaskPackage\
-        .query()\
-        .order(-TaskPackage.assigned_at)\
-        .fetch(keys_only=True)]
+    tps = [tp.key.urlsafe()
+           for tp in sorted(TaskPackage.query().fetch(), key=lambda x: len(x.progress) - len(x.tasks))]
     if len(tps) > 0:
         print 'Refilled with taskpackage:', len(tps)
         assert memcache.set('geo-expertise-tp-pool', tps)
