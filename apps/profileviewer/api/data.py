@@ -112,9 +112,9 @@ def assign_taskpackage():
         pool = mc.gets('geo-expertise-tp-pool')
         tpkey = pool.pop(0)
         tp = _k(tpkey, 'TaskPackage').get()
-        if len(tp.progress) == 0:
-            tp.progress = tp.tasks
-            tp.put()
+        # if len(tp.progress) == 0:
+            # tp.progress = tp.tasks
+            # tp.put()
         mc.cas('geo-expertise-tp-pool', pool, time=360000)
         return tpkey
     except (IndexError, AttributeError):
@@ -132,7 +132,7 @@ def refill_taskpool():
 
     """
     tps = [tp.key.urlsafe()
-           for tp in sorted(TaskPackage.query().fetch(), key=lambda x: len(x.progress) - len(x.tasks))]
+           for tp in sorted(TaskPackage.query().fetch(), key=lambda x: len(x.tasks) - len(x.progress) )]
     if len(tps) > 0:
         print 'Refilled with taskpackage:', len(tps)
         assert memcache.set('geo-expertise-tp-pool', tps)
