@@ -376,7 +376,6 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
     user_agent = ndb.model.StringProperty(indexed=False)
     task = ndb.model.KeyProperty(indexed=True, kind='AnnotationTask')
     traceback = ndb.model.StringProperty(indexed=False, compressed=True)
-    task = ndb.model.KeyProperty(indexed=True, kind='AnnotationTask')
 
     @staticmethod
     def add(judge, task, scores, ipaddr, user_agent, tb):
