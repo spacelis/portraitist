@@ -111,10 +111,6 @@ def assign_taskpackage():
         mc = memcache.Client()
         pool = mc.gets('geo-expertise-tp-pool')
         tpkey = pool.pop(0)
-        tp = _k(tpkey, 'TaskPackage').get()
-        # if len(tp.progress) == 0:
-            # tp.progress = tp.tasks
-            # tp.put()
         mc.cas('geo-expertise-tp-pool', pool, time=360000)
         return tpkey
     except (IndexError, AttributeError):
@@ -131,15 +127,17 @@ def refill_taskpool():
     :returns: TODO
 
     """
-    tps = [tp.key.urlsafe()
-           for tp in sorted(TaskPackage.query().fetch(), key=lambda x: len(x.tasks) - len(x.progress) )]
+    tps = sorted(TaskPackage.query().fetch(), key=lambda x: -len(x.progress))
     if len(tps) > 0:
-        print 'Refilled with taskpackage:', len(tps)
-        assert memcache.set('geo-expertise-tp-pool', tps)
+        tpkeys = [tp.key.urlsafe() for tp in tps][:2]
+        print 'Refilled with taskpackage:', len(tpkeys)
+        print 'Refilled with tasks:', sum([len(x.progress) for x in tps])
+        assert memcache.set('geo-expertise-tp-pool', tpkeys)
         return {
             'action': 'refill_taskpool',
             'succeeded': True,
-            'num': len(tps)
+            'tasks': sum([len(x.progress) for x in tps]),
+            'taskpackage': len(tpkeys)
         }
 
 
@@ -260,7 +258,8 @@ def model_stats():
         'TaskPackage': len(TaskPackage.query().fetch(keys_only=True)),
         'ExpertiseRank': len(ExpertiseRank.query().fetch(keys_only=True)),
         'Judgement': len(Judgement.query().fetch(keys_only=True)),
-        'User': len(User.query().fetch(keys_only=True))
+        'User': len(User.query().fetch(keys_only=True)),
+        'Unfinished': sum([len(tp.progress) for tp in TaskPackage.query().fetch()])
     }
 
 
