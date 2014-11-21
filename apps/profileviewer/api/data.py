@@ -128,18 +128,23 @@ def refill_taskpool():
     :returns: TODO
 
     """
-    tps = sorted(TaskPackage.query().fetch(), key=lambda x: -len(x.progress))
-    if len(tps) > 0:
-        tpkeys = [tp.key.urlsafe() for tp in tps][:2]
+    pool = [tp
+            for tp in sorted(TaskPackage.query().fetch(), key=lambda x: -len(x.progress))
+            if len(tp.progress) > 0]
+    print pool
+    if len(pool) > 0:
+        tpkeys = [tp.key.urlsafe() for tp in pool]
         print 'Refilled with taskpackage:', len(tpkeys)
-        print 'Refilled with tasks:', sum([len(x.progress) for x in tps])
+        print 'Refilled with tasks:', sum([len(x.progress) for x in pool])
         assert memcache.set('geo-expertise-tp-pool', tpkeys)
         return {
             'action': 'refill_taskpool',
             'succeeded': True,
-            'tasks': sum([len(x.progress) for x in tps]),
+            'tasks': sum([len(x.progress) for x in pool]),
             'taskpackage': len(tpkeys)
         }
+    else:
+        raise TaskPackage.NoMoreTaskPackage()
 
 
 # ------- Import/Export ------
@@ -536,11 +541,8 @@ def make_another_pass_taskpackages():
     cnt = 0
     tasks_dist = Counter([j.task for j in Judgement.query().fetch(projection=('task',))] +
                          AnnotationTask.query().fetch(keys_only=True))
-    print tasks_dist
     least = tasks_dist.most_common()[-1][1]
-    print least
     tasks = [k for k, c in tasks_dist.most_common() if c == least]
-    print tasks
     for tkeys in partition(tasks, 10):
         TaskPackage(
             # parent=DEFAULT_PARENT_KEY,
@@ -659,6 +661,19 @@ def assert_error():
     """ Bring a debug page for console. """
     assert False
 
+@_REG.api_endpoint()
+def missing_tasks():
+    """ Bring a debug page for console. """
+    tasks = Counter([k.urlsafe() for k in AnnotationTask.query().fetch(keys_only=True)])
+    done = Counter([j.task.urlsafe() for j in Judgement.query(projection=('task',)).fetch()])
+    expect = tasks + done
+    level = expect.most_common()[-1][1]
+    missing = list([k for k, c in expect.most_common() if c == level])
+    return {
+        'pass': level,
+        'missing': missing,
+        'missing_num': len(missing)
+    }
 
 # Fix compression wrapping for the restored data
 
