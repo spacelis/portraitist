@@ -149,18 +149,12 @@ def taskpackage(request):
     return r
 
 
-def request_taskpackage(request):
+def request_taskpackage(_):
     """ Request a taskpackage for annotating.
-
-    :request: TODO
-    :returns: TODO
 
     """
     try:
         tpkey = assign_taskpackage()
-        tp = _k(tpkey, 'TaskPackage').get()
-        if len(tp.progress) == 0:
-            tp.progress = tp.tasks
         return redirect('/pagerouter?action=taskpackage&tpid=' + tpkey)
     except TaskPackage.NoMoreTaskPackage:
         return render_to_response('server_busy.html', {'redirect': '/pagerouter?action=request_taskpackage'})
