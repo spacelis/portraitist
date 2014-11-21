@@ -123,11 +123,17 @@ def assign_taskpackage():
 
 
 @_REG.api_endpoint(secured=True)
-def refill_taskpool():
+def refill_taskpool(_request):
     """ Refill the taskpool with non-recently touched tasks.
     :returns: TODO
 
     """
+    if int(_request.META['HTTP_X_APPENGINE_TASKEXECUTIONCOUNT']) > 0:
+        print 'Fail silently when retried.'
+        return {
+            'action': 'refill_taskpool',
+            'succeeded': False
+        }
     pool = [tp
             for tp in sorted(TaskPackage.query().fetch(), key=lambda x: -len(x.progress))
             if len(tp.progress) > 0]
