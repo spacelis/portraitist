@@ -22,6 +22,7 @@ from datetime import timedelta
 from itertools import groupby
 from itertools import cycle
 from itertools import izip
+from collections import Counter
 
 csv.field_size_limit(sys.maxsize)
 
@@ -529,6 +530,34 @@ def make_random_taskpackages():
         'num': cnt
     }
 
+@_REG.api_endpoint(secured=True)
+def make_another_pass_taskpackages():
+    """ Group tasks in to packages. """
+    cnt = 0
+    tasks_dist = Counter([j.task for j in Judgement.query().fetch(projection=('task',))] +
+                         AnnotationTask.query().fetch(keys_only=True))
+    print tasks_dist
+    least = tasks_dist.most_common()[-1][1]
+    print least
+    tasks = [k for k, c in tasks_dist.most_common() if c == least]
+    print tasks
+    for tkeys in partition(tasks, 10):
+        TaskPackage(
+            # parent=DEFAULT_PARENT_KEY,
+            tasks=tkeys,
+            progress=tkeys,
+            done_by=list(),
+            confirm_code=newToken('').split('-')[-1],
+            assigned_at=dt(2000, 1, 1)
+        ).put()
+        cnt += 1
+    return {
+        'action': 'make_another_pass_taskpackages',
+        'succeeded': True,
+        'taskpackages': len(TaskPackage.query().fetch(keys_only=True)),
+        'num': cnt
+    }
+
 @_REG.api_endpoint()
 def AxdFKxbczxW(cf_code):
     """ Verify confirmation code.
@@ -591,7 +620,6 @@ def export_taskpackages(_request, fmt='csv', verbose=False):
     :returns: @todo
 
     """
-    from collections import Counter
     url_template = lambda tpid: _request.build_absolute_uri(
         '/pagerouter?action=taskpackage&tpid=%s' % (tpid,))
 
