@@ -562,7 +562,6 @@ def make_another_pass_taskpackages():
     return {
         'action': 'make_another_pass_taskpackages',
         'succeeded': True,
-        'taskpackages': len(TaskPackage.query().fetch(keys_only=True)),
         'num': cnt
     }
 
