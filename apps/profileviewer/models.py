@@ -371,7 +371,7 @@ class Judgement(ndb.Model):  # pylint: disable=R0903
     candidate = ndb.model.KeyProperty(indexed=True, kind='TwitterAccount')
     topic_id = ndb.model.StringProperty(indexed=True)
     score = ndb.model.IntegerProperty(indexed=False)
-    created_at = ndb.model.DateTimeProperty(indexed=False)
+    created_at = ndb.model.DateTimeProperty(indexed=True)
     ipaddr = ndb.model.StringProperty(indexed=False)
     user_agent = ndb.model.StringProperty(indexed=False)
     task = ndb.model.KeyProperty(indexed=True, kind='AnnotationTask')

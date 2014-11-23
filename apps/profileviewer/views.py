@@ -395,11 +395,13 @@ def annotation_view(request, task_key):
     ])
 
     # prepare for review
-    if request_property(request, 'review', False):
-        judgements = [j
-                      for t in topics.values()
-                      for j in Judgement.query(Judgement.topic_id == t['topic_id'],
-                                               Judgement.candidate == rs[0].candidate).fetch(1)]
+    review = request_property(request, 'review', None)
+    if review is not None:
+        # judgements = [j
+        #               for t in topics.values()
+        #               for j in Judgement.query(Judgement.topic_id == t['topic_id'],
+        #                                        Judgement.candidate == rs[0].candidate).fetch(1)]
+        judgements = [_k(j, 'Judgement').get() for j in review.split(',')]
         topic_judgements = json.dumps({j.topic_id: j.score for j in judgements})
     else:
         topic_judgements = 'null'

@@ -603,20 +603,26 @@ def export_as_csv(records):
 
 
 @_REG.api_endpoint(secured=True, tojson=False)
-def tasksearch(_request, timespan):
+def tasksearch(_request, timespan=None, topic_id=None, canddiate=None):
     """TODO: Docstring for tasks.
     :returns: TODO
 
     """
-    start, end = [dt.strptime(x, '%Y-%m-%dT%H:%M:%S') for x in timespan.split(',')]
-    url_template = lambda tid: _request.build_absolute_uri('/task/%s?review=1' % (tid,))
+    url_template = lambda tid, jmds: _request.build_absolute_uri('/task/%s?review=%s' % (tid, ','.join(jmds)))
     resp = HttpResponse()
     resp.write('<html><body><ol>')
-    for tp in TaskPackage.query(TaskPackage.assigned_at > start, TaskPackage.assigned_at < end).fetch():
-        for t in tp.tasks:
-            resp.write('<li><a href="{0}">{1.topic_id}</a></li>'
-                       .format(url_template(t.urlsafe()),
-                               t.get().rankings[0].get()))
+    jmd = Judgement.query()
+
+    if timespan is not None:
+        start, end = [dt.strptime(x, '%Y-%m-%dT%H:%M:%S') for x in timespan.split(',')]
+        jmd = jmd.filter(Judgement.created_at > start).filter(Judgement.created_at < end)
+
+    if topic_id is not None:
+        jmd = jmd.filter(Judgement.topic_id == topic_id)
+
+    for j in jmd.fetch(50):
+        resp.write('<li><a href="{0}">{1.topic_id}</a>  {2} :  {1.score}</li>'\
+                    .format(url_template(j.task.urlsafe(), [j.key.urlsafe()]), j, j.candidate.get().screen_name))
     resp.write('</ol></body></html>')
     return resp
 
