@@ -603,7 +603,7 @@ def export_as_csv(records):
 
 
 @_REG.api_endpoint(secured=True, tojson=False)
-def tasksearch(_request, timespan=None, topic_id=None, canddiate=None):
+def tasksearch(_request, timespan=None, topic_id=None, judgement_id=None):
     """TODO: Docstring for tasks.
     :returns: TODO
 
@@ -619,6 +619,9 @@ def tasksearch(_request, timespan=None, topic_id=None, canddiate=None):
 
     if topic_id is not None:
         jmd = jmd.filter(Judgement.topic_id == topic_id)
+
+    if judgement_id is not None:
+        jmd = jmd.filter(Judgement.judge == _k(judgement_id, 'Judgement').get().judge)
 
     for j in jmd.fetch(50):
         resp.write('<li><a href="{0}">{1.topic_id}</a>  {2} :  {1.score}</li>'\
