@@ -39,7 +39,7 @@ skip_files:
 - ^(.*/)?.*\.py[co]$
 - ^(.*/)?.*/RCS/.*$
 - ^(.*/)?\..*$
-- ^apps/data/.*$
+# - ^apps/data/.*$
 
 env_variables:
   DJANGO_SETTINGS_MODULE: 'apps.settings'

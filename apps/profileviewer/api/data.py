@@ -196,6 +196,7 @@ def import_entities(filename, loader, pool=20):
         with flexopen(path) as fin:
             cnt = throttle_map(csv.DictReader(fin), async_loader, pool)
     except IOError:
+        # Check the skip_files in app.yaml may stop app accessing the datafile
         raise Http404
     return {
         'action': 'import',
